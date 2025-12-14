@@ -6,7 +6,6 @@ import { version } from '../package.json';
  * Fabric.js 版本号
  */
 export const VERSION = version;
-// eslint-disable-next-line @typescript-eslint/no-empty-function
 /**
  * 空函数
  */
