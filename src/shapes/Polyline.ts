@@ -26,29 +26,50 @@ import {
 } from '../constants';
 import type { CSSRules } from '../parser/typedefs';
 
+/**
+ * 折线默认值
+ */
 export const polylineDefaultValues: Partial<TClassProperties<Polyline>> = {
   /**
+   * @deprecated 临时选项，很快将被删除，取而代之的是不同的设计
+   *
    * @deprecated transient option soon to be removed in favor of a different design
    */
   exactBoundingBox: false,
 };
 
+/**
+ * 序列化折线属性接口
+ */
 export interface SerializedPolylineProps extends SerializedObjectProps {
+  /**
+   * 点数组
+   */
   points: XY[];
 }
 
+/**
+ * 折线类
+ */
 export class Polyline<
   Props extends TOptions<FabricObjectProps> = Partial<FabricObjectProps>,
   SProps extends SerializedPolylineProps = SerializedPolylineProps,
   EventSpec extends ObjectEvents = ObjectEvents,
 > extends FabricObject<Props, SProps, EventSpec> {
   /**
+   * 点数组
+   *
    * Points array
    * @type Array
    */
   declare points: XY[];
 
   /**
+   * 警告：功能正在进行中
+   * 计算精确的边界框，考虑到锐角的 strokeWidth
+   * 这将在 fabric 6.0 中默认变为 true
+   * 可能会作为优化保留，因为计算可能会很慢
+   *
    * WARNING: Feature in progress
    * Calculate the exact bounding box taking in account strokeWidth on acute angles
    * this will be turned to true by default on fabric 6.0
@@ -59,12 +80,25 @@ export class Polyline<
    */
   declare exactBoundingBox: boolean;
 
+  /**
+   * 是否已初始化
+   */
   declare private initialized: true | undefined;
 
+  /**
+   * 自身默认值
+   */
   static ownDefaults = polylineDefaultValues;
 
+  /**
+   * 类型
+   */
   static type = 'Polyline';
 
+  /**
+   * 获取默认值
+   * @returns 默认值对象
+   */
   static getDefaults(): Record<string, any> {
     return {
       ...super.getDefaults(),
@@ -73,6 +107,9 @@ export class Polyline<
   }
 
   /**
+   * 如果更改则触发尺寸重新计算的属性列表
+   * @todo 检查是否真的需要为所有情况重新计算
+   *
    * A list of properties that if changed trigger a recalculation of dimensions
    * @todo check if you really need to recalculate for all cases
    */
@@ -87,15 +124,29 @@ export class Polyline<
     'points',
   ];
 
+  /**
+   * 路径偏移量
+   */
   declare pathOffset: Point;
 
+  /**
+   * 描边偏移量
+   */
   declare strokeOffset: Point;
 
+  /**
+   * 缓存属性
+   */
   static cacheProperties = [...cacheProperties, 'points'];
 
+  /**
+   * 描边差异
+   */
   strokeDiff: Point;
 
   /**
+   * 构造函数
+   *
    * Constructor
    * @param {Array} points Array of points (where each point is an object with x and y)
    * @param {Object} [options] Options object
@@ -126,15 +177,26 @@ export class Polyline<
     typeof top === 'number' && this.set(TOP, top);
   }
 
+  /**
+   * 检查折线是否是开放的
+   * @returns 如果折线是开放的，则返回 true；否则返回 false
+   */
   protected isOpen() {
     return true;
   }
 
+  /**
+   * 将描边投影到点上
+   * @param options 投影选项
+   * @returns 投影结果
+   */
   private _projectStrokeOnPoints(options: TProjectStrokeOnPointsOptions) {
     return projectStrokeOnPoints(this.points, options, this.isOpen());
   }
 
   /**
+   * 计算多边形边界框
+   *
    * Calculate the polygon bounding box
    * @private
    */
@@ -196,6 +258,8 @@ export class Polyline<
   }
 
   /**
+   * 此函数是 svg 导入的辅助函数。它通过查看折线/多边形点返回 svg 未转换坐标中对象的中心。
+   *
    * This function is an helper for svg import. it returns the center of the object in the svg
    * untransformed coordinates, by look at the polyline/polygon points.
    * @private
@@ -206,10 +270,17 @@ export class Polyline<
     return new Point(bbox.left + bbox.width / 2, bbox.top + bbox.height / 2);
   }
 
+  /**
+   * 设置尺寸
+   */
   setDimensions() {
     this.setBoundingBox();
   }
 
+  /**
+   * 设置边界框
+   * @param adjustPosition 是否调整位置
+   */
   setBoundingBox(adjustPosition?: boolean) {
     const { left, top, width, height, pathOffset, strokeOffset, strokeDiff } =
       this._calcDimensions();
@@ -223,6 +294,8 @@ export class Polyline<
   }
 
   /**
+   * 检查描边是否计入尺寸
+   *
    * @deprecated intermidiate method to be removed, do not use
    */
   protected isStrokeAccountedForInDimensions() {
@@ -230,6 +303,8 @@ export class Polyline<
   }
 
   /**
+   * 获取非变换尺寸
+   *
    * @override stroke is taken in account in size
    */
   _getNonTransformedDimensions() {
@@ -240,6 +315,13 @@ export class Polyline<
   }
 
   /**
+   * 获取变换尺寸
+   *
+   * @override 在点上投影笔划时会考虑笔划和倾斜，
+   * 因此我们不希望默认计算也考虑到偏差。
+   * 虽然可以在“options”中传递“width”和“height”，但这样做很奇怪，请谨慎使用。
+   *
+   *
    * @override stroke and skewing are taken into account when projecting stroke on points,
    * therefore we don't want the default calculation to account for skewing as well.
    * Though it is possible to pass `width` and `height` in `options`, doing so is very strange, use with discretion.
@@ -279,6 +361,8 @@ export class Polyline<
   }
 
   /**
+   * 更改倾斜和缩放时重新计算尺寸
+   *
    * Recalculates dimensions when changing skew and scale
    * @private
    */
@@ -303,6 +387,10 @@ export class Polyline<
   }
 
   /**
+   * 返回实例的对象表示
+   * @param {Array} [propertiesToInclude] 您可能希望在输出中额外包含的任何属性
+   * @return {Object} 实例的对象表示
+   *
    * Returns object representation of an instance
    * @param {Array} [propertiesToInclude] Any properties that you might want to additionally include in the output
    * @return {Object} Object representation of an instance
@@ -318,6 +406,9 @@ export class Polyline<
   }
 
   /**
+   * 返回实例的 svg 表示
+   * @return {Array} 包含实例的具体 svg 表示的字符串数组
+   *
    * Returns svg representation of an instance
    * @return {Array} an array of strings with the specific svg representation
    * of the instance
@@ -348,6 +439,8 @@ export class Polyline<
   }
 
   /**
+   * 按顺序渲染
+   *
    * @private
    * @param {CanvasRenderingContext2D} ctx Context to render on
    */
@@ -372,6 +465,9 @@ export class Polyline<
   }
 
   /**
+   * 返回此实例的复杂度
+   * @return {Number} 此实例的复杂度
+   *
    * Returns complexity of an instance
    * @return {Number} complexity of this instance
    */
@@ -382,12 +478,19 @@ export class Polyline<
   /* _FROM_SVG_START_ */
 
   /**
+   * 解析 SVG 元素时要考虑的属性名称列表（由 {@link Polyline.fromElement} 使用）
+   * @see: http://www.w3.org/TR/SVG/shapes.html#PolylineElement
+   *
    * List of attribute names to account for when parsing SVG element (used by {@link Polyline.fromElement})
    * @see: http://www.w3.org/TR/SVG/shapes.html#PolylineElement
    */
   static ATTRIBUTE_NAMES = [...SHARED_ATTRIBUTES];
 
   /**
+   * 从 SVG 元素返回 Polyline 实例
+   * @param {HTMLElement} element 要解析的元素
+   * @param {Object} [options] 选项对象
+   *
    * Returns Polyline instance from an SVG element
    * @param {HTMLElement} element Element to parser
    * @param {Object} [options] Options object
@@ -414,6 +517,10 @@ export class Polyline<
   /* _FROM_SVG_END_ */
 
   /**
+   * 从对象表示返回 Polyline 实例
+   * @param {Object} object 要从中创建实例的对象
+   * @returns {Promise<Polyline>}
+   *
    * Returns Polyline instance from an object representation
    * @param {Object} object Object to create an instance from
    * @returns {Promise<Polyline>}

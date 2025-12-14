@@ -28,6 +28,8 @@ type ScaleTransform = Transform & {
 type ScaleBy = TAxis | 'equally' | '' | undefined;
 
 /**
+ * 检查事件和 fabricObject 属性以了解是否进行比例缩放
+ *
  * Inspect event and fabricObject properties to understand if the scaling action
  * @param {Event} eventData from the user action
  * @param {FabricObject} fabricObject the fabric object about to scale
@@ -46,6 +48,8 @@ export function scaleIsProportional(
 }
 
 /**
+ * 检查 fabricObject 以了解当前缩放操作是否被允许
+ *
  * Inspect fabricObject to understand if the current scaling action is allowed
  * @param {FabricObject} fabricObject the fabric object about to scale
  * @param {String} by 'x' or 'y' or ''
@@ -86,6 +90,8 @@ export function scalingIsForbidden(
 const scaleMap = ['e', 'se', 's', 'sw', 'w', 'nw', 'n', 'ne', 'e'];
 
 /**
+ * 返回缩放操作的正确光标样式
+ *
  * return the correct cursor style for the scale action
  * @param {Event} eventData the javascript event that is causing the scale
  * @param {Control} control the control that is interested in the action
@@ -113,6 +119,9 @@ export const scaleCursorStyleHandler: ControlCursorCallback = (
 };
 
 /**
+ * 基本缩放逻辑，用于 X、Y、自由或等比缩放的不同约束。
+ * 需要用 `wrapWithFixedAnchor` 包装才能生效。
+ *
  * Basic scaling logic, reused with different constrain for scaling X,Y, freely or equally.
  * Needs to be wrapped with `wrapWithFixedAnchor` to be effective
  * @param {Event} eventData javascript event that is doing the transform
@@ -219,6 +228,9 @@ function scaleObject(
 }
 
 /**
+ * 通用缩放逻辑，从角落等比或自由缩放。
+ * 需要用 `wrapWithFixedAnchor` 包装才能生效。
+ *
  * Generic scaling logic, to scale from corners either equally or freely.
  * Needs to be wrapped with `wrapWithFixedAnchor` to be effective
  * @param {Event} eventData javascript event that is doing the transform
@@ -237,6 +249,9 @@ export const scaleObjectFromCorner: TransformActionHandler<ScaleTransform> = (
 };
 
 /**
+ * X 轴缩放逻辑。
+ * 需要用 `wrapWithFixedAnchor` 包装才能生效。
+ *
  * Scaling logic for the X axis.
  * Needs to be wrapped with `wrapWithFixedAnchor` to be effective
  * @param {Event} eventData javascript event that is doing the transform
@@ -255,6 +270,9 @@ const scaleObjectX: TransformActionHandler<ScaleTransform> = (
 };
 
 /**
+ * Y 轴缩放逻辑。
+ * 需要用 `wrapWithFixedAnchor` 包装才能生效。
+ *
  * Scaling logic for the Y axis.
  * Needs to be wrapped with `wrapWithFixedAnchor` to be effective
  * @param {Event} eventData javascript event that is doing the transform
@@ -272,16 +290,31 @@ const scaleObjectY: TransformActionHandler<ScaleTransform> = (
   return scaleObject(eventData, transform, x, y, { by: 'y' });
 };
 
+/**
+ * 等比缩放。
+ *
+ * Scaling equally.
+ */
 export const scalingEqually = wrapWithFireEvent(
   SCALING,
   wrapWithFixedAnchor(scaleObjectFromCorner),
 );
 
+/**
+ * X 轴缩放。
+ *
+ * Scaling X.
+ */
 export const scalingX = wrapWithFireEvent(
   SCALING,
   wrapWithFixedAnchor(scaleObjectX),
 );
 
+/**
+ * Y 轴缩放。
+ *
+ * Scaling Y.
+ */
 export const scalingY = wrapWithFireEvent(
   SCALING,
   wrapWithFixedAnchor(scaleObjectY),

@@ -8,15 +8,23 @@ import { isWebGLPipelineState } from './utils';
 import { classRegistry } from '../ClassRegistry';
 import { fragmentSource } from './shaders/blur';
 
+/**
+ * Blur 滤镜的自有属性
+ */
 type BlurOwnProps = {
   blur: number;
 };
 
+/**
+ * Blur 滤镜的默认值
+ */
 export const blurDefaultValues: BlurOwnProps = {
   blur: 0,
 };
 
 /**
+ * 模糊滤镜类
+ *
  * Blur filter class
  * @example
  * const filter = new Blur({
@@ -28,6 +36,10 @@ export const blurDefaultValues: BlurOwnProps = {
  */
 export class Blur extends BaseFilter<'Blur', BlurOwnProps> {
   /**
+   * 模糊值，以图像尺寸的百分比表示。
+   * 专门用于在不同分辨率下保持图像模糊恒定。
+   * 范围在 0 到 1 之间。
+   *
    * blur value, in percentage of image dimensions.
    * specific to keep the image blur constant at different resolutions
    * range between 0 and 1.
@@ -35,7 +47,13 @@ export class Blur extends BaseFilter<'Blur', BlurOwnProps> {
    */
   declare blur: BlurOwnProps['blur'];
 
+  /**
+   * 是否水平模糊
+   */
   declare horizontal: boolean;
+  /**
+   * 纵横比
+   */
   declare aspectRatio: number;
 
   static type = 'Blur';
@@ -44,10 +62,18 @@ export class Blur extends BaseFilter<'Blur', BlurOwnProps> {
 
   static uniformLocations = ['uDelta'];
 
+  /**
+   * 获取片段着色器源码
+   * @returns 片段着色器源码字符串
+   */
   getFragmentSource(): string {
     return fragmentSource;
   }
 
+  /**
+   * 应用滤镜
+   * @param options 管道状态
+   */
   applyTo(options: TWebGLPipelineState | T2DPipelineState) {
     if (isWebGLPipelineState(options)) {
       // this aspectRatio is used to give the same blur to vertical and horizontal
@@ -66,6 +92,10 @@ export class Blur extends BaseFilter<'Blur', BlurOwnProps> {
     }
   }
 
+  /**
+   * 应用于 2D 上下文
+   * @param options 2D 管道状态
+   */
   applyTo2d({ imageData: { data, width, height } }: T2DPipelineState) {
     // this code mimic the shader for output consistency
     // it samples 31 pixels across the image over a distance that depends from the blur value.
@@ -158,10 +188,12 @@ export class Blur extends BaseFilter<'Blur', BlurOwnProps> {
   }
 
   /**
+   * 将数据从此滤镜发送到其着色器程序的 uniform。
+   *
    * Send data from this filter to its shader program's uniforms.
    *
-   * @param {WebGLRenderingContext} gl The GL canvas context used to compile this filter's shader.
-   * @param {Object} uniformLocations A map of string uniform names to WebGLUniformLocation objects
+   * @param {WebGLRenderingContext} gl The GL canvas context used to compile this filter's shader. 用于编译此滤镜着色器的 GL 画布上下文。
+   * @param {Object} uniformLocations A map of string uniform names to WebGLUniformLocation objects 字符串 uniform 名称到 WebGLUniformLocation 对象的映射
    */
   sendUniformData(
     gl: WebGLRenderingContext,
@@ -171,10 +203,18 @@ export class Blur extends BaseFilter<'Blur', BlurOwnProps> {
     gl.uniform2fv(uniformLocations.uDelta, delta);
   }
 
+  /**
+   * 是否为中性状态
+   * @returns boolean
+   */
   isNeutralState() {
     return this.blur === 0;
   }
 
+  /**
+   * 获取模糊值
+   * @returns number
+   */
   getBlurValue(): number {
     let blurScale = 1;
     const { horizontal, aspectRatio } = this;
@@ -193,8 +233,10 @@ export class Blur extends BaseFilter<'Blur', BlurOwnProps> {
   }
 
   /**
+   * 选择正确的图像百分比值进行模糊
+   *
    * choose right value of image percentage to blur with
-   * @returns {Array} a numeric array with delta values
+   * @returns {Array} a numeric array with delta values 包含 delta 值的数字数组
    */
   chooseRightDelta() {
     const blur = this.getBlurValue();

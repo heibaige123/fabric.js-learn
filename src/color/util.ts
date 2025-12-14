@@ -1,6 +1,12 @@
 import type { TRGBAColorSource } from './typedefs';
 
 /**
+ * 将色相转换为 RGB 值
+ * @param p
+ * @param q
+ * @param t
+ * @returns RGB 值
+ *
  * @param {Number} p
  * @param {Number} q
  * @param {Number} t
@@ -26,6 +32,14 @@ export const hue2rgb = (p: number, q: number, t: number): number => {
 };
 
 /**
+ * 将 RGB 转换为 HSL
+ * 改编自 {@link https://gist.github.com/mjackson/5311256 https://gist.github.com/mjackson}
+ * @param r 红色值
+ * @param g 绿色值
+ * @param b 蓝色值
+ * @param a Alpha 值（透传）
+ * @returns HSL 颜色
+ *
  * Adapted from {@link https://gist.github.com/mjackson/5311256 https://gist.github.com/mjackson}
  * @param {Number} r Red color value
  * @param {Number} g Green color value
@@ -70,16 +84,29 @@ export const rgb2Hsl = (
   return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100), a];
 };
 
+/**
+ * 将 alpha 字符串转换为浮点数
+ * @param value alpha 值字符串
+ * @returns 浮点数
+ */
 export const fromAlphaToFloat = (value = '1') =>
   parseFloat(value) / (value.endsWith('%') ? 100 : 1);
 
 /**
+ * 将 [0, 255] 范围内的值转换为十六进制
+ * @param value 数值
+ * @returns 十六进制字符串
+ *
  * Convert a value in the inclusive range [0, 255] to hex
  */
 export const hexify = (value: number) =>
   Math.min(Math.round(value), 255).toString(16).toUpperCase().padStart(2, '0');
 
 /**
+ * 计算 RGB 的灰度平均值并透传 alpha
+ * @param color RGBA 颜色源
+ * @returns 灰度 RGBA 颜色源
+ *
  * Calculate the grey average value for rgb and pass through alpha
  */
 export const greyAverage = ([

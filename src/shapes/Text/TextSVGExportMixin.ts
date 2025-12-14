@@ -14,9 +14,24 @@ import { radiansToDegrees } from '../../util/misc/radiansDegreesConversion';
 import { Point } from '../../Point';
 import { matrixToSVG } from '../../util/misc/svgExport';
 
+/**
+ * 多个空格的正则表达式
+ */
 const multipleSpacesRegex = /  +/g;
+/**
+ * 双引号的正则表达式
+ */
 const dblQuoteRegex = /"/g;
 
+/**
+ * 创建内联 SVG 矩形
+ * @param color 颜色
+ * @param left 左侧
+ * @param top 顶部
+ * @param width 宽度
+ * @param height 高度
+ * @returns SVG 矩形字符串
+ */
 function createSVGInlineRect(
   color: string,
   left: number,
@@ -27,13 +42,26 @@ function createSVGInlineRect(
   return `\t\t${createSVGRect(color, { left, top, width, height })}\n`;
 }
 
+/**
+ * Text SVG 导出混入类
+ */
 export class TextSVGExportMixin extends FabricObjectSVGExportMixin {
+  /**
+   * 私有方法，返回实例的 SVG 表示
+   * @param this {TextSVGExportMixin & FabricText}
+   * @returns
+   */
   _toSVG(this: TextSVGExportMixin & FabricText): string[] {
     const offsets = this._getSVGLeftTopOffsets(),
       textAndBg = this._getSVGTextAndBg(offsets.textTop, offsets.textLeft);
     return this._wrapSVGTextAndBg(textAndBg);
   }
 
+  /**
+   * 返回实例的 SVG 表示
+   * @param {Function} [reviver] 用于进一步修改 SVG 元素的方法
+   * @return {String} 实例的 SVG 表示
+   */
   toSVG(this: TextSVGExportMixin & FabricText, reviver?: TSVGReviver): string {
     const textSvg = this._createBaseSVGMarkup(this._toSVG(), {
         reviver,
@@ -54,6 +82,11 @@ export class TextSVGExportMixin extends FabricObjectSVGExportMixin {
     return textSvg;
   }
 
+  /**
+   * 获取 SVG 左上角偏移量
+   * @private
+   * @returns {Object} 包含 textLeft, textTop, lineTop 的对象
+   */
   private _getSVGLeftTopOffsets(this: TextSVGExportMixin & FabricText) {
     return {
       textLeft: -this.width / 2,
@@ -62,6 +95,14 @@ export class TextSVGExportMixin extends FabricObjectSVGExportMixin {
     };
   }
 
+  /**
+   * 包装 SVG 文本和背景
+   * @private
+   * @param {Object} options 包含 textBgRects 和 textSpans 的对象
+   * @param {string[]} options.textSpans 文本 span 数组
+   * @param {string[]} options.textBgRects 文本背景矩形数组
+   * @returns {string[]} SVG 字符串数组
+   */
   private _wrapSVGTextAndBg(
     this: TextSVGExportMixin & FabricText,
     {
@@ -94,6 +135,13 @@ export class TextSVGExportMixin extends FabricObjectSVGExportMixin {
   }
 
   /**
+   * 返回 SVG 文本和背景
+   *
+   * @private
+   * @param {Number} textTopOffset 文本顶部偏移
+   * @param {Number} textLeftOffset 文本左侧偏移
+   * @return {Object}
+   *
    * @private
    * @param {Number} textTopOffset Text top offset
    * @param {Number} textLeftOffset Text left offset
@@ -150,6 +198,16 @@ export class TextSVGExportMixin extends FabricObjectSVGExportMixin {
     };
   }
 
+  /**
+   * 创建文本字符 span
+   * @private
+   * @param {string} char 字符
+   * @param {TextStyleDeclaration} styleDecl 样式声明
+   * @param {number} left 左侧位置
+   * @param {number} top 顶部位置
+   * @param {GraphemeBBox} charBox 字符包围盒
+   * @returns {string} SVG tspan 字符串
+   */
   private _createTextCharSpan(
     this: TextSVGExportMixin & FabricText,
     char: string,
@@ -186,6 +244,14 @@ export class TextSVGExportMixin extends FabricObjectSVGExportMixin {
     )}" ${dySpan}${angleAttr}${fillStyles}>${escapeXml(char)}</tspan>`;
   }
 
+  /**
+   * 设置 SVG 文本行的文本
+   * @private
+   * @param {string[]} textSpans 文本 span 数组
+   * @param {number} lineIndex 行索引
+   * @param {number} textLeftOffset 文本左侧偏移
+   * @param {number} textTopOffset 文本顶部偏移
+   */
   private _setSVGTextLineText(
     this: TextSVGExportMixin & FabricText,
     textSpans: string[],
@@ -251,6 +317,14 @@ export class TextSVGExportMixin extends FabricObjectSVGExportMixin {
     }
   }
 
+  /**
+   * 设置 SVG 文本行的背景
+   * @private
+   * @param {string[]} textBgRects 文本背景矩形数组
+   * @param {number} i 行索引
+   * @param {number} leftOffset 左侧偏移
+   * @param {number} textTopOffset 文本顶部偏移
+   */
   private _setSVGTextLineBg(
     this: TextSVGExportMixin & FabricText,
     textBgRects: (string | number)[],
@@ -298,6 +372,10 @@ export class TextSVGExportMixin extends FabricObjectSVGExportMixin {
   }
 
   /**
+   * 返回 svg 导出的样式字符串
+   * @param {Boolean} skipShadow 跳过阴影过滤器输出的布尔值
+   * @return {String}
+   *
    * Returns styles-string for svg-export
    * @param {Boolean} skipShadow a boolean to skip shadow filter output
    * @return {String}
@@ -307,6 +385,11 @@ export class TextSVGExportMixin extends FabricObjectSVGExportMixin {
   }
 
   /**
+   * 返回 svg 导出的样式字符串
+   * @param {Object} style 从中检索样式属性的对象
+   * @param {Boolean} useWhiteSpace 在样式中包含附加属性的布尔值。
+   * @return {String}
+   *
    * Returns styles-string for svg-export
    * @param {Object} style the object from which to retrieve style properties
    * @param {Boolean} useWhiteSpace a boolean to include an additional attribute in the style.
@@ -361,6 +444,10 @@ export class TextSVGExportMixin extends FabricObjectSVGExportMixin {
   }
 
   /**
+   * 返回 svg 导出的 text-decoration 属性
+   * @param {Object} style 从中检索样式属性的对象
+   * @return {String}
+   *
    * Returns text-decoration property for svg-export
    * @param {Object} style the object from which to retrieve style properties
    * @return {String}

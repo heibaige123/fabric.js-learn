@@ -75,6 +75,15 @@
         "tsconfig-extensions.json": true,
         "tsconfig.json": true,
         "typedoc.config.json": true,
-        ".gitignore": true
+        ".gitignore": true,
+        "**/*.spec.ts": true,
+        "**/*.test.ts": true,
+        "**/__snapshots__": true
     },
+    "cSpell.words": [
+        "behaviour",
+        "fabricjs",
+        "Familys",
+        "unitless"
+    ],
 }

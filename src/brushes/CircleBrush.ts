@@ -9,21 +9,36 @@ import { BaseBrush } from './BaseBrush';
 import type { CircleBrushPoint } from './typedefs';
 import { CENTER } from '../constants';
 
+/**
+ * 圆形画笔类
+ */
 export class CircleBrush extends BaseBrush {
   /**
+   * 画笔宽度
+   *
    * Width of a brush
    * @type Number
    */
   width = 10;
 
+  /**
+   * 存储画笔点的数组
+   */
   declare points: CircleBrushPoint[];
 
+  /**
+   * 构造函数
+   * @param canvas 画布实例
+   */
   constructor(canvas: Canvas) {
     super(canvas);
     this.points = [];
   }
 
   /**
+   * 在鼠标按下和移动时调用
+   * @param pointer 指针位置
+   *
    * Invoked inside on mouse down and mouse move
    * @param {Point} pointer
    */
@@ -35,6 +50,11 @@ export class CircleBrush extends BaseBrush {
     ctx.restore();
   }
 
+  /**
+   * 绘制单个点
+   * @param ctx 渲染上下文
+   * @param point 画笔点
+   */
   dot(ctx: CanvasRenderingContext2D, point: CircleBrushPoint) {
     ctx.fillStyle = point.fill;
     ctx.beginPath();
@@ -44,6 +64,9 @@ export class CircleBrush extends BaseBrush {
   }
 
   /**
+   * 鼠标按下时调用
+   * @param pointer 指针位置
+   *
    * Invoked on mouse down
    */
   onMouseDown(pointer: Point) {
@@ -54,6 +77,9 @@ export class CircleBrush extends BaseBrush {
   }
 
   /**
+   * 渲染画笔的完整状态
+   * @private
+   *
    * Render the full state of the brush
    * @private
    */
@@ -68,6 +94,9 @@ export class CircleBrush extends BaseBrush {
   }
 
   /**
+   * 鼠标移动时调用
+   * @param pointer 指针位置
+   *
    * Invoked on mouse move
    * @param {Point} pointer
    */
@@ -85,6 +114,8 @@ export class CircleBrush extends BaseBrush {
   }
 
   /**
+   * 鼠标松开时调用
+   *
    * Invoked on mouse up
    */
   onMouseUp() {
@@ -121,6 +152,10 @@ export class CircleBrush extends BaseBrush {
   }
 
   /**
+   * 添加点
+   * @param pointer 指针位置
+   * @returns 刚刚添加的点
+   *
    * @param {Object} pointer
    * @return {Point} Just added pointer point
    */

@@ -5,6 +5,10 @@ import type { TBBox, SVGElementName, SupportedSVGUnit } from '../../typedefs';
 import { toFixed } from './toFixed';
 
 /**
+ * 返回 fabric 解析的给定 svg 的属性数组
+ * @param type svg 元素类型（例如 'circle'）
+ * @returns 支持的属性名称字符串数组
+ *
  * Returns array of attributes for given svg that fabric parses
  * @param {SVGElementName} type Type of svg element (eg. 'circle')
  * @return {Array} string names of supported attributes
@@ -39,6 +43,12 @@ export const getSvgAttributes = (type: SVGElementName) => {
 };
 
 /**
+ * 如果适用，将属性值转换为像素值。
+ * 返回转换后的像素或未转换的原始值。
+ * @param value 要操作的数值字符串
+ * @param fontSize 字体大小
+ * @returns 数值
+ *
  * Converts from attribute value to pixel value if applicable.
  * Returns converted pixels or original value not converted.
  * @param {string} value number to operate on
@@ -73,17 +83,40 @@ export const parseUnit = (value: string, fontSize = DEFAULT_SVG_FONT_SIZE) => {
   }
 };
 
+/**
+ * 保留宽高比选项
+ */
 export type MeetOrSlice = 'meet' | 'slice';
 
+/**
+ * 对齐选项
+ */
 export type MinMidMax = 'Min' | 'Mid' | 'Max' | 'none';
 
+/**
+ * 解析 preserveAspectRatio 属性的结果类型
+ */
 export type TPreserveArParsed = {
+  /**
+   * 保持宽高比选项
+   */
   meetOrSlice: MeetOrSlice;
+  /**
+   * 水平对齐选项
+   */
   alignX: MinMidMax;
+  /**
+   * 垂直对齐选项
+   */
   alignY: MinMidMax;
 };
 
 // align can be either none or undefined or a combination of mid/max
+/**
+ * 解析对齐选项
+ * @param align 对齐字符串
+ * @returns
+ */
 const parseAlign = (align: string): MinMidMax[] => {
   //divide align in alignX and alignY
   if (align && align !== NONE) {
@@ -95,6 +128,11 @@ const parseAlign = (align: string): MinMidMax[] => {
 };
 
 /**
+ * 从元素解析 preserveAspectRatio 属性
+ * https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/preserveAspectRatio
+ * @param attribute 要解析的属性
+ * @returns 包含 align 和 meetOrSlice 属性的对象
+ *
  * Parse preserveAspectRatio attribute from element
  * https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/preserveAspectRatio
  * @param {string} attribute to be parsed
@@ -116,6 +154,13 @@ export const parsePreserveAspectRatioAttribute = (
 };
 
 /**
+ * Adobe Illustrator (至少 CS5) 无法渲染基于 rgba() 的填充值
+ * 我们通过将 alpha 通道“移动”到 opacity 属性并将 fill 的 alpha 设置为 1 来解决此问题
+ * @param prop 属性名
+ * @param value 属性值
+ * @param inlineStyle 默认为内联样式，使用的分隔符是 ":"，另一个是 "="
+ * @returns
+ *
  * Adobe Illustrator (at least CS5) is unable to render rgba()-based fill values
  * we work around it by "moving" alpha channel into opacity attribute and setting fill's alpha to 1
  * @param prop
@@ -154,6 +199,13 @@ export const colorPropToSVG = (
   }
 };
 
+/**
+ * 创建 SVG 矩形
+ * @param color 颜色
+ * @param bbox 边界框
+ * @param precision 精度
+ * @returns SVG 矩形字符串
+ */
 export const createSVGRect = (
   color: string,
   { left, top, width, height }: TBBox,

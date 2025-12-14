@@ -28,19 +28,46 @@ import {
   SKEW_Y,
 } from '../constants';
 
+/**
+ * 扩展的变换类型，包含倾斜方向
+ */
 export type SkewTransform = Transform & { skewingSide: -1 | 1 };
 
+/**
+ * 轴相关键的映射
+ */
 const AXIS_KEYS: Record<
   TAxis,
   {
+    /**
+     * 对应的反向轴
+     */
     counterAxis: TAxis;
+    /**
+     * 缩放键
+     */
     scale: TAxisKey<'scale'>;
+    /**
+     * 倾斜键
+     */
     skew: TAxisKey<'skew'>;
+    /**
+     * 锁定倾斜键
+     */
     lockSkewing: TAxisKey<'lockSkewing'>;
+    /**
+     * 原点键
+     */
     origin: TAxisKey<'origin'>;
+    /**
+     * 翻转键
+     */
     flip: TAxisKey<'flip'>;
   }
 > = {
+  /**
+   * X 轴键映射
+   */
   x: {
     counterAxis: 'y',
     scale: SCALE_X,
@@ -49,6 +76,9 @@ const AXIS_KEYS: Record<
     origin: 'originX',
     flip: 'flipX',
   },
+  /**
+   * Y 轴键映射
+   */
   y: {
     counterAxis: 'x',
     scale: SCALE_Y,
@@ -59,9 +89,14 @@ const AXIS_KEYS: Record<
   },
 };
 
+/**
+ * 倾斜光标样式映射
+ */
 const skewMap = ['ns', 'nesw', 'ew', 'nwse'];
 
 /**
+ * 返回倾斜操作的正确光标样式
+ *
  * return the correct cursor style for the skew action
  * @param {Event} eventData the javascript event that is causing the scale
  * @param {Control} control the control that is interested in the action
@@ -85,6 +120,9 @@ export const skewCursorStyleHandler: ControlCursorCallback = (
 };
 
 /**
+ * 由于倾斜是在缩放之前应用的，因此计算是在无缩放平面中完成的
+ * @see https://github.com/fabricjs/fabric.js/pull/8380
+ *
  * Since skewing is applied before scaling, calculations are done in a scaleless plane
  * @see https://github.com/fabricjs/fabric.js/pull/8380
  */
@@ -145,6 +183,8 @@ function skewObject(
 }
 
 /**
+ * 给定轴上倾斜的包装动作处理程序，处理倾斜方向并确定锚点的正确变换原点
+ *
  * Wrapped Action handler for skewing on a given axis, takes care of the
  * skew direction and determines the correct transform origin for the anchor point
  * @param {Event} eventData javascript event that is doing the transform
@@ -215,6 +255,8 @@ function skewHandler(
 }
 
 /**
+ * X 轴倾斜的包装动作处理程序，处理倾斜方向并确定锚点的正确变换原点
+ *
  * Wrapped Action handler for skewing on the X axis, takes care of the
  * skew direction and determines the correct transform origin for the anchor point
  * @param {Event} eventData javascript event that is doing the transform
@@ -233,6 +275,8 @@ export const skewHandlerX: TransformActionHandler = (
 };
 
 /**
+ * Y 轴倾斜的包装动作处理程序，处理倾斜方向并确定锚点的正确变换原点
+ *
  * Wrapped Action handler for skewing on the Y axis, takes care of the
  * skew direction and determines the correct transform origin for the anchor point
  * @param {Event} eventData javascript event that is doing the transform

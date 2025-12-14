@@ -34,55 +34,158 @@ import { log } from '../util/internals/console';
 
 // @todo Would be nice to have filtering code not imported directly.
 
+/**
+ * 图片源类型
+ */
 export type ImageSource =
   | HTMLImageElement
   | HTMLVideoElement
   | HTMLCanvasElement;
 
+/**
+ * 解析后的保持纵横比偏移量
+ */
 export type ParsedPAROffsets = {
+  /**
+   * 宽度
+   */
   width: number;
+  /**
+   * 高度
+   */
   height: number;
+  /**
+   * X轴缩放
+   */
   scaleX: number;
+  /**
+   * Y轴缩放
+   */
   scaleY: number;
+  /**
+   * 左侧偏移
+   */
   offsetLeft: number;
+  /**
+   * 顶部偏移
+   */
   offsetTop: number;
+  /**
+   * X轴裁剪
+   */
   cropX: number;
+  /**
+   * Y轴裁剪
+   */
   cropY: number;
 };
 
+/**
+ * 图片独有的属性接口
+ */
 interface UniqueImageProps {
+  /**
+   * 是否从属性中获取 src
+   */
   srcFromAttribute: boolean;
+  /**
+   * 最小缩放触发器
+   */
   minimumScaleTrigger: number;
+  /**
+   * X轴裁剪
+   */
   cropX: number;
+  /**
+   * Y轴裁剪
+   */
   cropY: number;
+  /**
+   * 图片平滑处理
+   */
   imageSmoothing: boolean;
+  /**
+   * 滤镜列表
+   */
   filters: BaseFilter<string, Record<string, any>>[];
+  /**
+   * 调整大小滤镜
+   */
   resizeFilter?: Resize;
 }
 
+/**
+ * 图片默认值
+ */
 export const imageDefaultValues: Partial<TClassProperties<FabricImage>> = {
+  /**
+   * 描边宽度
+   */
   strokeWidth: 0,
+  /**
+   * 是否从属性中获取 src
+   */
   srcFromAttribute: false,
+  /**
+   * 最小缩放触发器
+   */
   minimumScaleTrigger: 0.5,
+  /**
+   * X轴裁剪
+   */
   cropX: 0,
+  /**
+   * Y轴裁剪
+   */
   cropY: 0,
+  /**
+   * 图片平滑处理
+   */
   imageSmoothing: true,
 };
 
+/**
+ * 序列化图片属性接口
+ */
 export interface SerializedImageProps extends SerializedObjectProps {
+  /**
+   * 图片源地址
+   */
   src: string;
+  /**
+   * 跨域设置
+   */
   crossOrigin: TCrossOrigin;
+  /**
+   * 滤镜列表
+   */
   filters: any[];
+  /**
+   * 调整大小滤镜
+   */
   resizeFilter?: ResizeSerializedProps;
+  /**
+   * X轴裁剪
+   */
   cropX: number;
+  /**
+   * Y轴裁剪
+   */
   cropY: number;
 }
 
+/**
+ * 图片属性接口
+ */
 export interface ImageProps extends FabricObjectProps, UniqueImageProps {}
 
+/**
+ * 图片属性列表
+ */
 const IMAGE_PROPS = ['cropX', 'cropY'] as const;
 
 /**
+ * 图片类
  * @see {@link http://fabric5.fabricjs.com/fabric-intro-part-1#images}
  */
 export class FabricImage<
@@ -94,6 +197,9 @@ export class FabricImage<
   implements ImageProps
 {
   /**
+   * 当调用 {@link FabricImage.getSrc} 时，从元素 src 返回值 `element.getAttribute('src')`。
+   * 这允许将相对 url 用作图像 src。
+   *
    * When calling {@link FabricImage.getSrc}, return value from element src with `element.getAttribute('src')`.
    * This allows for relative urls as image src.
    * @since 2.7.0
@@ -103,6 +209,10 @@ export class FabricImage<
   declare srcFromAttribute: boolean;
 
   /**
+   * 私有
+   * 包含 scaleX 的最后一个值，用于检测
+   * 图像是否在上次渲染后调整了大小
+   *
    * private
    * contains last value of scaleX to detect
    * if the Image got resized after the last Render
@@ -111,6 +221,10 @@ export class FabricImage<
   protected _lastScaleX = 1;
 
   /**
+   * 私有
+   * 包含 scaleY 的最后一个值，用于检测
+   * 图像是否在上次渲染后调整了大小
+   *
    * private
    * contains last value of scaleY to detect
    * if the Image got resized after the last Render
@@ -119,6 +233,9 @@ export class FabricImage<
   protected _lastScaleY = 1;
 
   /**
+   * 私有
+   * 包含应用过滤器链应用的缩放的最后一个值
+   *
    * private
    * contains last value of scaling applied by the apply filter chain
    * @type Number
@@ -126,6 +243,9 @@ export class FabricImage<
   protected _filterScalingX = 1;
 
   /**
+   * 私有
+   * 包含应用过滤器链应用的缩放的最后一个值
+   *
    * private
    * contains last value of scaling applied by the apply filter chain
    * @type Number
@@ -133,6 +253,10 @@ export class FabricImage<
   protected _filterScalingY = 1;
 
   /**
+   * 最小缩放因子，在该因子下触发任何 resizeFilter 以调整图像大小
+   * 0 将禁用自动调整大小。1 将始终自动触发。
+   * 大于 1 的数字尚未实现。
+   *
    * minimum scale factor under which any resizeFilter is triggered to resize the image
    * 0 will disable the automatic resize. 1 will trigger automatically always.
    * number bigger than 1 are not implemented yet.
@@ -141,6 +265,8 @@ export class FabricImage<
   declare minimumScaleTrigger: number;
 
   /**
+   * 用于检索表示此图像的纹理的键
+   *
    * key used to retrieve the texture representing this image
    * @since 2.0.0
    * @type String
@@ -148,6 +274,8 @@ export class FabricImage<
   declare cacheKey: string;
 
   /**
+   * 图像裁剪（以像素为单位），相对于原始图像大小。
+   *
    * Image crop in pixels from original image size.
    * @since 2.0.0
    * @type Number
@@ -155,6 +283,8 @@ export class FabricImage<
   declare cropX: number;
 
   /**
+   * 图像裁剪（以像素为单位），相对于原始图像大小。
+   *
    * Image crop in pixels from original image size.
    * @since 2.0.0
    * @type Number
@@ -162,6 +292,9 @@ export class FabricImage<
   declare cropY: number;
 
   /**
+   * 指示此画布在绘制此图像时是否使用图像平滑。
+   * 还会影响此图像的 cacheCanvas 是否使用 imageSmoothing
+   *
    * Indicates whether this canvas will use image smoothing when painting this image.
    * Also influence if the cacheCanvas for this image uses imageSmoothing
    * @since 4.0.0-beta.11
@@ -169,23 +302,57 @@ export class FabricImage<
    */
   declare imageSmoothing: boolean;
 
+  /**
+   * 保持纵横比
+   */
   declare preserveAspectRatio: string;
 
+  /**
+   * 图片源地址
+   */
   declare protected src: string;
 
+  /**
+   * 滤镜列表
+   */
   declare filters: BaseFilter<string, Record<string, any>>[];
+  /**
+   * 调整大小滤镜
+   */
   declare resizeFilter: Resize;
 
+  /**
+   * 图片元素
+   */
   declare _element: ImageSource;
+  /**
+   * 过滤后的元素
+   */
   declare _filteredEl?: HTMLCanvasElement;
+  /**
+   * 原始元素
+   */
   declare _originalElement: ImageSource;
 
+  /**
+   * 类型
+   */
   static type = 'Image';
 
+  /**
+   * 缓存属性
+   */
   static cacheProperties = [...cacheProperties, ...IMAGE_PROPS];
 
+  /**
+   * 自身默认值
+   */
   static ownDefaults = imageDefaultValues;
 
+  /**
+   * 获取默认值
+   * @returns 默认值对象
+   */
   static getDefaults(): Record<string, any> {
     return {
       ...super.getDefaults(),
@@ -193,6 +360,12 @@ export class FabricImage<
     };
   }
   /**
+   * 构造函数
+   * 图像可以使用任何画布可绘制对象或字符串进行初始化。
+   * 字符串应该是一个 url，并将作为图像加载。
+   * Canvas 和 Image 元素开箱即用，而视频需要额外的代码才能工作。
+   * 请检查视频元素事件以进行搜索。
+   *
    * Constructor
    * Image can be initialized with any canvas drawable or a string.
    * The string should be a url and will be loaded as an image.
@@ -221,6 +394,8 @@ export class FabricImage<
   }
 
   /**
+   * 返回此实例基于的图像元素
+   *
    * Returns image element which this instance if based on
    */
   getElement() {
@@ -228,6 +403,10 @@ export class FabricImage<
   }
 
   /**
+   * 将此实例的图像元素设置为指定的元素。
+   * 如果定义了过滤器，它们将应用于新图像。
+   * 替换后，您可能需要调用 `canvas.renderAll` 和 `object.setCoords`，以渲染新图像并更新控件区域。
+   *
    * Sets image element for this instance to a specified one.
    * If filters defined they are applied to new image.
    * You might need to call `canvas.renderAll` and `object.setCoords` after replacing, to render new image and update controls area.
@@ -253,6 +432,8 @@ export class FabricImage<
   }
 
   /**
+   * 如果处于 webgl 模式，则删除单个纹理
+   *
    * Delete a single texture if in webgl mode
    */
   removeTexture(key: string) {
@@ -263,6 +444,8 @@ export class FabricImage<
   }
 
   /**
+   * 删除纹理、对元素的引用以及最终的 JSDOM 清理
+   *
    * Delete textures, reference to elements and eventually JSDOM cleanup
    */
   dispose() {
@@ -281,6 +464,8 @@ export class FabricImage<
   }
 
   /**
+   * 获取 crossOrigin 值（对应图像元素的）
+   *
    * Get the crossOrigin value (of the corresponding image element)
    */
   getCrossOrigin(): string | null {
@@ -291,6 +476,8 @@ export class FabricImage<
   }
 
   /**
+   * 返回图像的原始大小
+   *
    * Returns original size of an image
    */
   getOriginalSize() {
@@ -308,6 +495,8 @@ export class FabricImage<
   }
 
   /**
+   * 描边图像的边框
+   *
    * @private
    * @param {CanvasRenderingContext2D} ctx Context to render on
    */
@@ -327,6 +516,8 @@ export class FabricImage<
   }
 
   /**
+   * 返回实例的对象表示
+   *
    * Returns object representation of an instance
    * @param {Array} [propertiesToInclude] Any properties that you might want to additionally include in the output
    * @return {Object} Object representation of an instance
@@ -351,6 +542,8 @@ export class FabricImage<
   }
 
   /**
+   * 如果图像应用了裁剪，则返回 true，检查 cropX、cropY、width、height 的值。
+   *
    * Returns true if an image has crop applied, inspecting values of cropX,cropY,width,height.
    * @return {Boolean}
    */
@@ -364,6 +557,8 @@ export class FabricImage<
   }
 
   /**
+   * 返回实例的 svg 表示
+   *
    * Returns svg representation of an instance
    * @return {string[]} an array of strings with the specific svg representation
    * of the instance
@@ -434,6 +629,8 @@ export class FabricImage<
   }
 
   /**
+   * 返回图像的源
+   *
    * Returns source of an image
    * @param {Boolean} filtered indicates if the src is needed for svg
    * @return {String} Source of an image
@@ -456,6 +653,8 @@ export class FabricImage<
   }
 
   /**
+   * getSrc 的别名
+   *
    * Alias for getSrc
    * @param filtered
    * @deprecated
@@ -465,6 +664,9 @@ export class FabricImage<
   }
 
   /**
+   * 加载并设置图像的源
+   * **重要**：建议在调用此方法之前中止加载任务，以防止竞争条件和不必要的网络
+   *
    * Loads and sets source of an image\
    * **IMPORTANT**: It is recommended to abort loading tasks before calling this method to prevent race conditions and unnecessary networking
    * @param {String} src Source string (URL)
@@ -478,6 +680,8 @@ export class FabricImage<
   }
 
   /**
+   * 返回实例的字符串表示
+   *
    * Returns string representation of an instance
    * @return {String} String representation of an instance
    */
@@ -485,6 +689,9 @@ export class FabricImage<
     return `#<Image: { src: "${this.getSrc()}" }>`;
   }
 
+  /**
+   * 应用调整大小滤镜
+   */
   applyResizeFilters() {
     const filter = this.resizeFilter,
       minimumScale = this.minimumScaleTrigger,
@@ -520,6 +727,8 @@ export class FabricImage<
   }
 
   /**
+   * 应用分配给此图像的过滤器（来自“filters”数组）或来自过滤器参数
+   *
    * Applies filters assigned to this image (from "filters" array) or from filter param
    * @param {Array} filters to be applied
    * @param {Boolean} forResizing specify if the filter operation is a resize operation
@@ -589,6 +798,8 @@ export class FabricImage<
   }
 
   /**
+   * 描边并按顺序渲染
+   *
    * @private
    * @param {CanvasRenderingContext2D} ctx Context to render on
    */
@@ -602,6 +813,9 @@ export class FabricImage<
   }
 
   /**
+   * 在目标上下文上绘制对象的缓存副本。
+   * 它将为绘制操作设置 imageSmoothing
+   *
    * Paint the cached copy of the object on the target context.
    * it will set the imageSmoothing for the draw operation
    * @param {CanvasRenderingContext2D} ctx Context to render on
@@ -615,6 +829,14 @@ export class FabricImage<
   }
 
   /**
+   * 决定 FabricImage 是否应该缓存。创建自己的缓存级别
+   * needsItsOwnCache 应该在对象绘制方法需要缓存步骤时使用。
+   * 通常，您不会缓存组中的对象，因为外部组已被缓存。
+   * 这是特殊的 Image 版本，我们希望尽可能避免缓存。
+   * 本质上，图像不会从缓存中受益。它们可能需要缓存，在这种情况下我们会这样做。
+   * 此外，缓存图像通常会导致细节丢失。
+   * 应该进行全面的性能审计。
+   *
    * Decide if the FabricImage should cache or not. Create its own cache level
    * needsItsOwnCache should be used when the object drawing method requires
    * a cache step.
@@ -629,6 +851,10 @@ export class FabricImage<
     return this.needsItsOwnCache();
   }
 
+  /**
+   * 渲染填充
+   * @param ctx 渲染上下文
+   */
   _renderFill(ctx: CanvasRenderingContext2D) {
     const elementToDraw = this._element;
     if (!elementToDraw) {
@@ -661,6 +887,8 @@ export class FabricImage<
   }
 
   /**
+   * 需要检查图像是否需要调整大小
+   *
    * needed to check if image needs resize
    * @private
    */
@@ -670,6 +898,8 @@ export class FabricImage<
   }
 
   /**
+   * 重置宽度和高度为原始图像大小
+   *
    * @private
    * @deprecated unused
    */
@@ -678,6 +908,8 @@ export class FabricImage<
   }
 
   /**
+   * 设置图像对象的宽度和高度，使用元素或选项
+   *
    * @private
    * Set the width and the height of the image object, using the element or the
    * options.
@@ -689,6 +921,8 @@ export class FabricImage<
   }
 
   /**
+   * 计算中心的偏移量和图像的缩放因子，以遵守 preserveAspectRatio 属性
+   *
    * Calculate offset for center and scale factor for the image in order to respect
    * the preserveAspectRatio attribute
    * @private
@@ -764,6 +998,8 @@ export class FabricImage<
   }
 
   /**
+   * 解析 SVG 元素时要考虑的属性名称列表（由 {@link FabricImage.fromElement} 使用）
+   *
    * List of attribute names to account for when parsing SVG element (used by {@link FabricImage.fromElement})
    * @see {@link http://www.w3.org/TR/SVG/struct.html#ImageElement}
    */
@@ -781,6 +1017,8 @@ export class FabricImage<
   ];
 
   /**
+   * 从其对象表示创建 FabricImage 实例
+   *
    * Creates an instance of FabricImage from its object representation
    * @param {Object} object Object to create an instance from
    * @param {object} [options] Options object
@@ -810,6 +1048,8 @@ export class FabricImage<
   }
 
   /**
+   * 从 URL 字符串创建 Image 实例
+   *
    * Creates an instance of Image from an URL string
    * @param {String} url URL to create an image from
    * @param {LoadImageOptions} [options] Options object
@@ -826,6 +1066,8 @@ export class FabricImage<
   }
 
   /**
+   * 从 SVG 元素返回 {@link FabricImage} 实例
+   *
    * Returns {@link FabricImage} instance from an SVG element
    * @param {HTMLElement} element Element to parse
    * @param {Object} [options] Options object

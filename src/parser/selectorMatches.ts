@@ -1,3 +1,9 @@
+/**
+ * 检查元素是否匹配给定的选择器
+ * @param element 要检查的元素
+ * @param selector 选择器字符串
+ * @returns 如果匹配则返回 true，否则返回 false
+ */
 export function selectorMatches(
   element: HTMLElement | SVGElement,
   selector: string,

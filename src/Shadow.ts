@@ -12,6 +12,8 @@ import { toFixed } from './util/misc/toFixed';
 import { rotateVector } from './util/misc/vectors';
 
 /**
+ * 匹配阴影 offsetX, offsetY 和 blur 的正则表达式 (例如: "2px 2px 10px rgba(0,0,0,0.2)", "rgb(0,255,0) 2px 2px")
+ *
    * Regex matching shadow offsetX, offsetY and blur (ex: "2px 2px 10px rgba(0,0,0,0.2)", "rgb(0,255,0) 2px 2px")
    * - (?:\s|^): This part captures either a whitespace character (\s) or the beginning of a line (^). It's non-capturing (due to (?:...)), meaning it doesn't create a capturing group.
    * - (-?\d+(?:\.\d*)?(?:px)?(?:\s?|$))?: This captures the first component of the shadow, which is the horizontal offset. Breaking it down:
@@ -40,6 +42,9 @@ const reOffsetsAndBlur = new RegExp(
     '?(?:px)?)?(?:\\s?|$)(?:$|\\s)',
 );
 
+/**
+ * 阴影默认值
+ */
 export const shadowDefaultValues: Partial<TClassProperties<Shadow>> = {
   color: 'rgb(0,0,0)',
   blur: 0,
@@ -50,54 +55,97 @@ export const shadowDefaultValues: Partial<TClassProperties<Shadow>> = {
   nonScaling: false,
 };
 
+/**
+ * 序列化后的阴影选项
+ */
 export type SerializedShadowOptions = {
+  /**
+   * 阴影颜色
+   */
   color: string;
+  /**
+   * 阴影模糊半径
+   */
   blur: number;
+  /**
+   * 阴影水平偏移
+   */
   offsetX: number;
+  /**
+   * 阴影垂直偏移
+   */
   offsetY: number;
+  /**
+   * 阴影是否影响描边
+   */
   affectStroke: boolean;
+  /**
+   * 阴影是否不随对象缩放
+   */
   nonScaling: boolean;
+  /**
+   * 类型
+   */
   type: string;
 };
 
+/**
+ * 阴影类
+ */
 export class Shadow {
   /**
+   * 阴影颜色
+   *
    * Shadow color
    * @type String
    */
   declare color: string;
 
   /**
+   * 阴影模糊半径
+   *
    * Shadow blur
    * @type Number
    */
   declare blur: number;
 
   /**
+   * 阴影水平偏移
+   *
    * Shadow horizontal offset
    * @type Number
    */
   declare offsetX: number;
 
   /**
+   * 阴影垂直偏移
+   *
    * Shadow vertical offset
    * @type Number
    */
   declare offsetY: number;
 
   /**
+   * 阴影是否应影响描边操作
+   *
    * Whether the shadow should affect stroke operations
    * @type Boolean
    */
   declare affectStroke: boolean;
 
   /**
+   * 指示 toObject 是否应包含默认值
+   *
    * Indicates whether toObject should include default values
    * @type Boolean
    */
   declare includeDefaultValues: boolean;
 
   /**
+   * 当为 `false` 时，阴影将随对象缩放。
+   * 当为 `true` 时，阴影的 offsetX、offsetY 和 blur 将不受对象缩放的影响。
+   * 默认为 false
+   *
    * When `false`, the shadow will scale with the object.
    * When `true`, the shadow's offsetX, offsetY, and blur will not be affected by the object's scale.
    * default to false
@@ -105,14 +153,25 @@ export class Shadow {
    */
   declare nonScaling: boolean;
 
+  /**
+   * 唯一标识符
+   */
   declare id: number;
 
+  /**
+   * 自身默认值
+   */
   static ownDefaults = shadowDefaultValues;
 
+  /**
+   * 类型
+   */
   static type = 'shadow';
 
   /**
+   * 构造函数
    * @see {@link http://fabric5.fabricjs.com/shadows|Shadow demo}
+   * @param {Object|String} [options] 包含 color, blur, offsetX, offsetY 属性的选项对象或字符串 (例如 "rgba(0,0,0,0.2) 2px 2px 10px")
    * @param {Object|String} [options] Options object with any of color, blur, offsetX, offsetY properties or string (e.g. "rgba(0,0,0,0.2) 2px 2px 10px")
    */
   constructor(options?: Partial<TClassProperties<Shadow>>);
@@ -125,6 +184,9 @@ export class Shadow {
   }
 
   /**
+   * 解析阴影字符串
+   * @param {String} value 要解析的阴影值
+   * @return {Object} 包含 color, offsetX, offsetY 和 blur 的阴影对象
    * @param {String} value Shadow value to parse
    * @return {Object} Shadow object with color, offsetX, offsetY and blur
    */
@@ -144,6 +206,8 @@ export class Shadow {
   }
 
   /**
+   * 返回实例的字符串表示形式
+   *
    * Returns a string representation of an instance
    * @see http://www.w3.org/TR/css-text-decor-3/#text-shadow
    * @return {String} Returns CSS3 text-shadow declaration
@@ -153,6 +217,8 @@ export class Shadow {
   }
 
   /**
+   * 返回阴影的 SVG 表示形式
+   *
    * Returns SVG representation of a shadow
    * @param {FabricObject} object
    * @return {String} SVG representation of a shadow
@@ -209,6 +275,8 @@ export class Shadow {
   }
 
   /**
+   * 返回阴影的对象表示形式
+   *
    * Returns object representation of a shadow
    * @return {Object} Object representation of a shadow instance
    */
@@ -228,6 +296,10 @@ export class Shadow {
       : data;
   }
 
+  /**
+   * 从对象创建阴影实例
+   * @param {Partial<TClassProperties<Shadow>>} options 选项
+   */
   static async fromObject(options: Partial<TClassProperties<Shadow>>) {
     return new this(options);
   }

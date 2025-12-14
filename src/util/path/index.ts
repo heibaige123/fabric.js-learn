@@ -27,6 +27,7 @@ import { reArcCommandPoints, rePathCommand } from './regex';
 import { reNum } from '../../parser/constants';
 
 /**
+ * 可以重复的命令
  * Commands that may be repeated
  */
 const repeatedCommands: Record<string, 'l' | 'L'> = {
@@ -35,6 +36,20 @@ const repeatedCommands: Record<string, 'l' | 'L'> = {
 };
 
 /**
+ * 将旋转椭圆的弧转换为贝塞尔曲线
+ * @param theta1 弧的起始角度
+ * @param theta2 弧的结束角度
+ * @param cosTh 旋转角度的余弦值
+ * @param sinTh 旋转角度的正弦值
+ * @param rx X 轴半径（旋转前）
+ * @param ry Y 轴半径（旋转前）
+ * @param cx1 椭圆中心的 X 坐标
+ * @param cy1 椭圆中心的 Y 坐标
+ * @param mT
+ * @param fromX 弧起点的 X 坐标
+ * @param fromY 弧起点的 Y 坐标
+ * @returns 解析后的绝对三次贝塞尔曲线命令
+ *
  * Convert an arc of a rotated ellipse to a Bezier Curve
  * @param {TRadian} theta1 start of the arc
  * @param {TRadian} theta2 end of the arc
@@ -76,6 +91,18 @@ const segmentToBezier = (
 };
 
 /**
+ * 改编自 {@link http://dxr.mozilla.org/mozilla-central/source/dom/svg/SVGPathDataParser.cpp}
+ * 作者 Andrea Bogazzi，代码遵循 MPL 协议。如果你没有许可证副本，可以在这里获取
+ * http://mozilla.org/MPL/2.0/
+ * @param toX 终点 X 坐标
+ * @param toY 终点 Y 坐标
+ * @param rx X 轴半径
+ * @param ry Y 轴半径
+ * @param large 0 或 1 标志，决定弧线是大于还是小于 180 度
+ * @param sweep 0 或 1 标志，决定弧线是顺时针还是逆时针
+ * @param rotateX X 轴旋转角度
+ * @returns 解析后的绝对三次贝塞尔曲线命令数组
+ *
  * Adapted from {@link http://dxr.mozilla.org/mozilla-central/source/dom/svg/SVGPathDataParser.cpp}
  * by Andrea Bogazzi code is under MPL. if you don't have a copy of the license you can take it here
  * http://mozilla.org/MPL/2.0/
@@ -176,6 +203,14 @@ const arcToSegments = (
 
 /**
  * @private
+ * 计算两个向量之间的角度
+ * @param ux u 端点 x
+ * @param uy u 端点 y
+ * @param vx v 端点 x
+ * @param vy v 端点 y
+ * @returns 角度（弧度）
+ *
+ * @private
  * Calculate the angle between two vectors
  * @param ux u endpoint x
  * @param uy u endpoint y
@@ -199,23 +234,40 @@ const calcVectorAngle = (
 
 // functions for the Cubic beizer
 // taken from: https://github.com/konvajs/konva/blob/7.0.5/src/shapes/Path.ts#L350
+/**
+ * 三次贝塞尔曲线基函数 1: t^3
+ */
 const CB1 = (t: number) => t ** 3;
+/**
+ * 三次贝塞尔曲线基函数 2: 3t^2(1-t)
+ */
 const CB2 = (t: number) => 3 * t ** 2 * (1 - t);
+/**
+ * 三次贝塞尔曲线基函数 3: 3t(1-t)^2
+ */
 const CB3 = (t: number) => 3 * t * (1 - t) ** 2;
+/**
+ * 三次贝塞尔曲线基函数 4: (1-t)^3
+ */
 const CB4 = (t: number) => (1 - t) ** 3;
 
 /**
+ * 计算三次贝塞尔曲线的边界框
+ * 取自 http://jsbin.com/ivomiq/56/edit (无可用信用)
+ * TODO: 我们能否将其标准化，将起点设置为 0，然后平移 bbox？
+ * @param begx 起点 x
+ * @param begy 起点 y
+ * @param cp1x 第一控制点 x
+ * @param cp1y 第一控制点 y
+ * @param cp2x 第二控制点 x
+ * @param cp2y 第二控制点 y
+ * @param endx 贝塞尔曲线终点 x
+ * @param endy 贝塞尔曲线终点 y
+ * @returns 矩形边界
+ *
  * Calculate bounding box of a cubic Bezier curve
  * Taken from http://jsbin.com/ivomiq/56/edit (no credits available)
  * TODO: can we normalize this with the starting points set at 0 and then translated the bbox?
- * @param {number} begx starting point
- * @param {number} begy
- * @param {number} cp1x first control point
- * @param {number} cp1y
- * @param {number} cp2x second control point
- * @param {number} cp2y
- * @param {number} endx end of bezier
- * @param {number} endy
  * @return {TRectBounds} the rectangular bounds
  */
 export function getBoundsOfCurve(
@@ -314,6 +366,12 @@ export function getBoundsOfCurve(
 }
 
 /**
+ * 将弧线转换为一系列三次贝塞尔曲线
+ * @param fx 起点 x
+ * @param fy 起点 y
+ * @param coords 弧线命令
+ * @returns 解析后的绝对三次贝塞尔曲线命令数组
+ *
  * Converts arc to a bunch of cubic Bezier curves
  * @param {number} fx starting point x
  * @param {number} fy starting point y
@@ -338,6 +396,16 @@ export const fromArcToBeziers = (
 };
 
 /**
+ * 此函数接收解析后的 SVG 路径并将其简化以供 fabricJS 逻辑使用。
+ * 简化包括：
+ * - 所有命令转换为绝对坐标（小写转大写）
+ * - S 转换为 C
+ * - T 转换为 Q
+ * - A 转换为 C
+ * @param path 解析后的 SVG 路径命令数组
+ * @returns 简化的 SVG 路径命令数组
+ * TODO: 找出一种优雅的方式来移除类型断言
+ *
  * This function takes a parsed SVG path and makes it simpler for fabricJS logic.
  * Simplification consist of:
  * - All commands converted to absolute (lowercase to uppercase)
@@ -508,6 +576,13 @@ export const makePathSimpler = (path: TComplexPathData): TSimplePathData => {
 
 // todo verify if we can just use the point class here
 /**
+ * 计算从点 x1,y1 到 x2,y2 的长度
+ * @param x1 起点 x
+ * @param y1 起点 y
+ * @param x2 终点 x
+ * @param y2 终点 y
+ * @returns 线段长度
+ *
  * Calc length from point x1,y1 to x2,y2
  * @param {number} x1 starting point x
  * @param {number} y1 starting point y
@@ -523,15 +598,18 @@ const calcLineLength = (
 ): number => Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
 
 /**
+ * 获取一个迭代器，该迭代器接收百分比并返回一个点
+ * @param begx 起点 x
+ * @param begy 起点 y
+ * @param cp1x 第一控制点 x
+ * @param cp1y 第一控制点 y
+ * @param cp2x 第二控制点 x
+ * @param cp2y 第二控制点 y
+ * @param endx 终点 x
+ * @param endy 终点 y
+ * @returns 迭代器函数
+ *
  * Get an iterator that takes a percentage and returns a point
- * @param {number} begx
- * @param {number} begy
- * @param {number} cp1x
- * @param {number} cp1y
- * @param {number} cp2x
- * @param {number} cp2y
- * @param {number} endx
- * @param {number} endy
  */
 const getPointOnCubicBezierIterator =
   (
@@ -555,10 +633,31 @@ const getPointOnCubicBezierIterator =
     );
   };
 
+/**
+ * 二次贝塞尔曲线基函数 1: t^2
+ */
 const QB1 = (t: number) => t ** 2;
+/**
+ * 二次贝塞尔曲线基函数 2: 2t(1-t)
+ */
 const QB2 = (t: number) => 2 * t * (1 - t);
+/**
+ * 二次贝塞尔曲线基函数 3: (1-t)^2
+ */
 const QB3 = (t: number) => (1 - t) ** 2;
 
+/**
+ * 获取三次贝塞尔曲线切线的迭代器
+ * @param p1x 起点 x
+ * @param p1y 起点 y
+ * @param p2x 第一控制点 x
+ * @param p2y 第一控制点 y
+ * @param p3x 第二控制点 x
+ * @param p3y 第二控制点 y
+ * @param p4x 终点 x
+ * @param p4y 终点 y
+ * @returns 切线角度迭代器
+ */
 const getTangentCubicIterator =
   (
     p1x: number,
@@ -581,6 +680,16 @@ const getTangentCubicIterator =
     return Math.atan2(tangentY, tangentX);
   };
 
+/**
+ * 获取二次贝塞尔曲线上的点的迭代器
+ * @param p1x 起点 x
+ * @param p1y 起点 y
+ * @param p2x 控制点 x
+ * @param p2y 控制点 y
+ * @param p3x 终点 x
+ * @param p3y 终点 y
+ * @returns 点迭代器
+ */
 const getPointOnQuadraticBezierIterator =
   (
     p1x: number,
@@ -600,6 +709,16 @@ const getPointOnQuadraticBezierIterator =
     );
   };
 
+/**
+ * 获取二次贝塞尔曲线切线的迭代器
+ * @param p1x 起点 x
+ * @param p1y 起点 y
+ * @param p2x 控制点 x
+ * @param p2y 控制点 y
+ * @param p3x 终点 x
+ * @param p3y 终点 y
+ * @returns 切线角度迭代器
+ */
 const getTangentQuadraticIterator =
   (
     p1x: number,
@@ -618,6 +737,14 @@ const getTangentQuadraticIterator =
 
 // this will run over a path segment (a cubic or quadratic segment) and approximate it
 // with 100 segments. This will good enough to calculate the length of the curve
+/**
+ * 路径迭代器
+ * 这将遍历路径段（三次或二次段）并用 100 个段对其进行近似。这足以计算曲线的长度。
+ * @param iterator 点迭代器
+ * @param x1 起点 x
+ * @param y1 起点 y
+ * @returns 路径长度
+ */
 const pathIterator = (
   iterator: (pct: number) => Point,
   x1: number,
@@ -634,6 +761,13 @@ const pathIterator = (
 };
 
 /**
+ * 给定 pathInfo 和以像素为单位的距离，找到从 0 到 1 的百分比
+ * 对应于该像素在路径上的运行。
+ * 然后将使用该百分比在画布上找到路径的正确点。
+ * @param segInfo fabricJS 解析路径信息的集合
+ * @param distance 距起点的距离，以像素为单位。
+ * @returns 包含 x 和 y（画布上的点）以及角度（该点上的切线）的信息对象；
+ *
  * Given a pathInfo, and a distance in pixels, find the percentage from 0 to 1
  * that correspond to that pixels run over the path.
  * The percentage will be then used to find the correct point on the canvas for the path.
@@ -675,6 +809,10 @@ const findPercentageForDistance = (
 };
 
 /**
+ * 遍历解析和简化的路径并提取一些信息（每个命令的长度和起点）
+ * @param path 解析后的路径命令
+ * @returns 路径命令信息
+ *
  * Run over a parsed and simplified path and extract some information (length of each command and starting point)
  * @param {TSimplePathData} path parsed path commands
  * @return {TPathSegmentInfo[]} path commands information
@@ -782,6 +920,12 @@ export const getPathSegmentsInfo = (
 };
 
 /**
+ * 获取路径上指定距离的点
+ * @param path 路径数据
+ * @param distance 距离
+ * @param infos 路径段信息
+ * @returns 点和角度信息
+ *
  * Get the point on the path that is distance along the path
  * @param path
  * @param distance
@@ -829,9 +973,21 @@ export const getPointOnPath = (
   }
 };
 
+/**
+ * 匹配所有路径命令的正则表达式
+ */
 const rePathCmdAll = new RegExp(rePathCommand, 'gi');
+/**
+ * 匹配圆弧命令点的正则表达式
+ */
 const regExpArcCommandPoints = new RegExp(reArcCommandPoints, 'g');
+/**
+ * 匹配数字的正则表达式
+ */
 const reMyNum = new RegExp(reNum, 'gi');
+/**
+ * 路径命令的参数长度
+ */
 const commandLengths = {
   m: 2,
   l: 2,
@@ -844,6 +1000,15 @@ const commandLengths = {
   a: 7,
 } as const;
 /**
+ * 解析 SVG 路径字符串
+ * @param pathString 路径字符串
+ * @returns SVG 路径命令数组
+ * @example <caption>用法</caption>
+ * parsePath('M 3 4 Q 3 5 2 1 4 0 Q 9 12 2 1 4 0') === [
+ *   ['M', 3, 4],
+ *   ['Q', 3, 5, 2, 1, 4, 0],
+ *   ['Q', 9, 12, 2, 1, 4, 0],
+ * ];
  *
  * @param {string} pathString
  * @return {TComplexPathData} An array of SVG path commands
@@ -901,6 +1066,10 @@ export const parsePath = (pathString: string): TComplexPathData => {
 };
 
 /**
+ * 将点转换为平滑的 SVG 路径
+ * @param points 点数组
+ * @param correction 对路径应用修正（通常我们使用 `width / 1000`）。如果值为 undefined，则使用 0 作为修正值。
+ * @returns SVG 路径命令数组
  *
  * Converts points to a smooth SVG path
  * @param {XY[]} points Array of points
@@ -955,6 +1124,14 @@ export const getSmoothPathFromPoints = (
 };
 
 /**
+ * 通过变换每个段来变换路径。
+ * 它必须是简化的路径，否则将无法工作。
+ * 警告：这取决于 pathOffset 才能正确操作
+ * @param path fabricJS 解析并简化的路径命令
+ * @param transform 表示变换的矩阵
+ * @param pathOffset `Path.pathOffset`
+ * @returns 变换后的路径
+ *
  * Transform a path by transforming each segment.
  * it has to be a simplified path or it won't work.
  * WARNING: this depends from pathOffset for correct operation
@@ -997,6 +1174,11 @@ export const transformPath = (
 };
 
 /**
+ * 返回创建正多边形的路径命令数组
+ * @param numVertexes 顶点数
+ * @param radius 半径
+ * @returns SVG 路径命令数组
+ *
  * Returns an array of path commands to create a regular polygon
  * @param {number} numVertexes
  * @param {number} radius
@@ -1024,6 +1206,11 @@ export const getRegularPolygonPath = (
 };
 
 /**
+ * 连接路径命令以返回 svg 格式
+ * @param pathData fabricJS 解析的路径命令
+ * @param fractionDigits 保留的小数位数
+ * @return 连接后的路径 'M 0 0 L 20 30'
+ *
  * Join path commands to go back to svg format
  * @param {TSimplePathData} pathData fabricJS parsed path commands
  * @param {number} fractionDigits number of fraction digits to "leave"

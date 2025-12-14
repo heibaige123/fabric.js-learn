@@ -35,24 +35,56 @@ import type {
 import { classRegistry } from '../ClassRegistry';
 import type { TModificationEvents } from '../EventTypeDefs';
 
+/**
+ * LayoutManager 类名常量
+ */
 const LAYOUT_MANAGER = 'layoutManager';
 
+/**
+ * 序列化的 LayoutManager 接口
+ */
 export type SerializedLayoutManager = {
+  /**
+   * 类型
+   */
   type: string;
+  /**
+   * 策略名称
+   */
   strategy: string;
 };
 
+/**
+ * 布局管理器类，负责管理组的布局
+ */
 export class LayoutManager {
+  /**
+   * 上一个布局策略
+   */
   declare private _prevLayoutStrategy?: LayoutStrategy;
+  /**
+   * 订阅映射，存储对象和其对应的取消订阅函数
+   */
   declare protected _subscriptions: Map<FabricObject, VoidFunction[]>;
 
+  /**
+   * 当前使用的布局策略
+   */
   strategy: LayoutStrategy;
 
+  /**
+   * 构造函数
+   * @param strategy 布局策略，默认为 FitContentLayout
+   */
   constructor(strategy: LayoutStrategy = new FitContentLayout()) {
     this.strategy = strategy;
     this._subscriptions = new Map();
   }
 
+  /**
+   * 执行布局
+   * @param context 布局上下文
+   */
   public performLayout(context: LayoutContext) {
     const strictContext: StrictLayoutContext = {
       bubbles: true,
@@ -76,12 +108,15 @@ export class LayoutManager {
   }
 
   /**
+   * 为已知会使布局失效的事件（在子对象上执行的一般变换）附加处理程序。
+   * 返回用于稍后取消订阅和清理的清理函数。
+   *
    * Attach handlers for events that we know will invalidate the layout when
    * performed on child objects ( general transforms ).
    * Returns the disposers for later unsubscribing and cleanup
-   * @param {FabricObject} object
-   * @param {RegistrationContext & Partial<StrictLayoutContext>} context
-   * @returns {VoidFunction[]} disposers remove the handlers
+   * @param {FabricObject} object 要附加处理程序的对象
+   * @param {RegistrationContext & Partial<StrictLayoutContext>} context 注册上下文
+   * @returns {VoidFunction[]} 移除处理程序的清理函数数组
    */
   protected attachHandlers(
     object: FabricObject,
@@ -122,10 +157,13 @@ export class LayoutManager {
   }
 
   /**
+   * 订阅对象以转换将触发父级布局更改的事件。
+   * 这仅对交互式组很重要。
+   *
    * Subscribe an object to transform events that will trigger a layout change on the parent
    * This is important only for interactive groups.
-   * @param object
-   * @param context
+   * @param object 要订阅的对象
+   * @param context 注册上下文
    */
   protected subscribe(
     object: FabricObject,
@@ -137,7 +175,11 @@ export class LayoutManager {
   }
 
   /**
+   * 取消订阅对象布局触发器
+   *
    * unsubscribe object layout triggers
+   * @param object 要取消订阅的对象
+   * @param _context 注册上下文（可选）
    */
   protected unsubscribe(
     object: FabricObject,
@@ -147,18 +189,30 @@ export class LayoutManager {
     this._subscriptions.delete(object);
   }
 
+  /**
+   * 取消订阅目标列表中的所有对象
+   * @param context 注册上下文
+   */
   unsubscribeTargets(
     context: RegistrationContext & Partial<StrictLayoutContext>,
   ) {
     context.targets.forEach((object) => this.unsubscribe(object, context));
   }
 
+  /**
+   * 订阅目标列表中的所有对象
+   * @param context 注册上下文
+   */
   subscribeTargets(
     context: RegistrationContext & Partial<StrictLayoutContext>,
   ) {
     context.targets.forEach((object) => this.subscribe(object, context));
   }
 
+  /**
+   * 在布局之前调用的钩子方法
+   * @param context 严格布局上下文
+   */
   protected onBeforeLayout(context: StrictLayoutContext) {
     const { target, type } = context;
     const { canvas } = target;
@@ -194,6 +248,11 @@ export class LayoutManager {
     }
   }
 
+  /**
+   * 获取布局结果
+   * @param context 严格布局上下文
+   * @returns 布局结果或 undefined
+   */
   protected getLayoutResult(
     context: StrictLayoutContext,
   ): Required<LayoutResult> | undefined {
@@ -235,6 +294,11 @@ export class LayoutManager {
     };
   }
 
+  /**
+   * 提交布局结果，更新目标对象的属性
+   * @param context 严格布局上下文
+   * @param layoutResult 布局结果
+   */
   protected commitLayout(
     context: StrictLayoutContext,
     layoutResult: Required<LayoutResult>,
@@ -265,6 +329,11 @@ export class LayoutManager {
     }
   }
 
+  /**
+   * 布局子对象
+   * @param context 严格布局上下文
+   * @param layoutResult 布局结果
+   */
   protected layoutObjects(
     context: StrictLayoutContext,
     layoutResult: Required<LayoutResult>,
@@ -281,6 +350,11 @@ export class LayoutManager {
   }
 
   /**
+   * 布局单个对象
+   * @param context 严格布局上下文
+   * @param layoutResult 布局结果，包含偏移量
+   * @param object 要布局的对象
+   *
    * @param {FabricObject} object
    * @param {Point} offset
    */
@@ -298,6 +372,11 @@ export class LayoutManager {
     });
   }
 
+  /**
+   * 在布局之后调用的钩子方法
+   * @param context 严格布局上下文
+   * @param layoutResult 布局结果（可选）
+   */
   protected onAfterLayout(
     context: StrictLayoutContext,
     layoutResult?: LayoutResult,
@@ -337,12 +416,19 @@ export class LayoutManager {
     target.set('dirty', true);
   }
 
+  /**
+   * 释放资源，取消所有订阅
+   */
   dispose() {
     const { _subscriptions } = this;
     _subscriptions.forEach((disposers) => disposers.forEach((d) => d()));
     _subscriptions.clear();
   }
 
+  /**
+   * 转换为对象表示
+   * @returns 对象表示
+   */
   toObject() {
     return {
       type: LAYOUT_MANAGER,
@@ -350,6 +436,10 @@ export class LayoutManager {
     };
   }
 
+  /**
+   * 转换为 JSON
+   * @returns JSON 对象
+   */
   toJSON() {
     return this.toObject();
   }

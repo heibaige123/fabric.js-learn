@@ -2,8 +2,15 @@
 import { WebGLProbe } from '../filters/GLProbes/WebGLProbe';
 import type { TCopyPasteData, TFabricEnv } from './types';
 
+/**
+ * 复制粘贴数据存储对象
+ */
 const copyPasteData: TCopyPasteData = {};
 
+/**
+ * 获取浏览器环境配置
+ * @returns Fabric 环境对象
+ */
 export const getEnv = (): TFabricEnv => {
   return {
     document,

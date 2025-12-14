@@ -6,13 +6,30 @@ import type {
 import { cloneStyles } from '../internals/cloneStyles';
 import { graphemeSplit } from '../lang_string';
 
+/**
+ * 文本样式数组类型
+ */
 export type TextStyleArray = {
+  /**
+   * 起始索引
+   */
   start: number;
+  /**
+   * 结束索引
+   */
   end: number;
+  /**
+   * 样式声明
+   */
   style: TextStyleDeclaration;
 }[];
 
 /**
+ * @param prevStyle 要比较的第一个样式
+ * @param thisStyle 要比较的第二个样式
+ * @param forTextSpans 是否检查上划线、下划线和删除线属性
+ * @returns 如果样式已更改，则为 true
+ *
  * @param {Object} prevStyle first style to compare
  * @param {Object} thisStyle second style to compare
  * @param {boolean} forTextSpans whether to check overline, underline, and line-through properties
@@ -39,6 +56,13 @@ export const hasStyleChanged = (
       prevStyle.linethrough !== thisStyle.linethrough));
 
 /**
+ * 返回文本对象内联样式属性的数组形式，样式按范围分组
+ * 而不是按字符分组。这种格式不那么冗长，更适合存储
+ * 所以它用于序列化（不在运行时）。
+ * @param styles 文本对象的每个字符样式
+ * @param text 应用样式的文本字符串
+ * @returns
+ *
  * Returns the array form of a text object's inline styles property with styles grouped in ranges
  * rather than per character. This format is less verbose, and is better suited for storage
  * so it is used in serialization (not during runtime).
@@ -90,6 +114,13 @@ export const stylesToArray = (
 };
 
 /**
+ * 返回样式属性的对象形式，其中样式是按字符分配的
+ * 而不是按范围分组。这种格式更冗长，并且
+ * 仅在运行时使用（不用于序列化/存储）
+ * @param styles 文本对象样式的序列化形式
+ * @param text 应用样式的文本字符串
+ * @returns
+ *
  * Returns the object form of the styles property with styles that are assigned per
  * character rather than grouped by range. This format is more verbose, and is
  * only used during runtime (not for serialization/storage)

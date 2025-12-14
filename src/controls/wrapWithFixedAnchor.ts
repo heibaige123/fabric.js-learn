@@ -1,6 +1,9 @@
 import type { Transform, TransformActionHandler } from '../EventTypeDefs';
 
 /**
+ * 包装一个动作处理程序，在变换时保存/恢复对象位置。
+ * 这是允许对象在变换时保持其位置的代码。
+ *
  * Wrap an action handler with saving/restoring object position on the transform.
  * this is the code that permits to objects to keep their position while transforming.
  * @param {Function} actionHandler the function to wrap

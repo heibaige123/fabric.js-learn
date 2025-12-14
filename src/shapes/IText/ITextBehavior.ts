@@ -14,6 +14,17 @@ import type { IText } from './IText';
 import { JUSTIFY } from '../Text/constants';
 
 /**
+ *  扩展此正则表达式以支持非英语语言
+ *
+ *  - ` `      匹配空格字符 (char code 32).
+ *  - `\n`     匹配换行符 (char code 10).
+ *  - `\.`     匹配 "." 字符 (char code 46).
+ *  - `,`      匹配 "," 字符 (char code 44).
+ *  - `;`      匹配 ";" 字符 (char code 59).
+ *  - `!`      匹配 "!" 字符 (char code 33).
+ *  - `\?`     匹配 "?" 字符 (char code 63).
+ *  - `\-`     匹配 "-" 字符 (char code 45).
+ *
  *  extend this regex to support non english languages
  *
  *  - ` `      Matches a SPACE character (char code 32).
@@ -28,50 +39,127 @@ import { JUSTIFY } from '../Text/constants';
 // eslint-disable-next-line no-useless-escape
 const reNonWord = /[ \n\.,;!\?\-]/;
 
+/**
+ * IText 事件接口
+ */
 export type ITextEvents = ObjectEvents & {
+  /**
+   * 选区改变事件
+   */
   'selection:changed': never;
+  /**
+   * 内容改变事件
+   */
   changed: never | { index: number; action: string };
+  /**
+   * 进入编辑模式事件
+   */
   'editing:entered': never | { e: TPointerEvent };
+  /**
+   * 退出编辑模式事件
+   */
   'editing:exited': never;
 };
 
+/**
+ * IText 行为类
+ */
 export abstract class ITextBehavior<
   Props extends TOptions<TextProps> = Partial<TextProps>,
   SProps extends SerializedTextProps = SerializedTextProps,
   EventSpec extends ITextEvents = ITextEvents,
 > extends FabricText<Props, SProps, EventSpec> {
+  /**
+   * 是否正在编辑
+   */
   declare abstract isEditing: boolean;
+  /**
+   * 光标闪烁延迟
+   */
   declare abstract cursorDelay: number;
+  /**
+   * 选区开始索引
+   */
   declare abstract selectionStart: number;
+  /**
+   * 选区结束索引
+   */
   declare abstract selectionEnd: number;
+  /**
+   * 光标闪烁持续时间
+   */
   declare abstract cursorDuration: number;
+  /**
+   * 是否可编辑
+   */
   declare abstract editable: boolean;
+  /**
+   * 编辑时的边框颜色
+   */
   declare abstract editingBorderColor: string;
 
+  /**
+   * 组合输入开始索引
+   */
   declare abstract compositionStart: number;
+  /**
+   * 组合输入结束索引
+   */
   declare abstract compositionEnd: number;
 
+  /**
+   * 隐藏的 textarea 元素
+   */
   declare abstract hiddenTextarea: HTMLTextAreaElement | null;
 
   /**
+   * 帮助确定文本何时处于组合模式，以便更改光标渲染。
+   *
    * Helps determining when the text is in composition, so that the cursor
    * rendering is altered.
    */
   declare protected inCompositionMode: boolean;
 
+  /**
+   * 正则表达式，用于匹配空格字符
+   */
   declare protected _reSpace: RegExp;
+  /**
+   * 当前光标动画状态
+   */
   declare private _currentTickState?: ValueAnimation;
+  /**
+   * 当前光标动画完成状态
+   */
   declare private _currentTickCompleteState?: ValueAnimation;
+  /**
+   * 当前光标不透明度
+   */
   protected _currentCursorOpacity = 1;
+  /**
+   * 编辑前的文本
+   */
   declare private _textBeforeEdit: string;
+  /**
+   * 鼠标按下时的选区开始索引
+   */
   declare protected __selectionStartOnMouseDown: number;
 
   /**
+   * 跟踪 IText 对象是否在实际点击之前被选中。
+   * 这是因为我们希望通过点击延迟进入编辑。
+   *
    * Keeps track if the IText object was selected before the actual click.
    * This because we want to delay enter editing by a click.
    */
   declare protected selected: boolean;
+  /**
+   * 光标偏移缓存
+   */
   declare protected cursorOffsetCache: { left?: number; top?: number };
+  /**
+   * 保存的属性
+   */
   declare protected _savedProps?: {
     hasControls: boolean;
     borderColor: string;
@@ -82,12 +170,33 @@ export abstract class ITextBehavior<
     defaultCursor?: CSSStyleDeclaration['cursor'];
     moveCursor?: CSSStyleDeclaration['cursor'];
   };
+  /**
+   * 选区方向
+   */
   declare protected _selectionDirection: 'left' | 'right' | null;
 
+  /**
+   * 初始化隐藏的 textarea
+   */
   abstract initHiddenTextarea(): void;
+  /**
+   * 触发选区改变事件
+   */
   abstract _fireSelectionChanged(): void;
+  /**
+   * 渲染光标或选区
+   */
   abstract renderCursorOrSelection(): void;
+  /**
+   * 从指针事件获取选区开始索引
+   * @param e 指针事件
+   */
   abstract getSelectionStartFromPointer(e: TPointerEvent): number;
+  /**
+   * 获取光标边界
+   * @param index 索引
+   * @param skipCaching 是否跳过缓存
+   */
   abstract _getCursorBoundaries(
     index: number,
     skipCaching?: boolean,
@@ -99,6 +208,8 @@ export abstract class ITextBehavior<
   };
 
   /**
+   * 初始化 IText 的所有交互行为
+   *
    * Initializes all the interactive behavior of IText
    */
   initBehavior() {
@@ -108,6 +219,10 @@ export abstract class ITextBehavior<
       this.updateSelectionOnMouseMove.bind(this);
   }
 
+  /**
+   * 取消选择时的处理
+   * @param options 选项
+   */
   onDeselect(options?: { e?: TPointerEvent; object?: FabricObject }) {
     this.isEditing && this.exitEditing();
     this.selected = false;
@@ -115,7 +230,13 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 动画光标
    * @private
+   * @param {Object} options 选项
+   * @param {number} options.toValue 目标值
+   * @param {number} options.duration 持续时间
+   * @param {number} [options.delay] 延迟
+   * @param {TOnAnimationChangeCallback<number>} [options.onComplete] 完成回调
    */
   _animateCursor({
     toValue,
@@ -146,7 +267,10 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 将光标从可见变为不可见
+   *
    * changes the cursor from visible to invisible
+   * @param {number} [delay] 延迟
    */
   private _tick(delay?: number) {
     this._currentTickState = this._animateCursor({
@@ -158,6 +282,8 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 将光标从不可见变为可见
+   *
    * Changes the cursor from invisible to visible
    */
   private _onTickComplete() {
@@ -170,7 +296,10 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 初始化延迟光标
+   *
    * Initializes delayed cursor
+   * @param {boolean} [restart] 是否重新开始
    */
   initDelayedCursor(restart?: boolean) {
     this.abortCursorAnimation();
@@ -178,6 +307,8 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 中止光标动画，清除所有超时，并在必要时清除 textarea 上下文
+   *
    * Aborts cursor animation, clears all timeouts and clear textarea context if necessary
    */
   abortCursorAnimation() {
@@ -200,6 +331,8 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 如果光标动画处于完成状态（动画之间）或之前从未开始，则重新启动光标动画
+   *
    * Restart tue cursor animation if either is in complete state ( between animations )
    * or if it never started before
    */
@@ -214,6 +347,8 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 选择整个文本
+   *
    * Selects entire text
    */
   selectAll() {
@@ -225,6 +360,8 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 选择整个文本并更新视觉状态
+   *
    * Selects entire text and updates the visual state
    */
   cmdAll() {
@@ -233,17 +370,21 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 返回选中的文本
+   *
    * Returns selected text
-   * @return {String}
+   * @return {String} 选中的文本
    */
   getSelectedText(): string {
     return this._text.slice(this.selectionStart, this.selectionEnd).join('');
   }
 
   /**
+   * 根据当前选择索引查找表示当前单词开头的新的选择索引
+   *
    * Find new selection index representing start of current word according to current selection index
-   * @param {Number} startFrom Current selection index
-   * @return {Number} New selection index
+   * @param {Number} startFrom 当前选择索引
+   * @return {Number} 新的选择索引
    */
   findWordBoundaryLeft(startFrom: number): number {
     let offset = 0,
@@ -265,9 +406,11 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 根据当前选择索引查找表示当前单词结尾的新的选择索引
+   *
    * Find new selection index representing end of current word according to current selection index
-   * @param {Number} startFrom Current selection index
-   * @return {Number} New selection index
+   * @param {Number} startFrom 当前选择索引
+   * @return {Number} 新的选择索引
    */
   findWordBoundaryRight(startFrom: number): number {
     let offset = 0,
@@ -289,9 +432,11 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 根据当前选择索引查找表示当前行开头的新的选择索引
+   *
    * Find new selection index representing start of current line according to current selection index
-   * @param {Number} startFrom Current selection index
-   * @return {Number} New selection index
+   * @param {Number} startFrom 当前选择索引
+   * @return {Number} 新的选择索引
    */
   findLineBoundaryLeft(startFrom: number): number {
     let offset = 0,
@@ -306,9 +451,11 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 根据当前选择索引查找表示当前行结尾的新的选择索引
+   *
    * Find new selection index representing end of current line according to current selection index
-   * @param {Number} startFrom Current selection index
-   * @return {Number} New selection index
+   * @param {Number} startFrom 当前选择索引
+   * @return {Number} 新的选择索引
    */
   findLineBoundaryRight(startFrom: number): number {
     let offset = 0,
@@ -323,10 +470,12 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 查找对应于单词开头或结尾的索引
+   *
    * Finds index corresponding to beginning or end of a word
-   * @param {Number} selectionStart Index of a character
-   * @param {Number} direction 1 or -1
-   * @return {Number} Index of the beginning or end of a word
+   * @param {Number} selectionStart 字符索引
+   * @param {Number} direction 1 或 -1
+   * @return {Number} 单词开头或结尾的索引
    */
   searchWordBoundary(selectionStart: number, direction: 1 | -1): number {
     const text = this._text;
@@ -350,8 +499,10 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 选择包含索引 selectionStart 处字符的单词
+   *
    * Selects the word that contains the char at index selectionStart
-   * @param {Number} selectionStart Index of a character
+   * @param {Number} selectionStart 字符索引
    */
   selectWord(selectionStart?: number) {
     selectionStart = selectionStart ?? this.selectionStart;
@@ -372,8 +523,10 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 选择包含 selectionStart 的行
+   *
    * Selects the line that contains selectionStart
-   * @param {Number} selectionStart Index of a character
+   * @param {Number} selectionStart 字符索引
    */
   selectLine(selectionStart?: number) {
     selectionStart = selectionStart ?? this.selectionStart;
@@ -387,7 +540,10 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 进入编辑状态
+   *
    * Enters editing state
+   * @param {TPointerEvent} [e] 指针事件
    */
   enterEditing(e?: TPointerEvent) {
     if (this.isEditing || !this.editable) {
@@ -406,6 +562,8 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 运行进入编辑状态的实际逻辑，参见 {@link enterEditing}
+   *
    * runs the actual logic that enter from editing state, see {@link enterEditing}
    */
   enterEditingImpl() {
@@ -428,7 +586,10 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 由 {@link Canvas#textEditingManager} 调用
+   *
    * called by {@link Canvas#textEditingManager}
+   * @param {TPointerEvent} e 指针事件
    */
   updateSelectionOnMouseMove(e: TPointerEvent) {
     if (this.getActiveControl()) {
@@ -467,6 +628,7 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 设置编辑属性
    * @private
    */
   _setEditingProps() {
@@ -482,7 +644,12 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 从 textarea 转换为字素索引
+   *
    * convert from textarea to grapheme indexes
+   * @param {number} start 开始索引
+   * @param {number} end 结束索引
+   * @param {string} text 文本
    */
   fromStringToGraphemeSelection(start: number, end: number, text: string) {
     const smallerTextStart = text.slice(0, start),
@@ -499,6 +666,8 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 从 fabric 转换为 textarea 值
+   *
    * convert from fabric to textarea values
    */
   fromGraphemeToStringSelection(
@@ -520,6 +689,7 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 更新 textarea
    * @private
    */
   _updateTextarea() {
@@ -540,6 +710,9 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 此函数从隐藏的 textarea 更新文本值，并重新计算文本边界框的大小和位置。
+   * 它由 fabricJS 内部调用，请勿直接使用。
+   *
    * This function updates the text value from the hidden textarea and recalculates the text bounding box
    * size and position.
    * It is called by fabricJS internals, do not use it directly.
@@ -580,6 +753,7 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 更新 textarea 位置
    * @private
    */
   updateTextareaPosition() {
@@ -591,8 +765,9 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 计算 textarea 位置
    * @private
-   * @return {Object} style contains style for hiddenTextarea
+   * @return {Object} style 包含 hiddenTextarea 的样式
    */
   _calcTextareaPosition() {
     if (!this.canvas) {
@@ -655,6 +830,7 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 保存编辑属性
    * @private
    */
   _saveEditingProps() {
@@ -671,6 +847,7 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 恢复编辑属性
    * @private
    */
   _restoreEditingProps() {
@@ -696,6 +873,9 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 运行退出编辑状态的实际逻辑，参见 {@link exitEditing}
+   * 但它不触发事件
+   *
    * runs the actual logic that exits from editing state, see {@link exitEditing}
    * But it does not fire events
    */
@@ -721,6 +901,8 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 退出编辑状态并触发相关事件
+   *
    * Exits from editing state and fires relevant events
    */
   exitEditing() {
@@ -740,6 +922,7 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 移除多余的样式
    * @private
    */
   _removeExtraneousStyles() {
@@ -751,9 +934,11 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 移除并重新排列从 start 到 end 的样式块。
+   *
    * remove and reflow a style block from start to end.
-   * @param {Number} start linear start position for removal (included in removal)
-   * @param {Number} end linear end position for removal ( excluded from removal )
+   * @param {Number} start 移除的线性起始位置（包含在移除中）
+   * @param {Number} end 移除的线性结束位置（不包含在移除中）
    */
   removeStyleFromTo(start: number, end: number) {
     const { lineIndex: lineStart, charIndex: charStart } =
@@ -813,9 +998,11 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 上移或下移线条样式
+   *
    * Shifts line styles up or down
-   * @param {Number} lineIndex Index of a line
-   * @param {Number} offset Can any number?
+   * @param {Number} lineIndex 行索引
+   * @param {Number} offset 偏移量
    */
   shiftLineStyles(lineIndex: number, offset: number) {
     const clonedStyles = Object.assign({}, this.styles);
@@ -831,14 +1018,17 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 处理当向文本添加一个或多个换行符时，插入更多连续样式行的情况。
+   * 由于当前样式需要先移动，我们首先移动所需行数的当前样式，然后从最后一行到第一行添加新行。
+   *
    * Handle insertion of more consecutive style lines for when one or more
    * newlines gets added to the text. Since current style needs to be shifted
    * first we shift the current style of the number lines needed, then we add
    * new lines from the last to the first.
-   * @param {Number} lineIndex Index of a line
-   * @param {Number} charIndex Index of a char
-   * @param {Number} qty number of lines to add
-   * @param {Array} copiedStyle Array of objects styles
+   * @param {Number} lineIndex 行索引
+   * @param {Number} charIndex 字符索引
+   * @param {Number} qty 要添加的行数
+   * @param {Array} copiedStyle 样式对象数组
    */
   insertNewlineStyleObject(
     lineIndex: number,
@@ -903,11 +1093,13 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 为给定的行/字符索引插入样式对象
+   *
    * Inserts style object for a given line/char index
-   * @param {Number} lineIndex Index of a line
-   * @param {Number} charIndex Index of a char
-   * @param {Number} quantity number Style object to insert, if given
-   * @param {Array} copiedStyle array of style objects
+   * @param {Number} lineIndex 行索引
+   * @param {Number} charIndex 字符索引
+   * @param {Number} quantity 要插入的样式对象数量（如果给定）
+   * @param {Array} copiedStyle 样式对象数组
    */
   insertCharStyleObject(
     lineIndex: number,
@@ -962,10 +1154,12 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 插入样式对象
+   *
    * Inserts style object(s)
-   * @param {Array} insertedText Characters at the location where style is inserted
-   * @param {Number} start cursor index for inserting style
-   * @param {Array} [copiedStyle] array of style objects to insert.
+   * @param {Array} insertedText 插入样式位置的字符
+   * @param {Number} start 插入样式的光标索引
+   * @param {Array} [copiedStyle] 要插入的样式对象数组
    */
   insertNewStyleBlock(
     insertedText: string[],
@@ -1031,11 +1225,14 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 从 start/end 移除字符
+   * start/end 是 _text 数组中的字素位置。
+   *
    * Removes characters from start/end
    * start/end ar per grapheme position in _text array.
    *
-   * @param {Number} start
-   * @param {Number} end default to start + 1
+   * @param {Number} start 开始位置
+   * @param {Number} end 结束位置，默认为 start + 1
    */
   removeChars(start: number, end: number = start + 1) {
     this.removeStyleFromTo(start, end);
@@ -1048,16 +1245,22 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 在 start 位置插入字符，在 start 位置之前。
+   * start 等于 1 意味着文本被插入到实际字素 0 和 1 之间。
+   * 如果提供了样式数组，它必须与字素中的文本长度相同。
+   * 如果提供了 end 并且大于 start，则替换旧文本。
+   * start/end 是 _text 数组中的字素位置。
+   *
    * insert characters at start position, before start position.
    * start  equal 1 it means the text get inserted between actual grapheme 0 and 1
    * if style array is provided, it must be as the same length of text in graphemes
    * if end is provided and is bigger than start, old text is replaced.
    * start/end ar per grapheme position in _text array.
    *
-   * @param {String} text text to insert
-   * @param {Array} style array of style objects
-   * @param {Number} start
-   * @param {Number} end default to start + 1
+   * @param {String} text 要插入的文本
+   * @param {Array} style 样式对象数组
+   * @param {Number} start 开始位置
+   * @param {Number} end 结束位置，默认为 start + 1
    */
   insertChars(
     text: string,
@@ -1083,6 +1286,9 @@ export abstract class ITextBehavior<
   }
 
   /**
+   * 根据光标的新位置设置 selectionStart 和 selectionEnd
+   * 模拟按下 shift 时的键盘-鼠标导航。
+   *
    * Set the selectionStart and selectionEnd according to the new position of cursor
    * mimic the key - mouse navigation when shift is pressed.
    */

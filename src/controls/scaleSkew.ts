@@ -10,11 +10,19 @@ import type { TAxisKey } from '../typedefs';
 import { scaleCursorStyleHandler, scalingX, scalingY } from './scale';
 import { skewCursorStyleHandler, skewHandlerX, skewHandlerY } from './skew';
 
+/**
+ * 检查是否按下了替代键以切换动作
+ * @param eventData 事件数据
+ * @param target 目标 Fabric 对象
+ * @returns
+ */
 function isAltAction(eventData: TPointerEvent, target: FabricObject) {
   return eventData[target.canvas!.altActionKey!];
 }
 
 /**
+ * 检查事件、控件和 fabricObject 以返回正确的动作名称
+ *
  * Inspect event, control and fabricObject to return the correct action name
  * @param {Event} eventData the javascript event that is causing the scale
  * @param {Control} control the control that is interested in the action
@@ -37,6 +45,8 @@ export const scaleOrSkewActionName: ControlCallback<
 };
 
 /**
+ * 结合倾斜和缩放样式处理程序以覆盖 fabric 标准用例
+ *
  * Combine skew and scale style handlers to cover fabric standard use case
  * @param {Event} eventData the javascript event that is causing the scale
  * @param {Control} control the control that is interested in the action
@@ -54,6 +64,9 @@ export const scaleSkewCursorStyleHandler: ControlCursorCallback = (
     : scaleCursorStyleHandler(eventData, control, fabricObject, coord);
 };
 /**
+ * 组合动作处理程序，用于缩放 X 或倾斜 Y
+ * 需要用 `wrapWithFixedAnchor` 包装才能生效。
+ *
  * Composed action handler to either scale X or skew Y
  * Needs to be wrapped with `wrapWithFixedAnchor` to be effective
  * @param {Event} eventData javascript event that is doing the transform
@@ -74,6 +87,9 @@ export const scalingXOrSkewingY: TransformActionHandler = (
 };
 
 /**
+ * 组合动作处理程序，用于缩放 Y 或倾斜 X
+ * 需要用 `wrapWithFixedAnchor` 包装才能生效。
+ *
  * Composed action handler to either scale Y or skew X
  * Needs to be wrapped with `wrapWithFixedAnchor` to be effective
  * @param {Event} eventData javascript event that is doing the transform

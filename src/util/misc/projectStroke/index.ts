@@ -7,6 +7,7 @@ import type { TProjection, TProjectStrokeOnPointsOptions } from './types';
 export type * from './types';
 
 /**
+ * 用于计算对象的边界框
  *
  * Used to calculate object's bounding box
  *
@@ -24,6 +25,7 @@ export const projectStrokeOnPoints = (
     return projections;
   }
 
+  // 首先我们移除重复的相邻点
   // first we remove duplicate neighboring points
   const reduced = points.reduce(
     (reduced, point) => {
@@ -38,6 +40,8 @@ export const projectStrokeOnPoints = (
   if (reduced.length === 1) {
     openPath = true;
   } else if (!openPath) {
+    // 如果末尾的点等于第一个点，则将其移除
+    // 以便正确投影第一个点
     // remove points from end in case they equal the first point
     // in order to correctly project the first point
     const start = reduced[0];

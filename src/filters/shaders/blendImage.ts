@@ -1,6 +1,12 @@
 import type { TBlendImageMode } from '../BlendImage';
 
+/**
+ * 图像混合滤镜的片元着色器源码集合
+ */
 export const fragmentSource: Record<TBlendImageMode, string> = {
+  /**
+   * 正片叠底模式
+   */
   multiply: `
     precision highp float;
     uniform sampler2D uTexture;
@@ -15,6 +21,9 @@ export const fragmentSource: Record<TBlendImageMode, string> = {
       gl_FragColor = color;
     }
     `,
+  /**
+   * 遮罩模式
+   */
   mask: `
     precision highp float;
     uniform sampler2D uTexture;
@@ -31,6 +40,9 @@ export const fragmentSource: Record<TBlendImageMode, string> = {
     `,
 } as const;
 
+/**
+ * 图像混合滤镜的顶点着色器源码
+ */
 export const vertexSource = `
     attribute vec2 aPosition;
     varying vec2 vTexCoord;

@@ -13,6 +13,11 @@ import type {
 import { getObjectBounds } from './utils';
 
 /**
+ * 暴露一个主要的公共方法 {@link calcLayoutResult}，供 `LayoutManager` 用于执行布局。
+ * 返回 `undefined` 表示 `LayoutManager` 跳过布局。
+ *
+ * 负责计算传递对象的边界框。
+ *
  * Exposes a main public method {@link calcLayoutResult} that is used by the `LayoutManager` to perform layout.
  * Returning `undefined` signals the `LayoutManager` to skip the layout.
  *
@@ -20,11 +25,18 @@ import { getObjectBounds } from './utils';
  */
 export abstract class LayoutStrategy {
   /**
+   * 由子类覆盖以实现持久化（TS 不支持 `static abstract`）
+   *
    * override by subclass for persistence (TS does not support `static abstract`)
    */
   static type = 'strategy';
 
   /**
+   * 由 `LayoutManager` 用于执行布局
+   * @param context 布局上下文
+   * @param objects 参与布局的对象数组
+   * @returns 布局结果 **或** `undefined` 以跳过布局
+   *
    * Used by the `LayoutManager` to perform layout
    * @TODO/fix: if this method is calcResult, should calc unconditionally.
    * the condition to not calc should be evaluated by the layoutManager.
@@ -39,6 +51,11 @@ export abstract class LayoutStrategy {
     }
   }
 
+  /**
+   * 确定是否应执行布局
+   * @param context 布局上下文
+   * @returns 如果应执行布局则返回 true
+   */
   shouldPerformLayout({ type, prevStrategy, strategy }: StrictLayoutContext) {
     return (
       type === LAYOUT_TYPE_INITIALIZATION ||
@@ -47,6 +64,11 @@ export abstract class LayoutStrategy {
     );
   }
 
+  /**
+   * 确定是否应布局剪切路径
+   * @param context 布局上下文
+   * @returns 如果应布局剪切路径则返回 true
+   */
   shouldLayoutClipPath({ type, target: { clipPath } }: StrictLayoutContext) {
     return (
       type !== LAYOUT_TYPE_INITIALIZATION &&
@@ -55,6 +77,12 @@ export abstract class LayoutStrategy {
     );
   }
 
+  /**
+   * 获取初始大小
+   * @param context 布局上下文
+   * @param result 包含中心点和尺寸的布局结果部分
+   * @returns 初始大小的点对象
+   */
   getInitialSize(
     context: StrictLayoutContext & InitializationLayoutContext,
     result: Pick<LayoutStrategyResult, 'center' | 'size'>,
@@ -63,6 +91,11 @@ export abstract class LayoutStrategy {
   }
 
   /**
+   * 覆盖此方法以自定义布局。
+   * @param objects 参与布局的对象数组
+   * @param context 布局上下文
+   * @returns 布局结果或 undefined
+   *
    * Override this method to customize layout.
    */
   calcBoundingBox(

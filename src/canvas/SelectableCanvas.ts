@@ -52,32 +52,54 @@ import { canvasDefaults } from './CanvasOptions';
 import { Intersection } from '../Intersection';
 import { isActiveSelection } from '../util/typeAssertions';
 
+/**
+ * 目标信息的数据结构
+ */
 export type TargetsInfo = {
+  /**
+   * 我们认为最能延续选择动作的目标。
+   */
   target?: FabricObject;
+  /**
+   * 容器下指针处的嵌套目标
+   */
   subTargets: FabricObject[];
 };
 
+/**
+ * 带有容器信息的目标信息的数据结构
+ */
 export type TargetsInfoWithContainer = {
+  // 我们认为最能延续选择动作的目标。
+  // 可能是 hoveredTarget 或当前选定的对象
   // the target we think is the most continuing the selection action.
   // could be hoveredTarget or the currently selected object
   target?: FabricObject;
+  // 容器下指针处的嵌套目标
   // the nested targets under the pointer for container
   subTargets: FabricObject[];
+  // 目标的容器，如果没有可选择的嵌套目标，则为目标本身
   // the container for target, or target itself if there are no selectable nested targets
   container?: FabricObject;
 };
 
+/**
+ * 带有容器信息的完整目标信息的数据结构
+ */
 export type FullTargetsInfoWithContainer = TargetsInfoWithContainer & {
+  // 悬停的目标
   // hoveredTarget
   currentTarget?: FabricObject;
+  // hoveredTarget 的容器，或容器本身
   // the container for hoveredTarget, or container itself
   currentContainer?: FabricObject;
+  // 当前容器的嵌套目标
   // nested targets of current container
   currentSubTargets: FabricObject[];
 };
 
 /**
- * Canvas class
+ * Canvas 类
  * @class Canvas
  * @extends StaticCanvas
  * @see {@link http://fabric5.fabricjs.com/fabric-intro-part-1#canvas}
@@ -174,41 +196,117 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   extends StaticCanvas<EventSpec>
   implements Omit<CanvasOptions, 'enablePointerEvents'>
 {
+  /**
+   * 对象列表
+   */
   declare _objects: FabricObject[];
 
   // transform config
+  /**
+   * 当为 true 时，对象可以通过拖动通常不会进行单边变换的角来进行单边（不成比例）变换。
+   */
   declare uniformScaling: boolean;
+  /**
+   * 指示哪个键切换统一缩放。
+   */
   declare uniScaleKey: TOptionalModifierKey;
+  /**
+   * 当为 true 时，对象使用中心点作为缩放变换的原点。
+   */
   declare centeredScaling: boolean;
+  /**
+   * 当为 true 时，对象使用中心点作为旋转变换的原点。
+   */
   declare centeredRotation: boolean;
+  /**
+   * 指示哪个键启用中心变换。
+   */
   declare centeredKey: TOptionalModifierKey;
+  /**
+   * 指示哪个键启用角上的替代操作。
+   */
   declare altActionKey: TOptionalModifierKey;
 
   // selection config
+  /**
+   * 指示是否应启用组选择
+   */
   declare selection: boolean;
+  /**
+   * 指示哪个键或哪些键启用多选点击。
+   */
   declare selectionKey: TOptionalModifierKey | ModifierKey[];
+  /**
+   * 指示哪个键启用替代选择。
+   */
   declare altSelectionKey: TOptionalModifierKey;
+  /**
+   * 选择的颜色
+   */
   declare selectionColor: string;
+  /**
+   * 默认虚线数组模式。
+   */
   declare selectionDashArray: number[];
+  /**
+   * 选择边框的颜色
+   */
   declare selectionBorderColor: string;
+  /**
+   * 用于对象/组选择的线条宽度
+   */
   declare selectionLineWidth: number;
+  /**
+   * 仅选择完全包含在拖动选择矩形中的形状。
+   */
   declare selectionFullyContained: boolean;
 
   // cursors
+  /**
+   * 悬停在 canvas 上的对象时使用的默认光标值
+   */
   declare hoverCursor: CSSStyleDeclaration['cursor'];
+  /**
+   * 在 canvas 上移动对象时使用的默认光标值
+   */
   declare moveCursor: CSSStyleDeclaration['cursor'];
+  /**
+   * 整个 canvas 使用的默认光标值
+   */
   declare defaultCursor: CSSStyleDeclaration['cursor'];
+  /**
+   * 自由绘制期间使用的光标值
+   */
   declare freeDrawingCursor: CSSStyleDeclaration['cursor'];
+  /**
+   * 用于禁用元素（具有禁用操作的角）的光标值
+   */
   declare notAllowedCursor: CSSStyleDeclaration['cursor'];
 
+  /**
+   * 赋予 canvas 包装器 (div) 元素的默认元素类
+   */
   declare containerClass: string;
 
   // target find config
+  /**
+   * 当为 true 时，对象检测基于每个像素而不是每个边界框进行
+   */
   declare perPixelTargetFind: boolean;
+  /**
+   * 对象检测期间容忍的目标像素周围的像素数
+   */
   declare targetFindTolerance: number;
+  /**
+   * 当为 true 时，跳过目标检测。
+   */
   declare skipTargetFind: boolean;
 
   /**
+   * 当为 true 时，canvas 上的鼠标事件（mousedown/mousemove/mouseup）会导致自由绘图。
+   * mousedown 后，mousemove 创建形状，
+   * 然后 mouseup 完成它并将 `fabric.Path` 的实例添加到 canvas 上。
+   *
    * When true, mouse events on canvas (mousedown/mousemove/mouseup) result in free drawing.
    * After mousedown, mousemove creates a shape,
    * and then mouseup finalizes it and adds an instance of `fabric.Path` onto canvas.
@@ -217,14 +315,28 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
    */
   declare isDrawingMode: boolean;
 
+  /**
+   * 指示对象在被选中时是否应保持在当前堆栈位置。
+   */
   declare preserveObjectStacking: boolean;
 
   // event config
+  /**
+   * 指示 canvas 上的右键单击是否可以输出上下文菜单
+   */
   declare stopContextMenu: boolean;
+  /**
+   * 指示 canvas 是否可以触发右键单击事件
+   */
   declare fireRightClick: boolean;
+  /**
+   * 指示 canvas 是否可以触发中键单击事件
+   */
   declare fireMiddleClick: boolean;
 
   /**
+   * 跟踪上一个事件中悬停的目标
+   *
    * Keep track of the hovered target in the previous event
    * @type FabricObject | null
    * @private
@@ -232,6 +344,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   declare _hoveredTarget?: FabricObject;
 
   /**
+   * 保存上一个事件中悬停的嵌套目标列表
+   *
    * hold the list of nested targets hovered in the previous events
    * @type FabricObject[]
    * @private
@@ -239,6 +353,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   _hoveredTargets: FabricObject[] = [];
 
   /**
+   * 保存要渲染的对象列表
+   *
    * hold the list of objects to render
    * @type FabricObject[]
    * @private
@@ -246,6 +362,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   declare _objectsToRender?: FabricObject[];
 
   /**
+   * 保存对包含当前正在进行的变换信息的数据结构的引用
+   *
    * hold a reference to a data structure that contains information
    * on the current on going transform
    * @type
@@ -254,6 +372,10 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   _currentTransform: Transform | null = null;
 
   /**
+   * 保存对用于跟踪 canvas 拖动上的选择框的数据结构的引用
+   * 在当前正在进行的变换上
+   * x, y, deltaX 和 deltaY 在场景平面中
+   *
    * hold a reference to a data structure used to track the selection
    * box on canvas drag
    * on the current on going transform
@@ -269,6 +391,9 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   } | null = null;
 
   /**
+   * 内部标志，用于了解 context top 是否需要清理
+   * 如果为 true，则 contextTop 将在下一次渲染时被清除
+   *
    * internal flag used to understand if the context top requires a cleanup
    * in case this is true, the contextTop will be cleared at the next render
    * @type boolean
@@ -277,6 +402,11 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   contextTopDirty = false;
 
   /**
+   * 在鼠标事件期间，我们可能需要在多个函数中多次使用指针。
+   * _scenePoint 保存对 fabricCanvas/design 坐标中指针的引用，该引用在事件生命周期内有效。
+   * 每个 fabricJS 鼠标事件每次都会创建和删除缓存
+   * 我们这样做是因为有一些 HTML DOM 检查函数可以获取实际的指针坐标
+   *
    * During a mouse event we may need the pointer multiple times in multiple functions.
    * _scenePoint holds a reference to the pointer in fabricCanvas/design coordinates that is valid for the event
    * lifespan. Every fabricJS mouse event create and delete the cache every time
@@ -286,6 +416,11 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   declare protected _scenePoint?: Point;
 
   /**
+   * 在鼠标事件期间，我们可能需要在多个函数中多次使用指针。
+   * _viewportPoint 保存对 html 坐标中指针的引用，该引用在事件生命周期内有效。
+   * 每个 fabricJS 鼠标事件每次都会创建和删除缓存
+   * 我们这样做是因为有一些 HTML DOM 检查函数可以获取实际的指针坐标
+   *
    * During a mouse event we may need the pointer multiple times in multiple functions.
    * _viewportPoint holds a reference to the pointer in html coordinates that is valid for the event
    * lifespan. Every fabricJS mouse event create and delete the cache every time
@@ -295,6 +430,9 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   declare protected _viewportPoint?: Point;
 
   /**
+   * 保存我们在事件生命周期内缓存的信息
+   * 在事件期间多次需要此数据，我们要避免多次重新计算它。
+   *
    * Holds the informations we cache during an event lifespan
    * This data is needed many times during an event and we want to avoid to recalculate it
    * multuple times.
@@ -307,23 +445,54 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
     return { ...super.getDefaults(), ...SelectableCanvas.ownDefaults };
   }
 
+  /**
+   * Canvas DOM 管理器
+   */
   declare elements: CanvasDOMManager;
+  /**
+   * 获取上层 canvas 元素
+   */
   get upperCanvasEl() {
     return this.elements.upper?.el;
   }
+  /**
+   * 获取上层 canvas 上下文
+   */
   get contextTop() {
     return this.elements.upper?.ctx;
   }
+  /**
+   * 获取包装器元素
+   */
   get wrapperEl() {
     return this.elements.container;
   }
+  /**
+   * 用于像素检测的 canvas 元素
+   */
   declare private pixelFindCanvasEl: HTMLCanvasElement;
+  /**
+   * 用于像素检测的 canvas 上下文
+   */
   declare private pixelFindContext: CanvasRenderingContext2D;
 
+  /**
+   * 指示当前是否正在绘图
+   */
   declare protected _isCurrentlyDrawing: boolean;
+  /**
+   * 自由绘图画笔
+   */
   declare freeDrawingBrush?: BaseBrush;
+  /**
+   * 当前活动对象
+   */
   declare _activeObject?: FabricObject;
 
+  /**
+   * 初始化元素
+   * @param el canvas 元素或其 id
+   */
   protected initElements(el?: string | HTMLCanvasElement) {
     this.elements = new CanvasDOMManager(el, {
       allowTouchScrolling: this.allowTouchScrolling,
@@ -333,7 +502,9 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 对象添加时的处理
    * @private
+   * @param {FabricObject} obj 被添加的对象
    * @param {FabricObject} obj Object that was added
    */
   _onObjectAdded(obj: FabricObject) {
@@ -342,7 +513,9 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 对象移除时的处理
    * @private
+   * @param {FabricObject} obj 被移除的对象
    * @param {FabricObject} obj Object that was removed
    */
   _onObjectRemoved(obj: FabricObject) {
@@ -363,12 +536,17 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
     super._onObjectRemoved(obj);
   }
 
+  /**
+   * 堆栈顺序改变时的处理
+   */
   _onStackOrderChanged() {
     this._objectsToRender = undefined;
     super._onStackOrderChanged();
   }
 
   /**
+   * 将对象分为两组，一组立即渲染，另一组作为 activeGroup 渲染。
+   *
    * Divides objects in two groups, one to render immediately
    * and one to render as activeGroup.
    * @return {Array} objects to render immediately and pushes the other in the activeGroup.
@@ -383,6 +561,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 渲染顶部 canvas 和辅助容器 canvas。
+   *
    * Renders both the top canvas and the secondary container canvas.
    */
   renderAll() {
@@ -404,6 +584,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 文本选择在渲染周期中由活动文本实例渲染
+   *
    * text selection is rendered by the active text instance during the rendering cycle
    */
   renderTopLayer(ctx: CanvasRenderingContext2D): void {
@@ -421,6 +603,10 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 仅渲染顶部 canvas 的方法。
+   * 也用于渲染组选择框。
+   * 不渲染文本选择。
+   *
    * Method to render only the top canvas.
    * Also used to render the group selection box.
    * Does not render text selection.
@@ -434,6 +620,9 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 设置像素目标查找的 canvas 容差值。
+   * 仅使用整数。
+   *
    * Set the canvas tolerance value for pixel taret find.
    * Use only integer numbers.
    * @private
@@ -448,6 +637,10 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 如果对象在特定位置是透明的，则返回 true
+   * 说明：这是 `目标在位置 X 处是透明的还是那里有控件`
+   * @TODO 这似乎很愚蠢，我们用透明度处理控件。我们可以通过编程方式找到控件而无需绘制它们，缓存 canvas 优化始终有效
+   *
    * Returns true if object is transparent at a certain location
    * Clarification: this is `is target transparent at location X or are controls there`
    * @TODO this seems dumb that we treat controls with transparency. we can find controls
@@ -481,6 +674,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 获取事件并确定是否按下了选择键
+   *
    * takes an event and determines if selection key has been pressed
    * @private
    * @param {TPointerEvent} e Event object
@@ -498,7 +693,10 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 决定是否应该清除选择
    * @private
+   * @param {TPointerEvent} e 事件对象
+   * @param {FabricObject} target 目标对象
    * @param {TPointerEvent} e Event object
    * @param {FabricObject} target
    */
@@ -523,6 +721,10 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 此方法将考虑按下的修饰键和我们要拖动的控件，并尝试猜测变换的锚点（原点）。
+   * 这实际上应该属于控件领域，我们应该删除用于遗留嵌入式操作的特定代码。
+   * @TODO 这可能值得讨论/重新发现和更改/重构
+   *
    * This method will take in consideration a modifier key pressed and the control we are
    * about to drag, and try to guess the anchor point ( origin ) of the transormation.
    * This should be really in the realm of controls, and we should remove specific code for legacy
@@ -561,6 +763,10 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 给定点击的控件，确定变换的原点。
+   * 这很糟糕，因为控件完全可以有自定义名称
+   * 应该在 4.0 版本之前消失
+   *
    * Given the control clicked, determine the origin of the transform.
    * This is bad because controls can totally have custom names
    * should disappear before release 4.0
@@ -598,7 +804,11 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 设置当前变换
    * @private
+   * @param {Event} e 事件对象
+   * @param {FabricObject} target 目标对象
+   * @param {boolean} [alreadySelected] 传递 true 以设置活动控件
    * @param {Event} e Event object
    * @param {FabricObject} target
    * @param {boolean} [alreadySelected] pass true to setup the active control
@@ -669,6 +879,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 设置 canvas 元素的光标类型
+   *
    * Set the cursor type of the canvas element
    * @param {String} value Cursor type of the canvas element.
    * @see http://www.w3.org/TR/css3-ui/#cursor
@@ -678,7 +890,9 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 绘制选择区域
    * @private
+   * @param {CanvasRenderingContext2D} ctx 用于绘制选择的上下文
    * @param {CanvasRenderingContext2D} ctx to draw the selection on
    */
   _drawSelection(ctx: CanvasRenderingContext2D): void {
@@ -719,6 +933,11 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 此函数负责决定哪个对象是交互事件的当前目标。
+   * 对于交互事件，我们指的是 canvas 上与指针相关的操作。
+   * 哪个是
+   * 11/09/2018 TODO: 如果 findTarget 可以区分是完整目标还是角的外部部分，那就太酷了。
+   *
    * This function is in charge of deciding which is the object that is the current target of an interaction event.
    * For interaction event we mean a pointer related action on the canvas.
    * Which is the
@@ -817,6 +1036,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 检查点是否在对象选择区域内，包括填充
+   *
    * Checks if the point is inside the object selection area including padding
    * @param {FabricObject} obj Object to test against
    * @param {Object} [pointer] point in scene coordinates
@@ -858,6 +1079,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 检查点是否在对象选择条件内。要么是带填充的区域，要么是像素（如果启用了 perPixelTargetFind）
+   *
    * Checks point is inside the object selection condition. Either area with padding
    * or over pixels if perPixelTargetFind is enabled
    * @param {FabricObject} obj Object to test against
@@ -888,6 +1111,9 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 给定一个对象数组，搜索指针位置下的可能目标
+   * 返回一个
+   *
    * Given an array of objects search possible targets under the pointer position
    * Returns an
    * @param {Array} objects objects array to look into
@@ -927,6 +1153,9 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 在对象数组中搜索包含指针的第一个对象
+   * 将该对象的子目标收集到作为参数传递的 subTargets 数组中
+   *
    * Search inside an objects array the fiurst object that contains pointer
    * Collect subTargets of that object inside the subTargets array passed as parameter
    * @param {FabricObject[]} objects objects array to look into
@@ -974,6 +1203,11 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 返回与 {@link HTMLCanvasElement} 处于同一平面的点，
+   * `(0, 0)` 是 {@link HTMLCanvasElement} 的左上角。
+   * 这意味着对 {@link viewportTransform} 的更改不会更改点的值
+   * 并且从查看者的角度来看它保持不变。
+   *
    * @returns point existing in the same plane as the {@link HTMLCanvasElement},
    * `(0, 0)` being the top left corner of the {@link HTMLCanvasElement}.
    * This means that changes to the {@link viewportTransform} do not change the values of the point
@@ -995,6 +1229,10 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 返回场景中存在的点（与 {@link FabricObject#getCenterPoint} 所在的平面相同）。
+   * 这意味着对 {@link viewportTransform} 的更改不会更改点的值，
+   * 但是，从查看者的角度来看，该点已更改。
+   *
    * @returns point existing in the scene (the same plane as the plane {@link FabricObject#getCenterPoint} exists in).
    * This means that changes to the {@link viewportTransform} do not change the values of the point,
    * however, from the viewer's perspective, the point is changed.
@@ -1014,6 +1252,10 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 返回相对于 canvas 的指针。
+   *
+   * 请改用 {@link getViewportPoint} 或 {@link getScenePoint}。
+   *
    * Returns pointer relative to canvas.
    *
    * Use {@link getViewportPoint} or {@link getScenePoint} instead.
@@ -1064,6 +1306,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 仅供内部使用
+   *
    * Internal use only
    * @protected
    */
@@ -1080,6 +1324,10 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
     }
   }
 
+  /**
+   * 创建用于像素检测的缓存 canvas
+   * @protected
+   */
   protected _createCacheCanvas() {
     this.pixelFindCanvasEl = createCanvasElement();
     this.pixelFindContext = this.pixelFindCanvasEl.getContext('2d', {
@@ -1089,6 +1337,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 返回绘制交互的顶部 canvas 的上下文
+   *
    * Returns context of top canvas where interactions are drawn
    * @returns {CanvasRenderingContext2D}
    */
@@ -1097,6 +1347,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 返回绘制对象选择的 canvas 的上下文
+   *
    * Returns context of canvas where object selection is drawn
    * @alias
    * @return {CanvasRenderingContext2D}
@@ -1106,6 +1358,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 返回绘制对象选择的 &lt;canvas> 元素
+   *
    * Returns &lt;canvas> element on which object selection is drawn
    * @return {HTMLCanvasElement}
    */
@@ -1114,6 +1368,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 返回当前活动对象
+   *
    * Returns currently active object
    * @return {FabricObject | null} active object
    */
@@ -1122,6 +1378,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 返回包含当前选定对象的数组
+   *
    * Returns an array with the current selected objects
    * @return {FabricObject[]} active objects array
    */
@@ -1135,6 +1393,7 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 比较旧的 activeObject 和当前的 activeObject 并触发正确的事件
    * @private
    * Compares the old activeObject with the current one and fires correct events
    * @param {FabricObject[]} oldObjects old activeObject
@@ -1194,6 +1453,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 将给定对象设置为 canvas 上唯一的活动对象
+   *
    * Sets given object as the only active object on canvas
    * @param {FabricObject} object Object to set as an active one
    * @param {TPointerEvent} [e] Event (passed along when firing "object:selected")
@@ -1208,6 +1469,10 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 这应该等同于 setActiveObject 但不触发任何事件。
+   * 承诺保持这种方式。
+   * 这是 setActiveObject 的功能部分。
+   *
    * This is supposed to be equivalent to setActiveObject but without firing
    * any event. There is commitment to have this stay this way.
    * This is the functional part of setActiveObject.
@@ -1240,6 +1505,10 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 这应该等同于 discardActiveObject 但不触发任何选择事件（仍然可以触发对象变换事件）。
+   * 承诺保持这种方式。
+   * 这是 discardActiveObject 的功能部分。
+   *
    * This is supposed to be equivalent to discardActiveObject but without firing
    * any selection events ( can still fire object transformation events ). There is commitment to have this stay this way.
    * This is the functional part of discardActiveObject.
@@ -1270,6 +1539,11 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 丢弃当前活动对象并触发事件。如果该函数由 fabric 调用
+   * 作为鼠标事件的结果，该事件作为参数传递并
+   * 发送到自定义事件的 fire 函数。当用作方法时
+   * e 参数没有任何应用。
+   *
    * Discards currently active object and fire events. If the function is called by fabric
    * as a consequence of a mouse event, the event is passed as a parameter and
    * sent to the fire function for the custom events. When used as a method the
@@ -1292,6 +1566,10 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 结束当前变换。
+   * 通常不需要调用此方法，除非您要中断用户发起的变换
+   * 因为某些其他事件（按下组合键，或阻止用户 UX 的某些内容）
+   *
    * End the current transform.
    * You don't usually need to call this method unless you are interrupting a user initiated transform
    * because of some other event ( a press of key combination, or something that block the user UX )
@@ -1308,7 +1586,9 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 完成当前变换
    * @private
+   * @param {Event} e 发送生成 finalize down 的鼠标事件，以便在事件中使用
    * @param {Event} e send the mouse event that generate the finalize down, so it can be used in the event
    */
   _finalizeCurrentTransform(e?: TPointerEvent) {
@@ -1334,6 +1614,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 设置此 canvas 实例的视口变换
+   *
    * Sets viewport transformation of this canvas instance
    * @param {Array} vpt a Canvas 2D API transform matrix
    */
@@ -1346,6 +1628,7 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 清除活动选择引用以及交互式 canvas 元素和上下文
    * @override clears active selection ref and interactive canvas elements and contexts
    */
   destroy() {
@@ -1370,6 +1653,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 清除实例的所有上下文（背景、主、顶部）
+   *
    * Clears all contexts (background, main, top) of an instance
    */
   clear() {
@@ -1382,6 +1667,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 绘制对象的控件（边框/控件）
+   *
    * Draws objects' controls (borders/controls)
    * @param {CanvasRenderingContext2D} ctx Context to render controls on
    */
@@ -1394,6 +1681,7 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 转换为对象
    * @private
    */
   protected _toObject(
@@ -1413,6 +1701,8 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 在对象上实现对象的组变换
+   *
    * Realizes an object's group transformation on it
    * @private
    * @param {FabricObject} [instance] the object to transform (gets mutated)
@@ -1443,6 +1733,11 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
   }
 
   /**
+   * 设置 SVG 对象
+   * @param {string[]} markup SVG 标记
+   * @param {FabricObject} instance 要设置的对象
+   * @param {TSVGReviver} [reviver] SVG 重生器函数
+   *
    * @private
    */
   _setSVGObject(

@@ -6,13 +6,34 @@ import { uid } from '../util/internals/uid';
 (function (global) {
   /** ERASER_START */
 
+  /**
+   * 扩展 Fabric 对象以支持橡皮擦功能
+   */
   var fabric = global.fabric,
+    /**
+     * 在剪切路径上方绘制橡皮擦
+     */
     __drawClipPath = fabric.Object.prototype._drawClipPath;
+  /**
+   * 唯一标识符生成器
+   */
   var _needsItsOwnCache = fabric.Object.prototype.needsItsOwnCache;
+  /**
+   *  返回实例的对象表示
+   */
   var _toObject = fabric.Object.prototype.toObject;
+  /**
+   * 返回 svg 输出的 id 属性
+   */
   var _getSvgCommons = fabric.Object.prototype.getSvgCommons;
+  /**
+   * 创建基本的剪切路径 SVG 标记
+   */
   var __createBaseClipPathSVGMarkup =
     fabric.Object.prototype._createBaseClipPathSVGMarkup;
+  /**
+   * 创建基本的 SVG 标记
+   */
   var __createBaseSVGMarkup = fabric.Object.prototype._createBaseSVGMarkup;
 
   fabric.Object.prototype.cacheProperties.push('eraser');
@@ -23,6 +44,12 @@ import { uid } from '../util/internals/uid';
    */
   fabric.util.object.extend(fabric.Object.prototype, {
     /**
+     * 指示此对象是否可以被 {@link fabric.EraserBrush} 擦除
+     * `deep` 选项引入了对组 `erasable` 属性的细粒度控制。
+     * 当设置为 `deep` 时，如果嵌套对象是可擦除的，橡皮擦将擦除它们，而保留组和其他对象不变。
+     * 当设置为 `true` 时，橡皮擦将擦除整个组。一旦组发生变化，橡皮擦将传播到其子项以实现正确的功能。
+     * 当设置为 `false` 时，橡皮擦将保留所有对象（包括组）不变。
+     *
      * Indicates whether this object can be erased by {@link fabric.EraserBrush}
      * The `deep` option introduces fine grained control over a group's `erasable` property.
      * When set to `deep` the eraser will erase nested objects if they are erasable, leaving the group and the other objects untouched.
@@ -35,12 +62,18 @@ import { uid } from '../util/internals/uid';
     erasable: true,
 
     /**
+     * 橡皮擦对象
+     *
      * @see {@link http://fabric5.fabricjs.com/erasing#eraser}
      * @type fabric.Eraser
      */
     eraser: undefined,
 
     /**
+     * 检查对象是否需要自己的缓存
+     * @override
+     * @returns 如果需要自己的缓存则返回 true
+     *
      * @override
      * @returns Boolean
      */
@@ -49,6 +82,12 @@ import { uid } from '../util/internals/uid';
     },
 
     /**
+     * 在剪切路径上方绘制橡皮擦
+     * @override
+     * @private
+     * @param ctx 渲染上下文
+     * @param clipPath 剪切路径对象
+     *
      * draw eraser above clip path
      * @override
      * @private
@@ -70,6 +109,10 @@ import { uid } from '../util/internals/uid';
     },
 
     /**
+     * 返回实例的对象表示
+     * @param propertiesToInclude 您可能希望在输出中额外包含的任何属性
+     * @returns 实例的对象表示
+     *
      * Returns an object representation of an instance
      * @param {Array} [propertiesToInclude] Any properties that you might want to additionally include in the output
      * @return {Object} Object representation of an instance
@@ -87,6 +130,10 @@ import { uid } from '../util/internals/uid';
 
     /* _TO_SVG_START_ */
     /**
+     * 返回 svg 输出的 id 属性
+     * @override
+     * @returns id 属性字符串
+     *
      * Returns id attribute for svg output
      * @override
      * @return {String}
@@ -99,6 +146,12 @@ import { uid } from '../util/internals/uid';
     },
 
     /**
+     * 为橡皮擦创建 svg 标记
+     * 使用 <mask> 实现 svg 的擦除，致谢：https://travishorn.com/removing-parts-of-shapes-in-svg-b539a89e5649
+     * 必须在对象标记创建之前调用，因为它依赖于掩码的 `clipPathId` 属性
+     * @param reviver 用于进一步解析 svg 表示的方法
+     * @returns svg 标记字符串
+     *
      * create svg markup for eraser
      * use <mask> to achieve erasing for svg, credit: https://travishorn.com/removing-parts-of-shapes-in-svg-b539a89e5649
      * must be called before object markup creation as it relies on the `clipPathId` property of the mask
@@ -121,6 +174,12 @@ import { uid } from '../util/internals/uid';
     },
 
     /**
+     * 创建基本的剪切路径 SVG 标记
+     * @private
+     * @param objectMarkup 对象标记
+     * @param options 选项
+     * @returns SVG 标记字符串
+     *
      * @private
      */
     _createBaseClipPathSVGMarkup: function (objectMarkup, options) {
@@ -131,6 +190,12 @@ import { uid } from '../util/internals/uid';
     },
 
     /**
+     * 创建基本的 SVG 标记
+     * @private
+     * @param objectMarkup 对象标记
+     * @param options 选项
+     * @returns SVG 标记字符串
+     *
      * @private
      */
     _createBaseSVGMarkup: function (objectMarkup, options) {
@@ -144,6 +209,11 @@ import { uid } from '../util/internals/uid';
 
   fabric.util.object.extend(fabric.Group.prototype, {
     /**
+     * 将橡皮擦路径添加到对象
+     * @private
+     * @param path 橡皮擦路径
+     * @returns Promise<fabric.Path[]>
+     *
      * @private
      * @param {fabric.Path} path
      * @returns {Promise<fabric.Path[]>}
@@ -161,6 +231,10 @@ import { uid } from '../util/internals/uid';
     },
 
     /**
+     * 将组的橡皮擦应用于其对象
+     * @see {@link http://fabric5.fabricjs.com/erasing#erasable_property}
+     * @returns Promise<fabric.Path[]|fabric.Path[][]|void>
+     *
      * Applies the group's eraser to its objects
      * @see {@link http://fabric5.fabricjs.com/erasing#erasable_property}
      * @returns {Promise<fabric.Path[]|fabric.Path[][]|void>}
@@ -206,25 +280,36 @@ import { uid } from '../util/internals/uid';
   });
 
   /**
+   * 对象的橡皮擦
+   *
    * An object's Eraser
    * @private
    * @class fabric.Eraser
    */
   fabric.Eraser = fabric.util.createClass(fabric.Group, {
     /**
+     * 类型
      * @readonly
      */
     type: 'eraser',
 
     /**
+     * X 轴原点
      */
     originX: 'center',
 
     /**
+     * Y 轴原点
      */
     originY: 'center',
 
     /**
+     * 橡皮擦应保持大小
+     * 添加或删除路径时尺寸不应更改
+     * 由 {@link fabric.Object#_drawClipPath} 处理
+     * @override
+     * @private
+     *
      * eraser should retain size
      * dimensions should not change when paths are added or removed
      * handled by {@link fabric.Object#_drawClipPath}
@@ -233,6 +318,10 @@ import { uid } from '../util/internals/uid';
      */
     layout: 'fixed',
 
+    /**
+     * 绘制对象
+     * @param ctx 渲染上下文
+     */
     drawObject: function (ctx) {
       ctx.save();
       ctx.fillStyle = 'black';
@@ -243,6 +332,13 @@ import { uid } from '../util/internals/uid';
 
     /* _TO_SVG_START_ */
     /**
+     * 返回实例的 svg 表示
+     * 使用 <mask> 实现 svg 的擦除，致谢：https://travishorn.com/removing-parts-of-shapes-in-svg-b539a89e5649
+     * 对于遮罩，我们需要在所有路径之前添加一个白色矩形
+     *
+     * @param reviver 用于进一步解析 svg 表示的方法
+     * @returns 实例的 svg 表示
+     *
      * Returns svg representation of an instance
      * use <mask> to achieve erasing for svg, credit: https://travishorn.com/removing-parts-of-shapes-in-svg-b539a89e5649
      * for masking we need to add a white rect before all paths
@@ -278,6 +374,11 @@ import { uid } from '../util/internals/uid';
   });
 
   /**
+   * 从对象表示返回实例
+   * @memberOf fabric.Eraser
+   * @param object 用于创建 Eraser 的对象
+   * @returns Promise<fabric.Eraser>
+   *
    * Returns instance from an object representation
    * @memberOf fabric.Eraser
    * @param {Object} object Object to create an Eraser from
@@ -299,6 +400,9 @@ import { uid } from '../util/internals/uid';
     });
   };
 
+  /**
+   * 橡皮擦画笔类混入
+   */
   var __renderOverlay = fabric.Canvas.prototype._renderOverlay;
   /**
    * @fires erasing:start
@@ -306,6 +410,9 @@ import { uid } from '../util/internals/uid';
    */
   fabric.util.object.extend(fabric.Canvas.prototype, {
     /**
+     * 由 {@link #renderAll} 使用
+     * @returns boolean
+     *
      * Used by {@link #renderAll}
      * @returns boolean
      */
@@ -319,6 +426,10 @@ import { uid } from '../util/internals/uid';
     },
 
     /**
+     * 擦除时，画笔会从画布中剪切出擦除路径
+     * 所以我们需要在每次渲染时将其渲染在画布顶部
+     * @param ctx 渲染上下文
+     *
      * While erasing the brush clips out the erasing path from canvas
      * so we need to render it on top of canvas every render
      * @param {CanvasRenderingContext2D} ctx
@@ -330,6 +441,19 @@ import { uid } from '../util/internals/uid';
   });
 
   /**
+   * 橡皮擦画笔类
+   * 支持选择性擦除，意味着只有可擦除的对象才会受到橡皮擦画笔的影响。
+   * 支持 **反向** 擦除，意味着画笔可以“撤消”擦除。
+   *
+   * 为了支持选择性擦除，画笔会剪切整个画布，
+   * 然后使用图案画笔（遮罩）在擦除路径上绘制所有不可擦除的对象。
+   * 如果画笔是 **反向** 的，则无需剪切画布。画笔绘制所有可擦除对象，但不带橡皮擦。
+   * 这实现了看似只擦除或取消擦除可擦除对象的预期效果。
+   * 擦除完成后，创建的路径将添加到所有相交对象的 `eraser` 属性中。
+   *
+   * 为了更新 EraserBrush，请调用 `preparePattern`。
+   * 当画布在擦除期间发生变化（即动画）并且您希望橡皮擦反映这些变化时，这可能会派上用场。
+   *
    * EraserBrush class
    * Supports selective erasing meaning that only erasable objects are affected by the eraser brush.
    * Supports **inverted** erasing meaning that the brush can "undo" erasing.
@@ -354,12 +478,17 @@ import { uid } from '../util/internals/uid';
       type: 'eraser',
 
       /**
+       * 当设置为 `true` 时，画笔将创建撤消擦除的视觉效果
+       *
        * When set to `true` the brush will create a visual effect of undoing erasing
        * @type boolean
        */
       inverted: false,
 
       /**
+       * 用于修复 https://github.com/fabricjs/fabric.js/issues/7984
+       * 在剪切主上下文时减小路径宽度，从而使两个上下文的视觉重叠更好
+       *
        * Used to fix https://github.com/fabricjs/fabric.js/issues/7984
        * Reduces the path width while clipping the main context, resulting in a better visual overlap of both contexts
        * @type number
@@ -372,6 +501,10 @@ import { uid } from '../util/internals/uid';
       _isErasing: false,
 
       /**
+       * 检查对象是否可擦除
+       * @private
+       * @param object 要检查的对象
+       * @returns boolean
        *
        * @private
        * @param {fabric.Object} object
@@ -382,6 +515,20 @@ import { uid } from '../util/internals/uid';
       },
 
       /**
+       * 准备集合遍历
+       * @private
+       * 旨在支持擦除包含可擦除和不可擦除对象的集合，同时保持对象堆叠顺序。\
+       * 迭代集合以允许嵌套的选择性擦除。\
+       * 在渲染图案画笔之前准备对象。\
+       * 如果画笔 **不是** 反向的，则渲染所有不可擦除的对象。\
+       * 如果画笔是反向的，则渲染所有对象，可擦除对象不带橡皮擦。
+       * 这将渲染被擦除的部分，就好像它们最初没有被擦除一样，从而实现撤消效果。
+       *
+       * @param collection 集合
+       * @param objects 对象数组
+       * @param ctx 渲染上下文
+       * @param restorationContext 恢复上下文
+       *
        * @private
        * This is designed to support erasing a collection with both erasable and non-erasable objects while maintaining object stacking.\
        * Iterates over collections to allow nested selective erasing.\
@@ -437,6 +584,12 @@ import { uid } from '../util/internals/uid';
       },
 
       /**
+       * 为擦除画笔准备图案
+       * 此图案将在剪切主上下文后绘制在顶部上下文上，
+       * 实现仅擦除可擦除对象的视觉效果
+       * @private
+       * @param objects 覆盖默认行为，传递要在图案上渲染的对象
+       *
        * Prepare the pattern for the erasing brush
        * This pattern will be drawn on the top context after clipping the main context,
        * achieving a visual effect of erasing only erasable objects
@@ -533,6 +686,10 @@ import { uid } from '../util/internals/uid';
       },
 
       /**
+       * 设置画笔样式
+       * @private
+       * @param ctx 渲染上下文
+       *
        * Sets brush styles
        * @private
        * @param {CanvasRenderingContext2D} ctx
@@ -543,6 +700,16 @@ import { uid } from '../util/internals/uid';
       },
 
       /**
+       * **自定义**
+       *
+       * 如果您需要橡皮擦在每次渲染时更新（即在擦除期间进行动画），请通过 **添加** 以下内容来覆盖此方法（性能可能会受到影响）：
+       * @example
+       * ```
+       * if(ctx === this.canvas.contextTop) {
+       *  this.preparePattern();
+       * }
+       * ```
+       *
        * **Customiztion**
        *
        * if you need the eraser to update on each render (i.e animating during erasing) override this method by **adding** the following (performance may suffer):
@@ -566,6 +733,9 @@ import { uid } from '../util/internals/uid';
       },
 
       /**
+       * 我们指示 {@link fabric.PencilBrush} 在必要时重新绘制自身
+       * @returns boolean
+       *
        * We indicate {@link fabric.PencilBrush} to repaint itself if necessary
        * @returns
        */
@@ -574,6 +744,10 @@ import { uid } from '../util/internals/uid';
       },
 
       /**
+       * 鼠标按下事件处理
+       * @param pointer 指针位置
+       * @param options 事件选项
+       * @returns
        *
        * @param {Point} pointer
        * @param {fabric.IEvent} options
@@ -596,6 +770,10 @@ import { uid } from '../util/internals/uid';
       },
 
       /**
+       * 渲染逻辑：
+       * 1. 使用画笔通过在画布顶部渲染来剪切画布（如果 `inverted === true` 则不需要）
+       * 2. 在顶部上下文中使用画布图案渲染画笔
+       *
        * Rendering Logic:
        * 1. Use brush to clip canvas by rendering it on top of canvas (unnecessary if `inverted === true`)
        * 2. Render brush with canvas pattern on top context
@@ -627,6 +805,12 @@ import { uid } from '../util/internals/uid';
       },
 
       /**
+       * 创建 fabric.Path 对象
+       * @override
+       * @private
+       * @param pathData 路径数据
+       * @returns 添加到画布的路径
+       *
        * Creates fabric.Path object
        * @override
        * @private
@@ -644,6 +828,14 @@ import { uid } from '../util/internals/uid';
       },
 
       /**
+       * 将剪切路径应用于路径的实用程序。
+       * 用于保留嵌套对象中橡皮擦路径的剪切。
+       * 当组具有应在对组对象应用擦除之前应用于路径的剪切路径时调用。
+       * @param path 画布坐标平面中的橡皮擦路径
+       * @param clipPath 要应用于路径的剪切路径
+       * @param clipPathContainerTransformMatrix 剪切路径所属对象的变换矩阵
+       * @returns 带有剪切路径的路径
+       *
        * Utility to apply a clip path to a path.
        * Used to preserve clipping on eraser paths in nested objects.
        * Called when a group has a clip path that should be applied to the path before applying erasing on the group's objects.
@@ -685,6 +877,13 @@ import { uid } from '../util/internals/uid';
       },
 
       /**
+       * 将剪切路径应用于路径的实用程序。
+       * 用于保留嵌套对象中橡皮擦路径的剪切。
+       * 当组具有应在对组对象应用擦除之前应用于路径的剪切路径时调用。
+       * @param path 橡皮擦路径
+       * @param object 剪切路径所属的对象
+       * @returns Promise<fabric.Path>
+       *
        * Utility to apply a clip path to a path.
        * Used to preserve clipping on eraser paths in nested objects.
        * Called when a group has a clip path that should be applied to the path before applying erasing on the group's objects.
@@ -705,7 +904,14 @@ import { uid } from '../util/internals/uid';
       },
 
       /**
-       * Adds path to object's eraser, walks down object's descendants if necessary
+       * 将路径添加到对象的橡皮擦，如有必要，向下遍历对象的后代
+       *
+       * @public
+       * @fires erasing:end on object
+       * @param obj 对象
+       * @param path 路径
+       * @param context 分配被擦除对象的上下文
+       * @returns Promise<fabric.Path | fabric.Path[]>
        *
        * @public
        * @fires erasing:end on object
@@ -766,7 +972,12 @@ import { uid } from '../util/internals/uid';
       },
 
       /**
-       * Add the eraser path to canvas drawables' clip paths
+       * 将橡皮擦路径添加到画布可绘制对象的剪切路径
+       *
+       * @param source 画布源
+       * @param path 路径
+       * @param context 分配被擦除对象的上下文
+       * @returns Promise<fabric.Path[]|void> 橡皮擦路径
        *
        * @param {fabric.Canvas} source
        * @param {fabric.Canvas} path
@@ -794,6 +1005,10 @@ import { uid } from '../util/internals/uid';
       },
 
       /**
+       * 在 contextTop 画布上绘制路径后，在 mouseup 上
+       * 我们使用捕获的点创建一个新的 fabric 路径对象
+       * 并将其添加到每个相交的可擦除对象。
+       *
        * On mouseup after drawing the path on contextTop canvas
        * we use the points captured to create an new fabric path object
        * and add it to every intersected erasable object.

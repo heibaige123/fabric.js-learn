@@ -2,6 +2,19 @@ import type { FabricObject } from '../../shapes/Object/FabricObject';
 import { sendObjectToPlane } from './planeChange';
 import { Group } from '../../shapes/Group';
 /**
+ * 将 2 个剪切路径合并为一个视觉上相等的剪切路径
+ *
+ * **重要**：\
+ * **不** 克隆参数，如果需要，请先克隆它们。
+ *
+ * 创建一个包装器（组），其中包含一个剪切路径并被另一个剪切路径剪切，以便内容保留在两者重叠的位置。
+ * 如果两个剪切路径都可能有自己的嵌套剪切路径，因此无法将一个分配给另一个的剪切路径属性，请使用此方法。
+ *
+ * 为了处理 \`inverted\` 属性，我们遵循以下情况中描述的逻辑：\
+ * **(1)** 两个剪切路径都反转 - 剪切路径将反转属性传递给包装器并自行丢失它。\
+ * **(2)** 一个反转而另一个不反转 - 包装器不应反转，反转的剪切路径必须剪切未反转的剪切路径以产生相同的视觉效果。\
+ * **(3)** 两个剪切路径都不反转 - 包装器和剪切路径保持不变。
+ *
  * Merges 2 clip paths into one visually equal clip path
  *
  * **IMPORTANT**:\

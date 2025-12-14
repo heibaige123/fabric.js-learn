@@ -1,3 +1,6 @@
+/**
+ * 移除颜色滤镜的片元着色器源码
+ */
 export const fragmentShader = `
 precision highp float;
 uniform sampler2D uTexture;

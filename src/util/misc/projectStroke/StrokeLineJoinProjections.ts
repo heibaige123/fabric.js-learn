@@ -16,9 +16,15 @@ import {
 import { StrokeProjectionsBase } from './StrokeProjectionsBase';
 import type { TProjection, TProjectStrokeOnPointsOptions } from './types';
 
+/**
+ * 零向量常量
+ */
 const zeroVector = new Point();
 
 /**
+ * 负责查找每种线连接类型的投影的类
+ * @see {@link [Closed path projections at #8344](https://github.com/fabricjs/fabric.js/pull/8344#2-closed-path)}
+ *
  * class in charge of finding projections for each type of line join
  * @see {@link [Closed path projections at #8344](https://github.com/fabricjs/fabric.js/pull/8344#2-closed-path)}
  *
@@ -32,34 +38,54 @@ const zeroVector = new Point();
  */
 export class StrokeLineJoinProjections extends StrokeProjectionsBase {
   /**
+   * 被投影的点 (∠BAC 的顶点)
+   *
    * The point being projected (the angle ∠BAC)
    */
   declare A: Point;
   /**
+   * A 之前的点
+   *
    * The point before A
    */
   declare B: Point;
   /**
+   * A 之后的点
+   *
    * The point after A
    */
   declare C: Point;
   /**
+   * AB 向量
+   *
    * The AB vector
    */
   AB: Point;
   /**
+   * AC 向量
+   *
    * The AC vector
    */
   AC: Point;
   /**
+   * A 的角度 (∠BAC)
+   *
    * The angle of A (∠BAC)
    */
   alpha: TRadian;
   /**
+   * A 的角平分线 (∠BAC)
+   *
    * The bisector of A (∠BAC)
    */
   bisector: Point;
 
+  /**
+   * 计算正交投影的旋转方向因子
+   * @param vector1 向量1
+   * @param vector2 向量2
+   * @returns 正交投影的旋转方向因子
+   */
   static getOrthogonalRotationFactor(vector1: Point, vector2?: Point) {
     const angle = vector2
       ? calcAngleBetweenVectors(vector1, vector2)
@@ -82,6 +108,13 @@ export class StrokeLineJoinProjections extends StrokeProjectionsBase {
     );
   }
 
+  /**
+   * 计算正交投影
+   * @param from 起始点
+   * @param to 结束点
+   * @param magnitude 大小
+   * @returns 正交投影向量
+   */
   calcOrthogonalProjection(
     from: Point,
     to: Point,
@@ -97,6 +130,9 @@ export class StrokeLineJoinProjections extends StrokeProjectionsBase {
   }
 
   /**
+   * BEVEL 连接
+   * 计算：投影点由与顶点正交的向量形成。
+   *
    * BEVEL
    * Calculation: the projection points are formed by the vector orthogonal to the vertex.
    *
@@ -117,6 +153,9 @@ export class StrokeLineJoinProjections extends StrokeProjectionsBase {
   }
 
   /**
+   * MITER 连接
+   * 计算：角由描边的外边缘在路径段的切线上延伸直到相交形成。
+   *
    * MITER
    * Calculation: the corner is formed by extending the outer edges of the stroke
    * at the tangents of the path segments until they intersect.
@@ -159,6 +198,9 @@ export class StrokeLineJoinProjections extends StrokeProjectionsBase {
   }
 
   /**
+   * ROUND (无倾斜)
+   * 计算：投影是平行于 X 和 Y 轴的两个向量
+   *
    * ROUND (without skew)
    * Calculation: the projections are the two vectors parallel to X and Y axes
    *
@@ -191,6 +233,9 @@ export class StrokeLineJoinProjections extends StrokeProjectionsBase {
   }
 
   /**
+   * ROUND (有倾斜)
+   * 计算：投影是变形后在 X 和 Y 轴方向上距离顶点最远的点。
+   *
    * ROUND (with skew)
    * Calculation: the projections are the points furthest from the vertex in
    * the direction of the X and Y axes after distortion.
@@ -254,6 +299,12 @@ export class StrokeLineJoinProjections extends StrokeProjectionsBase {
     return projections;
   }
 
+  /**
+   * ROUND 连接
+   * 计算：与描边连接 `round` 相同
+   *
+   * @returns
+   */
   projectRound() {
     const projections: Point[] = [];
     /* Include the start and end points of the circle segment, so that only
@@ -287,6 +338,11 @@ export class StrokeLineJoinProjections extends StrokeProjectionsBase {
   }
 
   /**
+   * 将描边宽度投影到点上，返回每个点的投影如下：
+   * - `miter`: 对应于外边界的 1 个点。如果超过斜接限制，它将是 2 个点（变为 bevel）
+   * - `bevel`: 对应于 bevel 可能边界的 2 个点，与描边正交。
+   * - `round`: 当没有倾斜时与 `bevel` 相同，有倾斜时是 4 个点。
+   *
    * Project stroke width on points returning projections for each point as follows:
    * - `miter`: 1 point corresponding to the outer boundary. If the miter limit is exceeded, it will be 2 points (becomes bevel)
    * - `bevel`: 2 points corresponding to the bevel possible boundaries, orthogonal to the stroke.
@@ -303,6 +359,10 @@ export class StrokeLineJoinProjections extends StrokeProjectionsBase {
     }
   }
 
+  /**
+   * 投影描边宽度到点上
+   * @returns
+   */
   public project(): TProjection[] {
     return this.projectPoints().map((point) => ({
       originPoint: this.A,

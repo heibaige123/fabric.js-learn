@@ -12,6 +12,8 @@ import {
 } from './util';
 
 /**
+ * 颜色类，提供通用的颜色操作
+ *
  * @class Color common color operations
  * @see {@link http://fabric5.fabricjs.com/fabric-intro-part-2#colors colors}
  */
@@ -20,6 +22,8 @@ export class Color {
   isUnrecognised = false;
 
   /**
+   * 构造函数
+   * @param color 可选的颜色值，可以是 hex、rgb(a)、hsl 格式或已知颜色列表中的名称
    *
    * @param {string} [color] optional in hex or rgb(a) or hsl format or from known color list
    */
@@ -38,6 +42,11 @@ export class Color {
   }
 
   /**
+   * 尝试解析颜色值
+   * @private
+   * @param color 要解析的颜色值
+   * @returns 解析后的 RGBA 颜色源
+   *
    * @private
    * @param {string} [color] Color value to parse
    * @returns {TRGBAColorSource}
@@ -59,6 +68,9 @@ export class Color {
   }
 
   /**
+   * 返回此颜色的源（源是一个数组表示；例如：[200, 200, 100, 1]）
+   * @returns 颜色源数组
+   *
    * Returns source of this color (where source is an array representation; ex: [200, 200, 100, 1])
    * @return {TRGBAColorSource}
    */
@@ -67,6 +79,9 @@ export class Color {
   }
 
   /**
+   * 设置此颜色的源（源是一个数组表示；例如：[200, 200, 100, 1]）
+   * @param source 颜色源数组
+   *
    * Sets source of this color (where source is an array representation; ex: [200, 200, 100, 1])
    * @param {TRGBAColorSource} source
    */
@@ -75,6 +90,9 @@ export class Color {
   }
 
   /**
+   * 返回 RGB 格式的颜色表示
+   * @returns 例如：rgb(0-255,0-255,0-255)
+   *
    * Returns color representation in RGB format
    * @return {String} ex: rgb(0-255,0-255,0-255)
    */
@@ -84,6 +102,9 @@ export class Color {
   }
 
   /**
+   * 返回 RGBA 格式的颜色表示
+   * @returns 例如：rgba(0-255,0-255,0-255,0-1)
+   *
    * Returns color representation in RGBA format
    * @return {String} ex: rgba(0-255,0-255,0-255,0-1)
    */
@@ -92,6 +113,9 @@ export class Color {
   }
 
   /**
+   * 返回 HSL 格式的颜色表示
+   * @returns 例如：hsl(0-360,0%-100%,0%-100%)
+   *
    * Returns color representation in HSL format
    * @return {String} ex: hsl(0-360,0%-100%,0%-100%)
    */
@@ -101,6 +125,9 @@ export class Color {
   }
 
   /**
+   * 返回 HSLA 格式的颜色表示
+   * @returns 例如：hsla(0-360,0%-100%,0%-100%,0-1)
+   *
    * Returns color representation in HSLA format
    * @return {String} ex: hsla(0-360,0%-100%,0%-100%,0-1)
    */
@@ -110,6 +137,9 @@ export class Color {
   }
 
   /**
+   * 返回 HEX 格式的颜色表示
+   * @returns 例如：FF5555
+   *
    * Returns color representation in HEX format
    * @return {String} ex: FF5555
    */
@@ -119,6 +149,9 @@ export class Color {
   }
 
   /**
+   * 返回 HEXA 格式的颜色表示
+   * @returns 例如：FF5555CC
+   *
    * Returns color representation in HEXA format
    * @return {String} ex: FF5555CC
    */
@@ -128,6 +161,9 @@ export class Color {
   }
 
   /**
+   * 获取此颜色的 alpha 通道值
+   * @returns 0-1 之间的数值
+   *
    * Gets value of alpha channel for this color
    * @return {Number} 0-1
    */
@@ -136,6 +172,10 @@ export class Color {
   }
 
   /**
+   * 设置此颜色的 alpha 通道值
+   * @param alpha Alpha 值 0-1
+   * @returns 当前颜色实例
+   *
    * Sets value of alpha channel for this color
    * @param {Number} alpha Alpha value 0-1
    * @return {Color} thisArg
@@ -146,6 +186,9 @@ export class Color {
   }
 
   /**
+   * 将颜色转换为灰度表示
+   * @returns 当前颜色实例
+   *
    * Transforms color to its grayscale representation
    * @return {Color} thisArg
    */
@@ -155,6 +198,10 @@ export class Color {
   }
 
   /**
+   * 将颜色转换为黑白表示
+   * @param threshold 阈值
+   * @returns 当前颜色实例
+   *
    * Transforms color to its black and white representation
    * @param {Number} threshold
    * @return {Color} thisArg
@@ -167,6 +214,10 @@ export class Color {
   }
 
   /**
+   * 将颜色与另一种颜色叠加
+   * @param otherColor 另一种颜色
+   * @returns 当前颜色实例
+   *
    * Overlays color with another color
    * @param {String|Color} otherColor
    * @return {Color} thisArg
@@ -188,6 +239,10 @@ export class Color {
   }
 
   /**
+   * 给定 RGB 格式的颜色，返回新的颜色对象
+   * @param color 颜色值 例如：rgb(0-255,0-255,0-255)
+   * @returns 颜色对象
+   *
    * Returns new color object, when given a color in RGB format
    * @param {String} color Color value ex: rgb(0-255,0-255,0-255)
    * @return {Color}
@@ -197,6 +252,10 @@ export class Color {
   }
 
   /**
+   * 给定 RGBA 格式的颜色，返回新的颜色对象
+   * @param color 颜色值
+   * @returns 颜色对象
+   *
    * Returns new color object, when given a color in RGBA format
    * @param {String} color
    * @return {Color}
@@ -206,6 +265,10 @@ export class Color {
   }
 
   /**
+   * 返回 RGB 或 RGBA 格式颜色的数组表示（例如：[100, 100, 200, 1]）
+   * @param color 颜色值 例如：rgb(0-255,0-255,0-255), rgb(0%-100%,0%-100%,0%-100%)
+   * @returns 颜色源数组
+   *
    * Returns array representation (ex: [100, 100, 200, 1]) of a color that's in RGB or RGBA format
    * @param {String} color Color value ex: rgb(0-255,0-255,0-255), rgb(0%-100%,0%-100%,0%-100%)
    * @return {TRGBAColorSource | undefined} source
@@ -224,6 +287,10 @@ export class Color {
   }
 
   /**
+   * 给定 HSL 格式的颜色，返回新的颜色对象
+   * @param color 颜色值 例如：hsl(0-260,0%-100%,0%-100%)
+   * @returns 颜色对象
+   *
    * Returns new color object, when given a color in HSL format
    * @param {String} color Color value ex: hsl(0-260,0%-100%,0%-100%)
    * @return {Color}
@@ -233,6 +300,10 @@ export class Color {
   }
 
   /**
+   * 给定 HSLA 格式的颜色，返回新的颜色对象
+   * @param color 颜色值
+   * @returns 颜色对象
+   *
    * Returns new color object, when given a color in HSLA format
    * @param {String} color
    * @return {Color}
@@ -242,6 +313,11 @@ export class Color {
   }
 
   /**
+   * 返回 HSL 或 HSLA 格式颜色的数组表示（例如：[100, 100, 200, 1]）。
+   * 改编自 <a href="https://rawgithub.com/mjijackson/mjijackson.github.com/master/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript.html">https://github.com/mjijackson</a>
+   * @param color 颜色值 例如：hsl(0-360,0%-100%,0%-100%) 或 hsla(0-360,0%-100%,0%-100%, 0-1)
+   * @returns 颜色源数组
+   *
    * Returns array representation (ex: [100, 100, 200, 1]) of a color that's in HSL or HSLA format.
    * Adapted from <a href="https://rawgithub.com/mjijackson/mjijackson.github.com/master/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript.html">https://github.com/mjijackson</a>
    * @param {String} color Color value ex: hsl(0-360,0%-100%,0%-100%) or hsla(0-360,0%-100%,0%-100%, 0-1)
@@ -280,6 +356,10 @@ export class Color {
   }
 
   /**
+   * 给定 HEX 格式的颜色，返回新的颜色对象
+   * @param color 颜色值 例如：FF5555
+   * @returns 颜色对象
+   *
    * Returns new color object, when given a color in HEX format
    * @param {String} color Color value ex: FF5555
    * @return {Color}
@@ -289,6 +369,10 @@ export class Color {
   }
 
   /**
+   * 返回 HEX 格式颜色的数组表示（例如：[100, 100, 200, 1]）
+   * @param color 例如：FF5555 或 FF5544CC (RGBa)
+   * @returns 颜色源数组
+   *
    * Returns array representation (ex: [100, 100, 200, 1]) of a color that's in HEX format
    * @param {String} color ex: FF5555 or FF5544CC (RGBa)
    * @return {TRGBAColorSource | undefined} source
@@ -311,6 +395,10 @@ export class Color {
   }
 
   /**
+   * 将可能是任何角度表示法（50deg, 0.5turn, 2rad）的字符串转换为不带 'deg' 后缀的度数
+   * @param value 例如：0deg, 0.5turn, 2rad
+   * @returns 度数，如果输入无效则返回 NaN
+   *
    * Converts a string that could be any angle notation (50deg, 0.5turn, 2rad)
    * into degrees without the 'deg' suffix
    * @param {String} value ex: 0deg, 0.5turn, 2rad

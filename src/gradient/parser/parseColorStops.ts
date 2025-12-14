@@ -3,9 +3,22 @@ import { parsePercent } from '../../parser/percent';
 import { ifNaN } from '../../util/internals/ifNaN';
 import type { ColorStop } from '../typedefs';
 
+/**
+ * 用于分割样式字符串中的键值对的正则表达式
+ */
 const RE_KEY_VALUE_PAIRS = /\s*;\s*/;
+
+/**
+ * 用于分割键和值的正则表达式
+ */
 const RE_KEY_VALUE = /\s*:\s*/;
 
+/**
+ * 解析单个 SVG 渐变停止点 (stop) 元素
+ * @param el SVG stop 元素
+ * @param opacityMultiplier 不透明度乘数
+ * @returns 包含偏移量和颜色的对象
+ */
 function parseColorStop(el: SVGStopElement, opacityMultiplier: number) {
   let colorValue, opacityValue;
   const style = el.getAttribute('style');
@@ -44,6 +57,12 @@ function parseColorStop(el: SVGStopElement, opacityMultiplier: number) {
   };
 }
 
+/**
+ * 解析 SVG 渐变元素中的所有颜色停止点
+ * @param el SVG 渐变元素
+ * @param opacityAttr 不透明度属性值
+ * @returns 颜色停止点数组
+ */
 export function parseColorStops(
   el: SVGGradientElement,
   opacityAttr: string | null,

@@ -3,6 +3,12 @@ import type { TSize } from '../../typedefs';
 import type { GradientCoords, GradientType, GradientUnits } from '../typedefs';
 import { parseGradientUnits, parseType } from './misc';
 
+/**
+ * 将百分比单位转换为数值
+ * @param valuesToConvert 需要转换的值的对象
+ * @param options 包含宽度、高度和渐变单位的选项
+ * @returns 转换后的数值对象
+ */
 function convertPercentUnitsToValues<
   T extends GradientType,
   K extends keyof GradientCoords<T>,
@@ -40,10 +46,21 @@ function convertPercentUnitsToValues<
   );
 }
 
+/**
+ * 获取 SVG 元素的属性值
+ * @param el SVG 渐变元素
+ * @param key 属性名
+ * @returns 属性值
+ */
 function getValue(el: SVGGradientElement, key: string) {
   return el.getAttribute(key);
 }
 
+/**
+ * 解析线性渐变的坐标
+ * @param el SVG 渐变元素
+ * @returns 线性渐变坐标对象
+ */
 export function parseLinearCoords(el: SVGGradientElement) {
   return {
     x1: getValue(el, 'x1') || 0,
@@ -53,6 +70,11 @@ export function parseLinearCoords(el: SVGGradientElement) {
   };
 }
 
+/**
+ * 解析径向渐变的坐标
+ * @param el SVG 渐变元素
+ * @returns 径向渐变坐标对象
+ */
 export function parseRadialCoords(el: SVGGradientElement) {
   return {
     x1: getValue(el, 'fx') || getValue(el, 'cx') || '50%',
@@ -64,6 +86,12 @@ export function parseRadialCoords(el: SVGGradientElement) {
   };
 }
 
+/**
+ * 解析渐变坐标
+ * @param el SVG 渐变元素
+ * @param size 尺寸对象
+ * @returns 解析后的渐变坐标
+ */
 export function parseCoords(el: SVGGradientElement, size: TSize) {
   return convertPercentUnitsToValues(
     parseType(el) === 'linear' ? parseLinearCoords(el) : parseRadialCoords(el),

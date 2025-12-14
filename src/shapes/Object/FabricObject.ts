@@ -8,6 +8,9 @@ import { classRegistry } from '../../ClassRegistry';
 
 // TODO somehow we have to make a tree-shakeable import
 
+/**
+ * FabricObject 接口，继承自 FabricObjectSVGExportMixin
+ */
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface FabricObject<
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -18,6 +21,9 @@ export interface FabricObject<
   EventSpec extends ObjectEvents = ObjectEvents,
 > extends FabricObjectSVGExportMixin {}
 
+/**
+ * FabricObject 类，继承自 InteractiveFabricObject
+ */
 // eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging
 export class FabricObject<
   Props extends TFabricObjectProps = Partial<FabricObjectProps>,

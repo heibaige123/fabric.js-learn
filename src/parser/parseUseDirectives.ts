@@ -3,6 +3,11 @@ import { getMultipleNodes } from './getMultipleNodes';
 import { applyViewboxTransform } from './applyViewboxTransform';
 import { parseStyleString } from './parseStyleString';
 
+/**
+ * 解析 SVG 文档中的 "use" 指令，将它们替换为引用的元素
+ * @param doc SVG 文档对象
+ * @returns void
+ */
 export function parseUseDirectives(doc: Document) {
   const nodelist = getMultipleNodes(doc, ['use', 'svg:use']);
   const skipAttributes = ['x', 'y', 'xlink:href', 'href', 'transform'];

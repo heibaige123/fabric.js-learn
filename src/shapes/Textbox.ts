@@ -12,40 +12,104 @@ import type { Control } from '../controls/Control';
 // @TODO: Many things here are configuration related and shouldn't be on the class nor prototype
 // regexes, list of properties that are not suppose to change by instances, magic consts.
 // this will be a separated effort
+/**
+ * 文本框默认值
+ */
 export const textboxDefaultValues: Partial<TClassProperties<Textbox>> = {
+  /**
+   * 最小宽度
+   */
   minWidth: 20,
+  /**
+   * 动态最小宽度
+   */
   dynamicMinWidth: 2,
+  /**
+   * 锁定缩放翻转
+   */
   lockScalingFlip: true,
+  /**
+   * 不缓存缩放
+   */
   noScaleCache: false,
+  /**
+   * 单词连接符正则
+   */
   _wordJoiners: /[ \t\r]/,
+  /**
+   * 是否按字素分割
+   */
   splitByGrapheme: false,
 };
 
+/**
+ * 字素数据类型
+ */
 export type GraphemeData = {
+  /**
+   * 单词数据
+   */
   wordsData: {
+    /**
+     * 单词字符数组
+     */
     word: string[];
+    /**
+     * 单词宽度
+     */
     width: number;
   }[][];
+  /**
+   * 最大单词宽度
+   */
   largestWordWidth: number;
 };
 
+/**
+ * 样式映射类型
+ */
 export type StyleMap = Record<string, { line: number; offset: number }>;
 
 // @TODO this is not complete
+/**
+ * 文本框独有的属性接口
+ */
 interface UniqueTextboxProps {
+  /**
+   * 最小宽度
+   */
   minWidth: number;
+  /**
+   * 是否按字素分割
+   */
   splitByGrapheme: boolean;
+  /**
+   * 动态最小宽度
+   */
   dynamicMinWidth: number;
+  /**
+   * 单词连接符正则
+   */
   _wordJoiners: RegExp;
 }
 
+/**
+ * 序列化文本框属性接口
+ */
 export interface SerializedTextboxProps
   extends SerializedITextProps,
     Pick<UniqueTextboxProps, 'minWidth' | 'splitByGrapheme'> {}
 
+/**
+ * 文本框属性接口
+ */
 export interface TextboxProps extends ITextProps, UniqueTextboxProps {}
 
 /**
+ * 文本框类，基于 IText，允许用户调整文本矩形的大小并自动换行。
+ * 文本框的 Y 轴缩放被锁定，用户只能更改宽度。
+ * 高度根据行的换行自动调整。
+ *
  * Textbox class, based on IText, allows the user to resize the text rectangle
  * and wraps lines automatically. Textboxes have their Y scaling locked, the
  * user can only change width. Height is adjusted automatically based on the
@@ -60,12 +124,19 @@ export class Textbox<
   implements UniqueTextboxProps
 {
   /**
+   * 文本框的最小宽度，以像素为单位。
+   * @type Number
+   *
    * Minimum width of textbox, in pixels.
    * @type Number
    */
   declare minWidth: number;
 
   /**
+   * 文本框的最小计算宽度，以像素为单位。
+   * 固定为 2，以便空文本框不会变为 0，并且在没有文本的情况下仍然可以选择。
+   * @type Number
+   *
    * Minimum calculated width of a textbox, in pixels.
    * fixed to 2 so that an empty textbox cannot go to 0
    * and is still selectable without text.
@@ -74,6 +145,11 @@ export class Textbox<
   declare dynamicMinWidth: number;
 
   /**
+   * 使用此布尔属性来分割没有空白概念的字符串。
+   * 这是帮助处理中文/日文的一种廉价方法
+   * @type Boolean
+   * @since 2.6.0
+   *
    * Use this boolean property in order to split strings that have no white space concept.
    * this is a cheap way to help with chinese/japanese
    * @type Boolean
@@ -81,18 +157,40 @@ export class Textbox<
    */
   declare splitByGrapheme: boolean;
 
+  /**
+   * 单词连接符正则
+   */
   declare _wordJoiners: RegExp;
 
+  /**
+   * 样式映射
+   */
   declare _styleMap: StyleMap;
 
+  /**
+   * 是否正在换行
+   */
   declare isWrapping: boolean;
 
+  /**
+   * 类型
+   */
   static type = 'Textbox';
 
+  /**
+   * 文本布局属性
+   */
   static textLayoutProperties = [...IText.textLayoutProperties, 'width'];
 
+  /**
+   * 自身默认值
+   */
   static ownDefaults = textboxDefaultValues;
 
+  /**
+   * 获取默认值
+   * @returns 默认值对象
+   */
   static getDefaults(): Record<string, any> {
     return {
       ...super.getDefaults(),
@@ -101,6 +199,10 @@ export class Textbox<
   }
 
   /**
+   * 构造函数
+   * @param {String} text 文本字符串
+   * @param {Object} [options] 选项对象
+   *
    * Constructor
    * @param {String} text Text string
    * @param {Object} [options] Options object
@@ -110,6 +212,10 @@ export class Textbox<
   }
 
   /**
+   * 创建默认控件对象。
+   * 如果您希望在所有对象之间共享一个控件实例，
+   * 请使此函数返回一个空对象，并将控件添加到 ownDefaults 对象中
+   *
    * Creates the default control object.
    * If you prefer to have on instance of controls shared among all objects
    * make this function return an empty object and add controls to the ownDefaults object
@@ -119,6 +225,10 @@ export class Textbox<
   }
 
   /**
+   * 与超类的此函数版本不同，Textbox 不会更新其宽度。
+   * @private
+   * @override
+   *
    * Unlike superclass's version of this function, Textbox does not update
    * its width.
    * @private
@@ -147,6 +257,10 @@ export class Textbox<
   }
 
   /**
+   * 生成一个转换样式对象的对象，使其按可视行（换行符和自动换行）分解。
+   * 原始文本样式对象按实际行（仅换行符）分解，这仅对 Text / IText 足够
+   * @private
+   *
    * Generate an object that translates the style object so that it is
    * broken up by visual lines (new lines and automatic wrapping).
    * The original text styles object is broken up by actual lines (new lines only),
@@ -184,6 +298,10 @@ export class Textbox<
   }
 
   /**
+   * 如果对象具有样式属性或在指定行中具有该属性，则返回 true
+   * @param {Number} lineIndex
+   * @return {Boolean}
+   *
    * Returns true if object has a style property or has it on a specified line
    * @param {Number} lineIndex
    * @return {Boolean}
@@ -199,6 +317,10 @@ export class Textbox<
   }
 
   /**
+   * 如果对象没有样式或行中没有样式，则返回 true
+   * @param {Number} lineIndex 行索引，lineIndex 是在换行后的行上。
+   * @return {Boolean}
+   *
    * Returns true if object has no styling or no styling in a line
    * @param {Number} lineIndex , lineIndex is on wrapped lines.
    * @return {Boolean}
@@ -240,9 +362,13 @@ export class Textbox<
   }
 
   /**
+   * 获取样式声明
+   *
    * @protected
    * @param {Number} lineIndex
    * @param {Number} charIndex
+   * @return {TextStyleDeclaration} 现有样式对象的引用，或者当未定义时返回新的空对象
+   *
    * @return {TextStyleDeclaration} a style object reference to the existing one or a new empty object when undefined
    */
   _getStyleDeclaration(
@@ -261,10 +387,12 @@ export class Textbox<
   }
 
   /**
-   * @param {Number} lineIndex
-   * @param {Number} charIndex
-   * @param {Object} style
+   * 设置样式声明
+   * @param {Number} lineIndex 行索引
+   * @param {Number} charIndex 字符索引
+   * @param {Object} style 样式对象
    * @private
+   *
    */
   protected _setStyleDeclaration(
     lineIndex: number,
@@ -276,9 +404,11 @@ export class Textbox<
   }
 
   /**
-   * @param {Number} lineIndex
-   * @param {Number} charIndex
+   * 删除样式声明
+   * @param {Number} lineIndex 行索引
+   * @param {Number} charIndex 字符索引
    * @private
+   *
    */
   protected _deleteStyleDeclaration(lineIndex: number, charIndex: number) {
     const map = this._styleMap[lineIndex];
@@ -286,12 +416,16 @@ export class Textbox<
   }
 
   /**
+   * 可能已损坏，需要修复
+   * 返回与换行后的 lineIndex 行对应的实际样式行
+   * 仅用于验证行是否存在。
+   * @param {Number} lineIndex
+   * @returns {Boolean} 行是否存在
+   * @private
+   *
    * probably broken need a fix
    * Returns the real style line that correspond to the wrapped lineIndex line
    * Used just to verify if the line does exist or not.
-   * @param {Number} lineIndex
-   * @returns {Boolean} if the line exists or not
-   * @private
    */
   protected _getLineStyle(lineIndex: number): boolean {
     const map = this._styleMap[lineIndex];
@@ -299,10 +433,12 @@ export class Textbox<
   }
 
   /**
-   * Set the line style to an empty object so that is initialized
+   * 将行样式设置为空对象以便初始化
    * @param {Number} lineIndex
    * @param {Object} style
    * @private
+   *
+   * Set the line style to an empty object so that is initialized
    */
   protected _setLineStyle(lineIndex: number) {
     const map = this._styleMap[lineIndex];
@@ -310,6 +446,13 @@ export class Textbox<
   }
 
   /**
+   * 使用 Textbox 的 'width' 属性包装文本。
+   * 首先，此函数在换行符处分割文本，因此我们保留用户输入的换行符。
+   * 然后，它通过调用 _wrapLine() 使用 Textbox 的宽度包装每一行。
+   * @param {Array} lines 分割成行的文本字符串数组
+   * @param {Number} desiredWidth 您想要包装到的宽度
+   * @returns {Array} 行数组
+   *
    * Wraps text using the 'width' property of Textbox. First this function
    * splits text on newlines, so we preserve newlines entered by the user.
    * Then it wraps each line using the width of the Textbox by calling
@@ -331,6 +474,11 @@ export class Textbox<
   }
 
   /**
+   * 对于由硬换行符终止的每一行文本，
+   * 测量每个单词的宽度并提取所有单词中最大的单词。
+   * 这里返回的单词是最终将被渲染的单词。
+   * @param {string[]} lines 我们需要测量的行
+   *
    * For each line of text terminated by an hard line stop,
    * measure each word width and extract the largest word from all.
    * The returned words here are the one that at the end will be rendered.
@@ -372,6 +520,17 @@ export class Textbox<
   }
 
   /**
+   * 辅助函数，用于测量文本字符串，给定其 lineIndex 和 charIndex 偏移量
+   * 当 charBounds 尚不可用时调用它。
+   * 如有必要，请重写
+   * 与 {@link Textbox#wordSplit} 一起使用
+   *
+   * @param {CanvasRenderingContext2D} ctx 上下文
+   * @param {String} text 文本
+   * @param {number} lineIndex 行索引
+   * @param {number} charOffset 字符偏移量
+   * @returns {number} 宽度
+   *
    * Helper function to measure a string of text, given its lineIndex and charIndex offset
    * It gets called when charBounds are not available yet.
    * Override if necessary
@@ -402,6 +561,11 @@ export class Textbox<
   }
 
   /**
+   * 重写此方法以自定义单词分割
+   * 与 {@link Textbox#_measureWord} 一起使用
+   * @param {string} value 要分割的字符串
+   * @returns {string[]} 单词数组
+   *
    * Override this method to customize word splitting
    * Use with {@link Textbox#_measureWord}
    * @param {string} value
@@ -412,6 +576,15 @@ export class Textbox<
   }
 
   /**
+   * 使用 Textbox 的宽度作为 desiredWidth 包装一行文本
+   * 并利用 GraphemeData 中已知的单词宽度
+   * @private
+   * @param {Number} lineIndex
+   * @param {Number} desiredWidth 您想要将行包装到的宽度
+   * @param {GraphemeData} graphemeData 包含所有行单词宽度的对象。
+   * @param {Number} reservedSpace 从包装中移除的空间，用于自定义功能
+   * @returns {Array} 给定文本被包装到的行数组
+   *
    * Wraps a line of text using the width of the Textbox as desiredWidth
    * and leveraging the known width o words from GraphemeData
    * @private
@@ -489,6 +662,11 @@ export class Textbox<
   }
 
   /**
+   * 检测文本行是否以硬换行符结束
+   * text 和 itext 没有换行，返回 false
+   * @param {Number} lineIndex 行索引
+   * @return {Boolean} 是否以硬换行符结束
+   *
    * Detect if the text line is ended with an hard break
    * text and itext do not have wrapping, return false
    * @param {Number} lineIndex text to split
@@ -507,6 +685,13 @@ export class Textbox<
   }
 
   /**
+   * 检测行是否有换行符，因此我们在移动和计算样式时需要考虑它。
+   * 这仅对于包装结束时的 splitByGrapheme 很重要。
+   * 如果我们不包装，偏移量始终为 1
+   * @param {Number} lineIndex 行索引
+   * @param {Boolean} [skipWrapping] 是否跳过包装检查
+   * @return {Number} 偏移量
+   *
    * Detect if a line has a linebreak and so we need to account for it when moving
    * and counting style.
    * This is important only for splitByGrapheme at the end of wrapping.
@@ -527,6 +712,11 @@ export class Textbox<
    * @returns {Array} Array of lines in the Textbox.
    * @override
    */
+  /**
+   * 将文本分割成行
+   * @param {String} text 要分割的文本
+   * @returns {Object} 包含行信息的对象
+   */
   _splitTextIntoLines(text: string) {
     const newText = super._splitTextIntoLines(text),
       graphemeLines = this._wrapText(newText.lines, this.width),
@@ -539,10 +729,18 @@ export class Textbox<
     return newText;
   }
 
+  /**
+   * 获取最小宽度
+   * @returns {Number} 最小宽度
+   */
   getMinWidth() {
     return Math.max(this.minWidth, this.dynamicMinWidth);
   }
 
+  /**
+   * 移除多余的样式
+   * @private
+   */
   _removeExtraneousStyles() {
     const linesToKeep = new Map();
     for (const prop in this._styleMap) {
@@ -560,6 +758,10 @@ export class Textbox<
   }
 
   /**
+   * 返回实例的对象表示
+   * @param {Array} [propertiesToInclude] 您可能希望在输出中额外包含的任何属性
+   * @return {Object} 实例的对象表示
+   *
    * Returns object representation of an instance
    * @param {Array} [propertiesToInclude] Any properties that you might want to additionally include in the output
    * @return {Object} object representation of an instance

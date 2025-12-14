@@ -1,7 +1,13 @@
 import { version } from '../../package.json';
 
+/**
+ * 空的 JSON 对象
+ */
 export const EMPTY_JSON = { version: version, objects: [] };
 
+/**
+ * 包含路径的 JSON 对象
+ */
 export const PATH_JSON = {
   version: version,
   objects: [
@@ -60,6 +66,9 @@ export const PATH_JSON = {
   overlay: 'rgba(0,0,0,0.2)',
 };
 
+/**
+ * 不包含默认值的路径 JSON 对象
+ */
 export const PATH_WITHOUT_DEFAULTS_JSON = {
   version: version,
   objects: [
@@ -107,6 +116,9 @@ export const PATH_WITHOUT_DEFAULTS_JSON = {
   overlay: 'rgba(0,0,0,0.2)',
 };
 
+/**
+ * 路径对象 JSON
+ */
 export const PATH_OBJ_JSON = {
   version: version,
   type: 'path',
@@ -158,6 +170,9 @@ export const PATH_OBJ_JSON = {
   ],
 };
 
+/**
+ * 无数据的路径 JSON 对象
+ */
 export const PATH_DATALESS_JSON = {
   version: version,
   objects: [
@@ -198,6 +213,9 @@ export const PATH_DATALESS_JSON = {
   ],
 };
 
+/**
+ * 矩形 JSON 对象
+ */
 export const RECT_JSON = {
   version: version,
   objects: [

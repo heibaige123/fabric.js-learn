@@ -1,4 +1,8 @@
 /**
+ * 返回元素的滚动偏移量
+ * @param element 要操作的元素
+ * @returns 包含 left/top 值的对象
+ *
  * Returns element scroll offsets
  * @param {HTMLElement} element Element to operate on
  * @return {Object} Object with left/top values
@@ -48,8 +52,18 @@ export function getScrollLeftTop(element: HTMLElement | null) {
   return { left, top };
 }
 
+/**
+ * 获取与元素关联的文档对象
+ * @param el 元素
+ * @returns 文档对象或 null
+ */
 export const getDocumentFromElement = (el: HTMLElement) =>
   el.ownerDocument || null;
 
+/**
+ * 获取与元素关联的窗口对象
+ * @param el 元素
+ * @returns 窗口对象或 null
+ */
 export const getWindowFromElement = (el: HTMLElement) =>
   el.ownerDocument?.defaultView || null;

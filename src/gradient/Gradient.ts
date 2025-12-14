@@ -22,6 +22,8 @@ import { classRegistry } from '../ClassRegistry';
 import { isPath } from '../util/typeAssertions';
 
 /**
+ * 渐变类
+ *
  * Gradient class
  * @class Gradient
  * @see {@link http://fabric5.fabricjs.com/fabric-intro-part-2#gradients}
@@ -31,6 +33,8 @@ export class Gradient<
   T extends GradientType = S extends GradientType ? S : 'linear',
 > {
   /**
+   * 当渐变来自 SVG 且在 pathgroups 之外时，用于对齐渐变的水平偏移量
+   *
    * Horizontal offset for aligning gradients coming from SVG when outside pathgroups
    * @type Number
    * @default 0
@@ -38,6 +42,8 @@ export class Gradient<
   declare offsetX: number;
 
   /**
+   * 当渐变来自 SVG 且在 pathgroups 之外时，用于对齐渐变的垂直偏移量
+   *
    * Vertical offset for aligning gradients coming from SVG when outside pathgroups
    * @type Number
    * @default 0
@@ -45,6 +51,10 @@ export class Gradient<
   declare offsetY: number;
 
   /**
+   * 在绘制之前应用于渐变的变换矩阵。
+   * 从 svg 渐变导入，不与中心的当前变换一起应用。
+   * 在应用此变换之前，原点位于对象的左上角加上 offsetY 和 offsetX。
+   *
    * A transform matrix to apply to the gradient before painting.
    * Imported from svg gradients, is not applied with the current transform in the center.
    * Before this transform is applied, the origin point is at the top left corner of the object
@@ -55,6 +65,11 @@ export class Gradient<
   declare gradientTransform?: TMat2D;
 
   /**
+   * 坐标单位。
+   * 如果是 `pixels`，坐标数值与宽度/高度单位相同。
+   * 如果设置为 `percentage`，坐标仍然是数字，但 1 表示宽度的 100%（对于 X）和高度的 100%（对于 Y）。它可以大于 1 也可以是负数。
+   * 允许的值为 pixels 或 percentage。
+   *
    * coordinates units for coords.
    * If `pixels`, the number of coords are in the same unit of width / height.
    * If set as `percentage` the coords are still a number, but 1 means 100% of width
@@ -66,6 +81,8 @@ export class Gradient<
   declare gradientUnits: GradientUnits;
 
   /**
+   * 渐变类型：线性或径向
+   *
    * Gradient type linear or radial
    * @type GradientType
    * @default 'linear'
@@ -73,12 +90,16 @@ export class Gradient<
   declare type: T;
 
   /**
+   * 定义渐变在空间中的位置和扩展方式
+   *
    * Defines how the gradient is located in space and spread
    * @type GradientCoords
    */
   declare coords: GradientCoords<T>;
 
   /**
+   * 定义渐变有多少种颜色以及它们在 coords 定义的轴上的位置
+   *
    * Defines how many colors a gradient has and how they are located on the axis
    * defined by coords
    * @type GradientCoords
@@ -86,19 +107,30 @@ export class Gradient<
   declare colorStops: ColorStop[];
 
   /**
+   * 如果为 true，则在画布序列化期间不会导出此对象
+   *
    * If true, this object will not be exported during the serialization of a canvas
    * @type boolean
    */
   declare excludeFromExport?: boolean;
 
   /**
+   * 用于 SVG 导出功能的 ID
+   *
    * ID used for SVG export functionalities
    * @type number | string
    */
   declare readonly id: string | number;
 
+  /**
+   * 类标识符
+   */
   static type = 'Gradient';
 
+  /**
+   *
+   * @param options 配置项
+   */
   constructor(options: GradientOptions<T>) {
     const {
       type = 'linear' as T,
@@ -126,8 +158,11 @@ export class Gradient<
   }
 
   /**
+   * 添加另一个颜色停止点
+   *
    * Adds another colorStop
    * @param {Record<string, string>} colorStop Object with offset and color
+   * @param colorStops 包含偏移量和颜色的对象
    * @return {Gradient} thisArg
    */
   addColorStop(colorStops: Record<string, string>) {
@@ -141,8 +176,11 @@ export class Gradient<
   }
 
   /**
+   * 返回渐变的对象表示
+   *
    * Returns object representation of a gradient
    * @param {string[]} [propertiesToInclude] Any properties that you might want to additionally include in the output
+   * @param propertiesToInclude 您可能希望在输出中额外包含的任何属性
    * @return {object}
    */
   toObject(
@@ -164,8 +202,13 @@ export class Gradient<
 
   /* _TO_SVG_START_ */
   /**
+   * 返回渐变的 SVG 表示
+   *
    * Returns SVG representation of an gradient
    * @param {FabricObject} object Object to create a gradient for
+   * @param object 为其创建渐变的对象
+   * @param options 选项对象
+   * @param options.additionalTransform 额外的变换
    * @return {String} SVG representation of an gradient (linear/radial)
    */
   toSVG(
@@ -286,8 +329,11 @@ export class Gradient<
   /* _TO_SVG_END_ */
 
   /**
+   * 返回 CanvasGradient 的实例
+   *
    * Returns an instance of CanvasGradient
    * @param {CanvasRenderingContext2D} ctx Context to render on
+   * @param ctx 渲染上下文
    * @return {CanvasGradient}
    */
   toLive(ctx: CanvasRenderingContext2D): CanvasGradient {
@@ -310,6 +356,11 @@ export class Gradient<
   static async fromObject(
     options: GradientOptions<'radial'>,
   ): Promise<Gradient<'radial'>>;
+  /**
+   * 从对象创建渐变实例
+   * @param options 渐变选项
+   * @returns 渐变实例的 Promise
+   */
   static async fromObject(
     options: GradientOptions<'linear'> | GradientOptions<'radial'>,
   ) {
@@ -325,12 +376,17 @@ export class Gradient<
 
   /* _FROM_SVG_START_ */
   /**
+   * 从 SVG 元素返回 {@link Gradient} 实例
+   *
    * Returns {@link Gradient} instance from an SVG element
    * @param {SVGGradientElement} el SVG gradient element
    * @param {FabricObject} instance
    * @param {String} opacity A fill-opacity or stroke-opacity attribute to multiply to each stop's opacity.
    * @param {SVGOptions} svgOptions an object containing the size of the SVG in order to parse correctly gradients
    * that uses gradientUnits as 'userSpaceOnUse' and percentages.
+   * @param el SVG 渐变元素
+   * @param instance Fabric 对象实例
+   * @param svgOptions SVG 选项
    * @return {Gradient} Gradient instance
    * @see http://www.w3.org/TR/SVG/pservers.html#LinearGradientElement
    * @see http://www.w3.org/TR/SVG/pservers.html#RadialGradientElement

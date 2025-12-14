@@ -13,20 +13,45 @@ import type { CSSRules } from '../parser/typedefs';
 
 // @TODO this code is terrible and Line should be a special case of polyline.
 
+/**
+ * 坐标属性列表
+ */
 const coordProps = ['x1', 'x2', 'y1', 'y2'] as const;
 
+/**
+ * 线条独有的属性接口
+ */
 interface UniqueLineProps {
+  /**
+   * 起点 x 坐标
+   */
   x1: number;
+  /**
+   * 终点 x 坐标
+   */
   x2: number;
+  /**
+   * 起点 y 坐标
+   */
   y1: number;
+  /**
+   * 终点 y 坐标
+   */
   y2: number;
 }
 
+/**
+ * 序列化线条属性接口
+ */
 export interface SerializedLineProps
   extends SerializedObjectProps,
     UniqueLineProps {}
 
 /**
+ * 绘制线条的类
+ * 将向 Polyline 添加一堆方法来处理线条情况
+ * 线条类使用起来非常奇怪，它是特殊的，每次有角度时它都很难与开发人员想要的一致
+ *
  * A Class to draw a line
  * A bunch of methods will be added to Polyline to handle the line case
  * The line class is very strange to work with, is all special, it hardly aligns
@@ -42,33 +67,49 @@ export class Line<
   implements UniqueLineProps
 {
   /**
+   * x 值或第一条线边缘
+   *
    * x value or first line edge
    * @type number
    */
   declare x1: number;
 
   /**
+   * y 值或第一条线边缘
+   *
    * y value or first line edge
    * @type number
    */
   declare y1: number;
 
   /**
+   * x 值或第二条线边缘
+   *
    * x value or second line edge
    * @type number
    */
   declare x2: number;
 
   /**
+   * y 值或第二条线边缘
+   *
    * y value or second line edge
    * @type number
    */
   declare y2: number;
 
+  /**
+   * 类型
+   */
   static type = 'Line';
 
+  /**
+   * 缓存属性
+   */
   static cacheProperties = [...cacheProperties, ...coordProps];
   /**
+   * 构造函数
+   *
    * Constructor
    * @param {Array} [points] Array of points
    * @param {Object} [options] Options object
@@ -89,6 +130,8 @@ export class Line<
   }
 
   /**
+   * 设置宽度和高度
+   *
    * @private
    * @param {Object} [options] Options
    */
@@ -105,6 +148,8 @@ export class Line<
   }
 
   /**
+   * 设置属性
+   *
    * @private
    * @param {String} key
    * @param {*} value
@@ -124,6 +169,8 @@ export class Line<
   }
 
   /**
+   * 渲染函数
+   *
    * @private
    * @param {CanvasRenderingContext2D} ctx Context to render on
    */
@@ -150,6 +197,8 @@ export class Line<
   }
 
   /**
+   * 此函数是 svg 导入的辅助函数。它返回 svg 未转换坐标中对象的中心
+   *
    * This function is an helper for svg import. it returns the center of the object in the svg
    * untransformed coordinates
    * @private
@@ -160,6 +209,8 @@ export class Line<
   }
 
   /**
+   * 返回实例的对象表示
+   *
    * Returns object representation of an instance
    * @param {Array} [propertiesToInclude] Any properties that you might want to additionally include in the output
    * @return {Object} object representation of an instance
@@ -175,6 +226,8 @@ export class Line<
   }
 
   /*
+   * 从其属性计算对象尺寸
+   *
    * Calculate object dimensions from its properties
    * @private
    */
@@ -192,6 +245,11 @@ export class Line<
   }
 
   /**
+   * 给定宽度和高度重新计算线条点
+   * 这些点只是简单地放置在中心周围，
+   * 这在内部渲染函数和 svg 输出之外没有用处
+   * 不适合开发人员使用。
+   *
    * Recalculates line points given width and height
    * Those points are simply placed around the center,
    * This is not useful outside internal render functions and svg output
@@ -218,6 +276,8 @@ export class Line<
   /* _FROM_SVG_START_ */
 
   /**
+   * 返回实例的 svg 表示
+   *
    * Returns svg representation of an instance
    * @return {Array} an array of strings with the specific svg representation
    * of the instance
@@ -232,12 +292,16 @@ export class Line<
   }
 
   /**
+   * 解析 SVG 元素时要考虑的属性名称列表（由 {@link Line.fromElement} 使用）
+   *
    * List of attribute names to account for when parsing SVG element (used by {@link Line.fromElement})
    * @see http://www.w3.org/TR/SVG/shapes.html#LineElement
    */
   static ATTRIBUTE_NAMES = SHARED_ATTRIBUTES.concat(coordProps);
 
   /**
+   * 从 SVG 元素返回 Line 实例
+   *
    * Returns Line instance from an SVG element
    * @param {HTMLElement} element Element to parse
    * @param {Object} [options] Options object
@@ -261,6 +325,8 @@ export class Line<
   /* _FROM_SVG_END_ */
 
   /**
+   * 从对象表示返回 Line 实例
+   *
    * Returns Line instance from an object representation
    * @param {Object} object Object to create an instance from
    * @returns {Promise<Line>}

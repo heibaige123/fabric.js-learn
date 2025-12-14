@@ -13,11 +13,21 @@ import { wrapWithFireEvent } from './wrapWithFireEvent';
 import { sendPointToPlane } from '../util/misc/planeChange';
 import { MODIFY_POLY } from '../constants';
 
+/**
+ * 路径修改操作名称
+ */
 const ACTION_NAME: TModificationEvents = MODIFY_POLY;
 
+/**
+ * 变换锚点类型
+ */
 type TTransformAnchor = Transform & { pointIndex: number };
 
 /**
+ * 此函数定位控件。
+ * 它将用于绘制和交互。
+ * @param pointIndex 点索引
+ *
  * This function locates the controls.
  * It'll be used both for drawing and for interaction.
  */
@@ -36,6 +46,11 @@ export const createPolyPositionHandler = (pointIndex: number) => {
 };
 
 /**
+ * 此函数定义控件的作用。
+ * 在单击控件并拖动后，每次鼠标移动都会调用它。
+ * 该函数接收鼠标事件、当前变换对象和画布坐标中的当前位置作为参数。
+ * `transform.target` 是对当前正在变换的对象的引用。
+ *
  * This function defines what the control does.
  * It'll be called on every mouse move after a control has been clicked and is being dragged.
  * The function receives as argument the mouse event, the current transform object
@@ -63,6 +78,10 @@ export const polyActionHandler = (
 };
 
 /**
+ * 当我们改变多边形的 `width`/`height`/`top`/`left` 时，保持多边形在相同的位置。
+ * @param pointIndex 点索引
+ * @param fn 变换操作处理程序
+ *
  * Keep the polygon in the same position when we change its `width`/`height`/`top`/`left`.
  */
 export const factoryPolyActionHandler = (
@@ -96,12 +115,28 @@ export const factoryPolyActionHandler = (
   };
 };
 
+/**
+ * 创建多边形动作处理程序。
+ *
+ * Create polygon action handler.
+ *
+ * @param pointIndex 点索引
+ */
 export const createPolyActionHandler = (pointIndex: number) =>
   wrapWithFireEvent(
     ACTION_NAME,
     factoryPolyActionHandler(pointIndex, polyActionHandler),
   );
 
+/**
+ * 为多边形或折线创建控件。
+ *
+ * Create controls for a polygon or polyline.
+ *
+ * @param arg0 多边形对象或点数
+ * @param options 控件选项
+ * @returns 控件对象
+ */
 export function createPolyControls(
   poly: Polyline,
   options?: Partial<Control>,

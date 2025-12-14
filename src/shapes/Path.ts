@@ -29,45 +29,94 @@ import type {
 import { CENTER, LEFT, TOP } from '../constants';
 import type { CSSRules } from '../parser/typedefs';
 
+/**
+ * 路径独有的属性接口
+ */
 interface UniquePathProps {
+  /**
+   * 源路径字符串
+   */
   sourcePath?: string;
+  /**
+   * 路径数据
+   */
   path?: TSimplePathData;
 }
 
+/**
+ * 序列化路径属性接口
+ */
 export interface SerializedPathProps
   extends SerializedObjectProps,
     UniquePathProps {}
 
+/**
+ * 路径属性接口
+ */
 export interface PathProps extends FabricObjectProps, UniquePathProps {}
 
+/**
+ * 路径边界框接口
+ */
 export interface IPathBBox extends TBBox {
+  /**
+   * 左侧位置
+   */
   left: number;
+  /**
+   * 顶部位置
+   */
   top: number;
+  /**
+   * 路径偏移量
+   */
   pathOffset: Point;
 }
 
+/**
+ * 路径类
+ */
 export class Path<
   Props extends TOptions<PathProps> = Partial<PathProps>,
   SProps extends SerializedPathProps = SerializedPathProps,
   EventSpec extends ObjectEvents = ObjectEvents,
 > extends FabricObject<Props, SProps, EventSpec> {
   /**
+   * 路径点数组
+   *
    * Array of path points
    * @type Array
    */
   declare path: TSimplePathData;
 
+  /**
+   * 路径偏移量
+   */
   declare pathOffset: Point;
 
+  /**
+   * 源路径字符串
+   */
   declare sourcePath?: string;
 
+  /**
+   * 路径段信息
+   */
   declare segmentsInfo?: TPathSegmentInfo[];
 
+  /**
+   * 类型
+   */
   static type = 'Path';
 
+  /**
+   * 缓存属性
+   */
   static cacheProperties = [...cacheProperties, 'path', 'fillRule'];
 
   /**
+   * 构造函数
+   *
    * Constructor
    * @param {TComplexPathData} path Path data (sequence of coordinates and corresponding "command" tokens)
    * @param {Partial<PathProps>} [options] Options object
@@ -87,6 +136,8 @@ export class Path<
   }
 
   /**
+   * 设置路径
+   *
    * @private
    * @param {TComplexPathData | string} path Path data (sequence of coordinates and corresponding "command" tokens)
    * @param {boolean} [adjustPosition] pass true to reposition the object according to the bounding box
@@ -98,6 +149,8 @@ export class Path<
   }
 
   /**
+   * 此函数是 svg 导入的辅助函数。它通过查看折线/多边形点返回 svg 未转换坐标中对象的中心。
+   *
    * This function is an helper for svg import. it returns the center of the object in the svg
    * untransformed coordinates, by look at the polyline/polygon points.
    * @private
@@ -109,6 +162,8 @@ export class Path<
   }
 
   /**
+   * 渲染路径命令
+   *
    * @private
    * @param {CanvasRenderingContext2D} ctx context to render path on
    */
@@ -158,6 +213,8 @@ export class Path<
   }
 
   /**
+   * 渲染函数
+   *
    * @private
    * @param {CanvasRenderingContext2D} ctx context to render path on
    */
@@ -167,6 +224,8 @@ export class Path<
   }
 
   /**
+   * 返回实例的字符串表示
+   *
    * Returns string representation of an instance
    * @return {string} string representation of an instance
    */
@@ -177,6 +236,8 @@ export class Path<
   }
 
   /**
+   * 返回实例的对象表示
+   *
    * Returns object representation of an instance
    * @param {Array} [propertiesToInclude] Any properties that you might want to additionally include in the output
    * @return {Object} object representation of an instance
@@ -192,6 +253,8 @@ export class Path<
   }
 
   /**
+   * 返回实例的无数据对象表示
+   *
    * Returns dataless object representation of an instance
    * @param {Array} [propertiesToInclude] Any properties that you might want to additionally include in the output
    * @return {Object} object representation of an instance
@@ -209,6 +272,8 @@ export class Path<
   }
 
   /**
+   * 返回实例的 svg 表示
+   *
    * Returns svg representation of an instance
    * @return {Array} an array of strings with the specific svg representation
    * of the instance
@@ -223,6 +288,8 @@ export class Path<
   }
 
   /**
+   * 获取路径命令的平移变换属性
+   *
    * @private
    * @return the path command's translate transform attribute
    */
@@ -235,6 +302,8 @@ export class Path<
   }
 
   /**
+   * 返回实例的 svg clipPath 表示
+   *
    * Returns svg clipPath representation of an instance
    * @param {Function} [reviver] Method for further parsing of svg representation.
    * @return {string} svg representation of an instance
@@ -251,6 +320,8 @@ export class Path<
   }
 
   /**
+   * 返回实例的 svg 表示
+   *
    * Returns svg representation of an instance
    * @param {Function} [reviver] Method for further parsing of svg representation.
    * @return {string} svg representation of an instance
@@ -264,6 +335,8 @@ export class Path<
   }
 
   /**
+   * 返回实例复杂度的数字表示
+   *
    * Returns number representation of an instance complexity
    * @return {number} complexity of this instance
    */
@@ -271,10 +344,17 @@ export class Path<
     return this.path.length;
   }
 
+  /**
+   * 设置尺寸
+   */
   setDimensions() {
     this.setBoundingBox();
   }
 
+  /**
+   * 设置边界框
+   * @param adjustPosition 是否调整位置
+   */
   setBoundingBox(adjustPosition?: boolean) {
     const { width, height, pathOffset } = this._calcDimensions();
     this.set({ width, height, pathOffset });
@@ -283,6 +363,10 @@ export class Path<
     adjustPosition && this.setPositionByOrigin(pathOffset, CENTER, CENTER);
   }
 
+  /**
+   * 从路径计算边界
+   * @returns 边界框
+   */
   _calcBoundsFromPath(): TBBox {
     const bounds: XY[] = [];
     let subpathStartX = 0,
@@ -352,6 +436,8 @@ export class Path<
   }
 
   /**
+   * 计算尺寸
+   *
    * @private
    */
   _calcDimensions(): IPathBBox {
@@ -367,12 +453,16 @@ export class Path<
   }
 
   /**
+   * 解析 SVG 元素时要考虑的属性名称列表（由 `Path.fromElement` 使用）
+   *
    * List of attribute names to account for when parsing SVG element (used by `Path.fromElement`)
    * @see http://www.w3.org/TR/SVG/paths.html#PathElement
    */
   static ATTRIBUTE_NAMES = [...SHARED_ATTRIBUTES, 'd'];
 
   /**
+   * 从对象创建 Path 实例
+   *
    * Creates an instance of Path from an object
    * @param {Object} object
    * @returns {Promise<Path>}
@@ -384,6 +474,8 @@ export class Path<
   }
 
   /**
+   * 从 SVG <path> 元素创建 Path 实例
+   *
    * Creates an instance of Path from an SVG <path> element
    * @param {HTMLElement} element to parse
    * @param {Partial<PathProps>} [options] Options object

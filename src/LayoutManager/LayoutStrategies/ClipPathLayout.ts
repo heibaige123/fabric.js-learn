@@ -8,19 +8,39 @@ import { getObjectBounds } from './utils';
 import { classRegistry } from '../../ClassRegistry';
 
 /**
+ * 布局将调整边界框以匹配剪切路径的边界框。
+ *
  * Layout will adjust the bounding box to match the clip path bounding box.
  */
 export class ClipPathLayout extends LayoutStrategy {
+  /**
+   * 布局策略类型标识
+   */
   static readonly type = 'clip-path';
 
+  /**
+   * 确定是否应执行布局计算
+   * @param context 布局上下文
+   * @returns 如果应执行布局则返回 true
+   */
   shouldPerformLayout(context: StrictLayoutContext): boolean {
     return !!context.target.clipPath && super.shouldPerformLayout(context);
   }
 
+  /**
+   * 确定是否应布局剪切路径
+   * @returns 总是返回 false
+   */
   shouldLayoutClipPath() {
     return false;
   }
 
+  /**
+   * 计算布局结果
+   * @param context 布局上下文
+   * @param objects 参与布局的对象数组
+   * @returns 布局策略结果或 undefined
+   */
   calcLayoutResult(
     context: StrictLayoutContext,
     objects: FabricObject[],

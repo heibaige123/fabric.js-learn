@@ -69,29 +69,49 @@ import type {
 } from '../../util/animation/types';
 import { ObjectGeometry } from './ObjectGeometry';
 
+/**
+ * FabricObject 类型定义
+ */
 type TAncestor = FabricObject;
+/**
+ * Collection 类型定义
+ */
 type TCollection = Group;
 
+/**
+ * Ancestors type definition
+ * 祖先类型定义
+ */
 export type Ancestors =
   | [FabricObject | Group]
   | [FabricObject | Group, ...Group[]]
   | Group[];
 
+/**
+ * Ancestry comparison result
+ * 祖先比较结果
+ */
 export type AncestryComparison = {
   /**
    * common ancestors of `this` and`other`(may include`this` | `other`)
+   * `this` 和 `other` 的共同祖先（可能包括 `this` | `other`）
    */
   common: Ancestors;
   /**
    * ancestors that are of `this` only
+   * 仅属于 `this` 的祖先
    */
   fork: Ancestors;
   /**
    * ancestors that are of `other` only
+   * 仅属于 `other` 的祖先
    */
   otherFork: Ancestors;
 };
 
+/**
+ * fabric 对象的缓存对象类型
+ */
 export type TCachedFabricObject<T extends FabricObject = FabricObject> = T &
   Required<
     Pick<
@@ -104,51 +124,119 @@ export type TCachedFabricObject<T extends FabricObject = FabricObject> = T &
       | 'cacheTranslationY'
     >
   > & {
+    /**
+     * 缓存对象的上下文
+     */
     _cacheContext: CanvasRenderingContext2D;
   };
 
+/**
+ * Options for converting object to canvas element
+ * 将对象转换为 canvas 元素的选项
+ */
 export type ObjectToCanvasElementOptions = {
   format?: ImageFormat;
-  /** Multiplier to scale by */
+  /**
+   * Multiplier to scale by
+   * 缩放倍数
+   */
   multiplier?: number;
-  /** Cropping left offset. Introduced in v1.2.14 */
+  /**
+   * Cropping left offset. Introduced in v1.2.14
+   * 裁剪左偏移量。在 v1.2.14 中引入
+   */
   left?: number;
-  /** Cropping top offset. Introduced in v1.2.14 */
+  /**
+   * Cropping top offset. Introduced in v1.2.14
+   * 裁剪顶部偏移量。在 v1.2.14 中引入
+   */
   top?: number;
-  /** Cropping width. Introduced in v1.2.14 */
+  /**
+   * Cropping width. Introduced in v1.2.14
+   * 裁剪宽度。在 v1.2.14 中引入
+   */
   width?: number;
-  /** Cropping height. Introduced in v1.2.14 */
+  /**
+   * Cropping height. Introduced in v1.2.14
+   * 裁剪高度。在 v1.2.14 中引入
+   */
   height?: number;
-  /** Enable retina scaling for clone image. Introduce in 1.6.4 */
+  /**
+   * Enable retina scaling for clone image. Introduce in 1.6.4
+   * 为克隆图像启用视网膜缩放。在 1.6.4 中引入
+   */
   enableRetinaScaling?: boolean;
-  /** Remove current object transform ( no scale , no angle, no flip, no skew ). Introduced in 2.3.4 */
+  /**
+   * Remove current object transform ( no scale , no angle, no flip, no skew ). Introduced in 2.3.4
+   * 移除当前对象变换（无缩放、无角度、无翻转、无倾斜）。在 2.3.4 中引入
+   */
   withoutTransform?: boolean;
-  /** Remove current object shadow. Introduced in 2.4.2 */
+  /**
+   * Remove current object shadow. Introduced in 2.4.2
+   * 移除当前对象阴影。在 2.4.2 中引入
+   */
   withoutShadow?: boolean;
-  /** Account for canvas viewport transform */
+  /**
+   * Account for canvas viewport transform
+   * 考虑画布视口变换
+   */
   viewportTransform?: boolean;
-  /** Function to create the output canvas to export onto */
+  /**
+   * Function to create the output canvas to export onto
+   * 创建要导出到的输出画布的函数
+   */
   canvasProvider?: <T extends StaticCanvas>(el?: HTMLCanvasElement) => T;
 };
 
+/**
+ * toDataURL 选项类型
+ */
 type toDataURLOptions = ObjectToCanvasElementOptions & {
+  /**
+   * 不透明度
+   */
   quality?: number;
 };
 
+/**
+ * 绘图上下文类型定义
+ */
 export type DrawContext =
   | {
+      /**
+       * 父剪切路径数组
+       */
       parentClipPaths: FabricObject[];
+      /**
+       * 绘图区域或缓存的宽度
+       */
       width: number;
+      /**
+       * 绘图区域或缓存的高度
+       */
       height: number;
+      /**
+       * 应用于缓存的 X 平移
+       */
       cacheTranslationX: number;
+      /**
+       * 应用于缓存的 Y 平移
+       */
       cacheTranslationY: number;
+      /**
+       * X 轴缩放级别（缩放因子）
+       */
       zoomX: number;
+      /**
+       * Y 轴缩放级别（缩放因子）
+       */
       zoomY: number;
     }
   | Record<string, never>;
 
 /**
  * Root object class from which all 2d shape classes inherit from
+ * 所有 2D 形状类继承的根对象类
  * @see {@link http://fabric5.fabricjs.com/fabric-intro-part-1#objects}
  *
  * @fires added
@@ -220,6 +308,8 @@ export class FabricObject<
    * This list of properties is used to check if the state of an object is changed.
    * This state change now is only used for children of groups to understand if a group
    * needs its cache regenerated during a .set call
+   * 此属性列表用于检查对象的状态是否已更改。
+   * 此状态更改现在仅用于组的子级，以了解组是否需要在 .set 调用期间重新生成其缓存
    * @type Array
    */
   static stateProperties: string[] = stateProperties;
@@ -229,6 +319,9 @@ export class FabricObject<
    * Those properties are checked by
    * calls to Object.set(key, value). If the key is in this list, the object is marked as dirty
    * and refreshed at the next render
+   * 检查缓存是否需要刷新时要考虑的属性列表
+   * 这些属性通过调用 Object.set(key, value) 进行检查。如果键在此列表中，则对象被标记为脏
+   * 并在下一次渲染时刷新
    * @type Array
    */
   static cacheProperties: string[] = cacheProperties;
@@ -236,6 +329,8 @@ export class FabricObject<
   /**
    * When set to `true`, object's cache will be rerendered next render call.
    * since 1.7.0
+   * 当设置为 `true` 时，对象的缓存将在下一次渲染调用时重新渲染。
+   * 自 1.7.0 起
    * @type Boolean
    * @default true
    */
@@ -245,6 +340,9 @@ export class FabricObject<
    * Quick access for the _cacheCanvas rendering context
    * This is part of the objectCaching feature
    * since 1.7.0
+   * _cacheCanvas 渲染上下文的快速访问
+   * 这是 objectCaching 功能的一部分
+   * 自 1.7.0 起
    * @type boolean
    * @default undefined
    * @private
@@ -256,6 +354,10 @@ export class FabricObject<
    * this canvas element is resized and cleared as needed
    * Is marked private, you can read it, don't use it since it is handled by fabric
    * since 1.7.0
+   * 对用于包含对象缓存的 HTMLCanvasElement 的引用
+   * 此 canvas 元素根据需要调整大小和清除
+   * 标记为私有，您可以读取它，但不要使用它，因为它由 fabric 处理
+   * 自 1.7.0 起
    * @type HTMLCanvasElement
    * @default undefined
    * @private
@@ -265,6 +367,8 @@ export class FabricObject<
   /**
    * zoom level used on the cacheCanvas to draw the cache, X axe
    * since 1.7.0
+   * 用于在 cacheCanvas 上绘制缓存的缩放级别，X 轴
+   * 自 1.7.0 起
    * @type number
    * @default undefined
    * @private
@@ -274,6 +378,8 @@ export class FabricObject<
   /**
    * zoom level used on the cacheCanvas to draw the cache, Y axe
    * since 1.7.0
+   * 用于在 cacheCanvas 上绘制缓存的缩放级别，Y 轴
+   * 自 1.7.0 起
    * @type number
    * @default undefined
    * @private
@@ -283,6 +389,8 @@ export class FabricObject<
   /**
    * zoom level used on the cacheCanvas to draw the cache, Y axe
    * since 1.7.0
+   * 用于在 cacheCanvas 上绘制缓存的缩放级别，Y 轴
+   * 自 1.7.0 起
    * @type number
    * @default undefined
    * @private
@@ -292,6 +400,8 @@ export class FabricObject<
   /**
    * translation of the cacheCanvas away from the center, for subpixel accuracy and crispness
    * since 1.7.0
+   * cacheCanvas 偏离中心的平移，用于亚像素精度和清晰度
+   * 自 1.7.0 起
    * @type number
    * @default undefined
    * @private
@@ -300,6 +410,7 @@ export class FabricObject<
 
   /**
    * A reference to the parent of the object, usually a Group
+   * 对象的父级引用，通常是一个组
    * @type number
    * @default undefined
    * @private
@@ -309,6 +420,8 @@ export class FabricObject<
   /**
    * Indicate if the object is sitting on a cache dedicated to it
    * or is part of a larger cache for many object ( a group for example)
+   * 指示对象是位于专用于它的缓存上
+   * 还是许多对象的较大缓存的一部分（例如组）
    * @type number
    * @default undefined
    * @private
@@ -318,6 +431,8 @@ export class FabricObject<
   /**
    * Private. indicates if the object inside a group is on a transformed context or not
    * or is part of a larger cache for many object ( a group for example)
+   * 私有。指示组内的对象是否在转换后的上下文中
+   * 或者是否是许多对象的较大缓存的一部分（例如组）
    * @type boolean
    * @default undefined
    * @private
@@ -339,6 +454,13 @@ export class FabricObject<
    * Hard to reach on instances and please do not use to drive instance's logic (this.constructor.type).
    * To idenfity a class use instanceof class ( instanceof Rect ).
    * We do not do that in fabricJS code because we want to try to have code splitting possible.
+   * 类类型。
+   * 这用于序列化和反序列化目的，在内部可用于标识类。
+   * 当我们将类转换为普通 JS 对象时，我们需要一种方法来识别它是哪个类，
+   * 而 type 就是我们这样做的方式。它没有其他目的，你不应该给它一个。
+   * 在实例上很难访问，请不要用于驱动实例的逻辑 (this.constructor.type)。
+   * 要标识类，请使用 instanceof class ( instanceof Rect )。
+   * 我们不在 fabricJS 代码中这样做，因为我们希望尝试使代码拆分成为可能。
    */
   static type = 'FabricObject';
 
@@ -348,6 +470,10 @@ export class FabricObject<
    * The setter exists to avoid type errors in old code and possibly current deserialization code.
    * DO NOT build new code around this type value
    * @TODO add sustainable warning message
+   * 类的旧标识符。首选使用 isType 或 instanceOf 等工具
+   * 将在 fabric 7 或 8 中删除。
+   * setter 的存在是为了避免旧代码和可能的当前反序列化代码中的类型错误。
+   * 不要围绕此类型值构建新代码
    * @type string
    * @deprecated
    */
@@ -365,6 +491,7 @@ export class FabricObject<
 
   /**
    * Constructor
+   * 构造函数
    * @param {Object} [options] Options object
    */
   constructor(options?: Props) {
@@ -375,6 +502,7 @@ export class FabricObject<
 
   /**
    * Create a the canvas used to keep the cached copy of the object
+   * 创建用于保存对象缓存副本的 canvas
    * @private
    */
   _createCacheCanvas() {
@@ -391,6 +519,11 @@ export class FabricObject<
    * those numbers are configurable so that you can get as much detail as you want
    * making bargain with performances.
    * It mutates the input object dims.
+   * 限制缓存尺寸，使 X * Y 不超过 config.perfLimitSizeTotal
+   * 并且每一边不超过 fabric.cacheSideLimit
+   * 这些数字是可配置的，以便您可以获得所需的尽可能多的细节
+   * 与性能进行权衡。
+   * 它会改变输入对象 dims。
    * @param {TCacheCanvasDimensions} dims
    * @return {TCacheCanvasDimensions} dims
    */
@@ -434,6 +567,7 @@ export class FabricObject<
   /**
    * Return the dimension and the zoom level needed to create a cache canvas
    * big enough to host the object to be cached.
+   * 返回创建足以容纳要缓存的对象的缓存 canvas 所需的尺寸和缩放级别。
    * @private
    * @return {TCacheCanvasDimensions} Informations about the object to be cached
    */
@@ -459,6 +593,8 @@ export class FabricObject<
   /**
    * Update width and height of the canvas for cache
    * returns true or false if canvas needed resize.
+   * 更新缓存 canvas 的宽度和高度
+   * 如果 canvas 需要调整大小，则返回 true 或 false。
    * @private
    * @return {Boolean} true if the canvas has been resized
    */
@@ -503,6 +639,8 @@ export class FabricObject<
   /**
    * Sets object's properties from options, for class constructor only.
    * Needs to be overridden for different defaults.
+   * 从选项设置对象的属性，仅用于类构造函数。
+   * 需要针对不同的默认值进行重写。
    * @protected
    * @param {Object} [options] Options object
    */
@@ -512,6 +650,7 @@ export class FabricObject<
 
   /**
    * Transforms context when rendering an object
+   * 渲染对象时转换上下文
    * @param {CanvasRenderingContext2D} ctx Context
    */
   transform(ctx: CanvasRenderingContext2D) {
@@ -524,6 +663,7 @@ export class FabricObject<
 
   /**
    * Return the object scale factor counting also the group scaling
+   * 返回对象缩放因子，也计算组缩放
    * @return {Point}
    */
   getObjectScaling() {
@@ -541,6 +681,7 @@ export class FabricObject<
 
   /**
    * Return the object scale factor counting also the group scaling, zoom and retina
+   * 返回对象缩放因子，也计算组缩放、缩放和视网膜
    * @return {Object} object with scaleX and scaleY properties
    */
   getTotalObjectScaling() {
@@ -555,6 +696,7 @@ export class FabricObject<
 
   /**
    * Return the object opacity counting also the group property
+   * 返回对象不透明度，也计算组属性
    * @return {Number}
    */
   getObjectOpacity() {
@@ -568,6 +710,7 @@ export class FabricObject<
   /**
    * Makes sure the scale is valid and modifies it if necessary
    * @todo: this is a control action issue, not a geometry one
+   * 确保缩放有效，并在必要时进行修改
    * @private
    * @param {Number} value, unconstrained
    * @return {Number} constrained value;
@@ -587,6 +730,7 @@ export class FabricObject<
 
   /**
    * Handles setting values on the instance and handling internal side effects
+   * 处理实例上的设置值并处理内部副作用
    * @protected
    * @param {String} key
    * @param {*} value
@@ -632,6 +776,7 @@ export class FabricObject<
 
   /**
    * return if the object would be visible in rendering
+   * 返回对象在渲染中是否可见
    * @return {Boolean}
    */
   isNotVisible() {
@@ -644,6 +789,7 @@ export class FabricObject<
 
   /**
    * Renders an object on a specified context
+   * 在指定的上下文中渲染对象
    * @param {CanvasRenderingContext2D} ctx Context to render on
    */
   render(ctx: CanvasRenderingContext2D) {
@@ -703,6 +849,7 @@ export class FabricObject<
 
   /**
    * Remove cacheCanvas and its dimensions from the objects
+   * 从对象中移除 cacheCanvas 及其尺寸
    */
   _removeCacheCanvas() {
     this._cacheCanvas = undefined;
@@ -716,6 +863,12 @@ export class FabricObject<
    * wrote to avoid extra caching, it has to return true when stroke happens,
    * can guess when it will not happen at 100% chance, does not matter if it misses
    * some use case where the stroke is invisible.
+   * 返回 true 如果对象将绘制描边
+   * 不考虑文本样式。这只是渲染时使用的快捷方式
+   * 我们希望它是一个近似值并且很快。
+   * 编写是为了避免额外的缓存，当描边发生时它必须返回 true，
+   * 可以猜测何时有 100% 的几率不会发生，如果错过了
+   * 描边不可见的某些用例也没关系。
    * @since 3.0.0
    * @returns Boolean
    */
@@ -732,6 +885,12 @@ export class FabricObject<
    * wrote to avoid extra caching, it has to return true when fill happens,
    * can guess when it will not happen at 100% chance, does not matter if it misses
    * some use case where the fill is invisible.
+   * 返回 true 如果对象将绘制填充
+   * 不考虑文本样式。这只是渲染时使用的快捷方式
+   * 我们希望它是一个近似值并且很快。
+   * 编写是为了避免额外的缓存，当填充发生时它必须返回 true，
+   * 可以猜测何时有 100% 的几率不会发生，如果错过了
+   * 填充不可见的某些用例也没关系。
    * @since 3.0.0
    * @returns Boolean
    */
@@ -745,6 +904,11 @@ export class FabricObject<
    * its own isolated canvas to render correctly.
    * Created to be overridden
    * since 1.7.12
+   * 当返回 `true` 时，强制对象拥有自己的缓存，即使它在组内
+   * 当您的对象在缓存上的行为方式特定并且始终需要
+   * 其自己的隔离 canvas 才能正确渲染时，可能需要这样做。
+   * 创建用于被重写
+   * 自 1.7.12 起
    * @returns Boolean
    */
   needsItsOwnCache() {
@@ -770,6 +934,11 @@ export class FabricObject<
    * a cache step.
    * Generally you do not cache objects in groups because the group outside is cached.
    * Read as: cache if is needed, or if the feature is enabled but we are not already caching.
+   * 决定对象是否应该缓存。创建自己的缓存级别
+   * objectCaching 是一个全局标志，胜过一切
+   * 当对象绘制方法需要缓存步骤时，应使用 needsItsOwnCache。
+   * 通常不在组中缓存对象，因为外部组已缓存。
+   * 读作：如果需要缓存，或者如果启用了该功能但我们尚未缓存，则进行缓存。
    * @return {Boolean}
    */
   shouldCache() {
@@ -782,6 +951,8 @@ export class FabricObject<
   /**
    * Check if this object will cast a shadow with an offset.
    * used by Group.shouldCache to know if child has a shadow recursively
+   * 检查此对象是否会投射带有偏移的阴影。
+   * 由 Group.shouldCache 使用以递归地了解子级是否有阴影
    * @return {Boolean}
    * @deprecated
    */
@@ -793,6 +964,7 @@ export class FabricObject<
 
   /**
    * Execute the drawing operation for an object clipPath
+   * 执行对象 clipPath 的绘制操作
    * @param {CanvasRenderingContext2D} ctx Context to render on
    * @param {FabricObject} clipPath
    */
@@ -816,6 +988,7 @@ export class FabricObject<
 
   /**
    * Execute the drawing operation for an object on a specified context
+   * 在指定的上下文中执行对象的绘制操作
    * @param {CanvasRenderingContext2D} ctx Context to render on
    * @param {boolean} forClipping apply clipping styles
    * @param {DrawContext} context additional context for rendering
@@ -865,6 +1038,7 @@ export class FabricObject<
 
   /**
    * Prepare clipPath state and cache and draw it on instance's cache
+   * 准备 clipPath 状态和缓存并将其绘制在实例的缓存上
    * @param {CanvasRenderingContext2D} ctx
    * @param {FabricObject} clipPath
    */
@@ -888,6 +1062,7 @@ export class FabricObject<
 
   /**
    * Paint the cached copy of the object on the target context.
+   * 在目标上下文中绘制对象的缓存副本。
    * @param {CanvasRenderingContext2D} ctx Context to render on
    */
   drawCacheOnCanvas(this: TCachedFabricObject, ctx: CanvasRenderingContext2D) {
@@ -904,6 +1079,10 @@ export class FabricObject<
    * This check has a big side effect, it changes the underlying cache canvas if necessary.
    * Do not call this method on your own to check if the cache is dirty, because if it is,
    * it is also going to wipe the cache. This is badly designed and needs to be fixed.
+   * 检查缓存是否脏，如果脏则清除上下文。
+   * 此检查有很大的副作用，如有必要，它会更改底层缓存 canvas。
+   * 不要自己调用此方法来检查缓存是否脏，因为如果是，
+   * 它也会擦除缓存。这设计得很糟糕，需要修复。
    * @param {Boolean} skipCanvas skip canvas checks because this object is painted
    * on parent canvas.
    */
@@ -932,6 +1111,7 @@ export class FabricObject<
 
   /**
    * Draws a background for the object big as its untransformed dimensions
+   * 为对象绘制一个与其未转换尺寸一样大的背景
    * @private
    * @param {CanvasRenderingContext2D} ctx Context to render on
    */
@@ -1022,6 +1202,7 @@ export class FabricObject<
   /**
    * @private
    * Sets line dash
+   * 设置虚线
    * @param {CanvasRenderingContext2D} ctx Context to set the dash line on
    * @param {Array} dashArray array representing dashes
    */
@@ -1120,6 +1301,8 @@ export class FabricObject<
    * function that actually render something on the context.
    * empty here to allow Obects to work on tests to benchmark fabric functionalites
    * not related to rendering
+   * 实际在上下文中渲染某些内容的函数。
+   * 此处为空以允许对象在测试中工作以基准测试与渲染无关的 fabric 功能
    * @param {CanvasRenderingContext2D} _ctx Context to render on
    */
   _render(_ctx: CanvasRenderingContext2D) {
@@ -1229,6 +1412,9 @@ export class FabricObject<
    * untransformed coordinates
    * It doesn't matter where the objects origin are, svg has left and top in the top left corner,
    * And this method is only run once on the object after the fromElement parser.
+   * 此函数是 svg 导入的助手。它返回 svg 未转换坐标中对象的中心
+   * 对象原点在哪里并不重要，svg 的 left 和 top 在左上角，
+   * 并且此方法仅在 fromElement 解析器之后在对象上运行一次。
    * @private
    * @return {Point} center point from element coordinates
    */
@@ -1238,6 +1424,7 @@ export class FabricObject<
 
   /**
    * Clones an instance.
+   * 克隆实例。
    * @param {Array} [propertiesToInclude] Any properties that you might want to additionally include in the output
    * @returns {Promise<FabricObject>}
    */
@@ -1255,6 +1442,12 @@ export class FabricObject<
    * and format option. toCanvasElement is faster and produce no loss of quality.
    * If you need to get a real Jpeg or Png from an object, using toDataURL is the right way to do it.
    * toCanvasElement and then toBlob from the obtained canvas is also a good option.
+   * 从对象创建 Image 实例
+   * 利用 toCanvasElement。
+   * 曾经此方法基于 toDataUrl 和 loadImage，因此它也有质量和格式选项。
+   * toCanvasElement 更快且不会产生质量损失。
+   * 如果你需要从对象获取真正的 Jpeg 或 Png，使用 toDataURL 是正确的方法。
+   * toCanvasElement 然后从获得的 canvas toBlob 也是一个不错的选择。
    * @todo fix the export type, it could not be Image but the type that getClass return for 'image'.
    * @param {ObjectToCanvasElementOptions} [options] for clone as image, passed to toDataURL
    * @param {Number} [options.multiplier=1] Multiplier to scale by
@@ -1276,6 +1469,7 @@ export class FabricObject<
 
   /**
    * Converts an object into a HTMLCanvas element
+   * 将对象转换为 HTMLCanvas 元素
    * @param {ObjectToCanvasElementOptions} options Options object
    * @param {Number} [options.multiplier=1] Multiplier to scale by
    * @param {Number} [options.left] Cropping left offset. Introduced in v1.2.14
@@ -1372,6 +1566,7 @@ export class FabricObject<
 
   /**
    * Converts an object into a data-url-like string
+   * 将对象转换为类似 data-url 的字符串
    * @param {Object} options Options object
    * @param {String} [options.format=png] The format of the output image. Either "jpeg" or "png"
    * @param {Number} [options.quality=1] Quality level (0..1). Only used for jpeg.
@@ -1410,6 +1605,15 @@ export class FabricObject<
    *
    * This compares both the static class `type` and the instance's own `type` property
    * against the provided list of types.
+   * 检查实例是否属于任何指定的类型。
+   * 我们使用它来过滤 `getObjects` 函数的对象列表。
+   *
+   * 对于检测实例类型，`instanceOf` 是更好的检查，
+   * 但是为了避免使特定类成为通用代码的依赖项，
+   * 我们在内部使用它。
+   *
+   * 这将比较静态类 `type` 和实例自己的 `type` 属性
+   * 与提供的类型列表。
    *
    * @param types - A list of type strings to check against.
    * @returns `true` if the object's type or class type matches any in the list, otherwise `false`.
@@ -1423,6 +1627,7 @@ export class FabricObject<
 
   /**
    * Returns complexity of an instance
+   * 返回实例的复杂度
    * @return {Number} complexity of this instance (is 1 unless subclassed)
    */
   complexity() {
@@ -1431,6 +1636,7 @@ export class FabricObject<
 
   /**
    * Returns a JSON representation of an instance
+   * 返回实例的 JSON 表示
    * @return {Object} JSON
    */
   toJSON() {
@@ -1440,6 +1646,7 @@ export class FabricObject<
 
   /**
    * Sets "angle" of an instance with centered rotation
+   * 设置实例的“角度”并以中心旋转
    * @param {TDegree} angle Angle value (in degrees)
    */
   rotate(angle: TDegree) {
@@ -1469,6 +1676,9 @@ export class FabricObject<
    * time a non-delegated property changes on the group. It is passed the key
    * and value as parameters. Not adding in this function's signature to avoid
    * Travis build error about unused variables.
+   * 此回调函数由对象的父组在每次组上的非委托属性更改时调用。
+   * 它传递键和值作为参数。
+   * 未在此函数的签名中添加以避免关于未使用变量的 Travis 构建错误。
    */
   setOnGroup() {
     // implemented by sub-classes, as needed.
@@ -1477,6 +1687,8 @@ export class FabricObject<
   /**
    * Sets canvas globalCompositeOperation for specific object
    * custom composition operation for the particular object can be specified using globalCompositeOperation property
+   * 为特定对象设置 canvas globalCompositeOperation
+   * 可以使用 globalCompositeOperation 属性指定特定对象的自定义合成操作
    * @param {CanvasRenderingContext2D} ctx Rendering canvas context
    */
   _setupCompositeOperation(ctx: CanvasRenderingContext2D) {
@@ -1488,6 +1700,8 @@ export class FabricObject<
   /**
    * cancel instance's running animations
    * override if necessary to dispose artifacts such as `clipPath`
+   * 取消实例正在运行的动画
+   * 如果需要处理诸如 `clipPath` 之类的工件，请覆盖
    */
   dispose() {
     runningAnimations.cancelByTarget(this);
@@ -1502,16 +1716,21 @@ export class FabricObject<
   // #region Animation methods
   /**
    * List of properties to consider for animating colors.
+   * 考虑用于动画颜色的属性列表。
    * @type String[]
    */
   static colorProperties: string[] = [FILL, STROKE, 'backgroundColor'];
 
   /**
    * Animates object's properties
+   * 动画对象的属性
    * @param {Record<string, number | number[] | TColorArg>} animatable map of keys and end values
+   * @param {Record<string, number | number[] | TColorArg>} animatable 键和结束值的映射
    * @param {Partial<AnimationOptions<T>>} options
+   * @param {Partial<AnimationOptions<T>>} options 选项
    * @see {@link http://fabric5.fabricjs.com/fabric-intro-part-2#animation}
    * @return {Record<string, TAnimation<T>>} map of animation contexts
+   * @return {Record<string, TAnimation<T>>} 动画上下文的映射
    *
    * As object — multiple properties
    *
@@ -1534,8 +1753,11 @@ export class FabricObject<
   /**
    * @private
    * @param {String} key Property to animate
+   * @param {String} key 要动画的属性
    * @param {String} to Value to animate to
+   * @param {String} endValue 要动画到的值
    * @param {Object} [options] Options object
+   * @param {Object} [options] 选项对象
    */
   _animate<T extends number | number[] | TColorArg>(
     key: string,
@@ -1596,12 +1818,16 @@ export class FabricObject<
   /**
    * A reference to the parent of the object
    * Used to keep the original parent ref when the object has been added to an ActiveSelection, hence loosing the `group` ref
+   * 对象的父级引用
+   * 用于在对象添加到 ActiveSelection 时保留原始父级引用，从而丢失 `group` 引用
    */
   declare parent?: Group;
 
   /**
    * Checks if object is descendant of target
    * Should be used instead of {@link Group.contains} or {@link StaticCanvas.contains} for performance reasons
+   * 检查对象是否是目标的后代
+   * 出于性能原因，应使用此方法代替 {@link Group.contains} 或 {@link StaticCanvas.contains}
    * @param {TAncestor} target
    * @returns {boolean}
    */
@@ -1618,6 +1844,7 @@ export class FabricObject<
 
   /**
    * @returns {Ancestors} ancestors (excluding `ActiveSelection`) from bottom to top
+   * @returns {Ancestors} 祖先（不包括 `ActiveSelection`）从下到上
    */
   getAncestors(): Ancestors {
     const ancestors: TAncestor[] = [];
@@ -1632,6 +1859,7 @@ export class FabricObject<
 
   /**
    * Compare ancestors
+   * 比较祖先
    *
    * @param {StackedObject} other
    * @returns {AncestryComparison} an object that represent the ancestry situation.
@@ -1697,7 +1925,8 @@ export class FabricObject<
   }
 
   /**
-   *
+   * Checks if objects share a common ancestor
+   * 检查对象是否共享共同的祖先
    * @param {StackedObject} other
    * @returns {boolean}
    */
@@ -1707,9 +1936,12 @@ export class FabricObject<
   }
 
   /**
-   *
+   * Checks if this object is in front of another object
+   * 检查此对象是否在另一个对象的前面
    * @param {FabricObject} other object to compare against
+   * @param {FabricObject} other 要比较的对象
    * @returns {boolean | undefined} if objects do not share a common ancestor or they are strictly equal it is impossible to determine which is in front of the other; in such cases the function returns `undefined`
+   * @returns {boolean | undefined} 如果对象不共享共同的祖先或它们严格相等，则无法确定哪个在另一个前面；在这种情况下，函数返回 `undefined`
    */
   isInFrontOf<T extends this>(other: T): boolean | undefined {
     if (this === other) {
@@ -1744,13 +1976,17 @@ export class FabricObject<
   /**
    * Define a list of custom properties that will be serialized when
    * instance.toObject() gets called
+   * 定义在调用 instance.toObject() 时将序列化的自定义属性列表
    */
   static customProperties: string[] = [];
 
   /**
    * Returns an object representation of an instance
+   * 返回实例的对象表示
    * @param {string[]} [propertiesToInclude] Any properties that you might want to additionally include in the output
+   * @param {string[]} [propertiesToInclude] 您可能希望在输出中额外包含的任何属性
    * @return {Object} Object representation of an instance
+   * @return {Object} 实例的对象表示
    */
   toObject(propertiesToInclude: any[] = []): any {
     const propertiesToSerialize = propertiesToInclude.concat(
@@ -1842,6 +2078,7 @@ export class FabricObject<
 
   /**
    * Returns (dataless) object representation of an instance
+   * 返回实例的（无数据）对象表示
    * @param {Array} [propertiesToInclude] Any properties that you might want to additionally include in the output
    * @return {Object} Object representation of an instance
    */
@@ -1853,6 +2090,7 @@ export class FabricObject<
   /**
    * @private
    * @param {Object} object
+   * @param {Object} object 对象
    */
   _removeDefaultValues<T extends object>(object: T): Partial<T> {
     // getDefaults() ( get from static ownDefaults ) should win over prototype since anyway they get assigned to instance
@@ -1883,6 +2121,7 @@ export class FabricObject<
 
   /**
    * Returns a string representation of an instance
+   * 返回实例的字符串表示
    * @return {String}
    */
   toString() {
@@ -1895,7 +2134,9 @@ export class FabricObject<
    * @param {object} object
    * @param {object} [options]
    * @param {string} [options.extraParam] property to pass as first argument to the constructor
+   * @param {string} [options.extraParam] 作为第一个参数传递给构造函数的属性
    * @param {AbortSignal} [options.signal] handle aborting, see https://developer.mozilla.org/en-US/docs/Web/API/AbortController/signal
+   * @param {AbortSignal} [options.signal] 处理中止，参见 https://developer.mozilla.org/en-US/docs/Web/API/AbortController/signal
    * @returns {Promise<FabricObject>}
    */
   static _fromObject<S extends FabricObject>(
@@ -1925,6 +2166,7 @@ export class FabricObject<
    * @param {object} object
    * @param {object} [options]
    * @param {AbortSignal} [options.signal] handle aborting, see https://developer.mozilla.org/en-US/docs/Web/API/AbortController/signal
+   * @param {AbortSignal} [options.signal] 处理中止，参见 https://developer.mozilla.org/en-US/docs/Web/API/AbortController/signal
    * @returns {Promise<FabricObject>}
    */
   static fromObject<T extends TOptions<SerializedObjectProps>>(

@@ -4,6 +4,9 @@ import type { T2DPipelineState, TWebGLUniformLocationMap } from './typedefs';
 import { classRegistry } from '../ClassRegistry';
 import { blendColorFragmentSource } from './shaders/blendColor';
 
+/**
+ * 混合模式类型
+ */
 export type TBlendMode =
   | 'multiply'
   | 'add'
@@ -16,12 +19,18 @@ export type TBlendMode =
   | 'exclusion'
   | 'tint';
 
+/**
+ * BlendColor 滤镜的自有属性
+ */
 type BlendColorOwnProps = {
   color: string;
   mode: TBlendMode;
   alpha: number;
 };
 
+/**
+ * BlendColor 滤镜的默认值
+ */
 export const blendColorDefaultValues: BlendColorOwnProps = {
   color: '#F95C63',
   mode: 'multiply',
@@ -29,6 +38,8 @@ export const blendColorDefaultValues: BlendColorOwnProps = {
 };
 
 /**
+ * 颜色混合滤镜类
+ *
  * Color Blend filter class
  * @example
  * const filter = new BlendColor({
@@ -46,6 +57,8 @@ export const blendColorDefaultValues: BlendColorOwnProps = {
  */
 export class BlendColor extends BaseFilter<'BlendColor', BlendColorOwnProps> {
   /**
+   * 用于混合操作的颜色。默认为红色，因为黑色或白色总是给出强烈的结果。
+   *
    * Color to make the blend operation with. default to a reddish color since black or white
    * gives always strong result.
    * @type String
@@ -53,12 +66,17 @@ export class BlendColor extends BaseFilter<'BlendColor', BlendColorOwnProps> {
   declare color: BlendColorOwnProps['color'];
 
   /**
+   * 滤镜的混合模式：multiply, add, difference, screen, subtract,
+   * darken, lighten, overlay, exclusion, tint 之一。
+   *
    * Blend mode for the filter: one of multiply, add, difference, screen, subtract,
    * darken, lighten, overlay, exclusion, tint.
    * @type String
    **/
   declare mode: BlendColorOwnProps['mode'];
   /**
+   * alpha 值。表示混合颜色操作的强度。
+   *
    * alpha value. represent the strength of the blend color operation.
    * @type Number
    **/
@@ -70,10 +88,18 @@ export class BlendColor extends BaseFilter<'BlendColor', BlendColorOwnProps> {
 
   static uniformLocations = ['uColor'];
 
+  /**
+   * 获取缓存键
+   * @returns 缓存键字符串
+   */
   getCacheKey() {
     return `${this.type}_${this.mode}`;
   }
 
+  /**
+   * 获取片段着色器源码
+   * @returns 片段着色器源码字符串
+   */
   protected getFragmentSource(): string {
     return `
       precision highp float;
@@ -91,10 +117,12 @@ export class BlendColor extends BaseFilter<'BlendColor', BlendColorOwnProps> {
   }
 
   /**
+   * 将混合操作应用于表示图像像素的 Uint8ClampedArray。
+   *
    * Apply the Blend operation to a Uint8ClampedArray representing the pixels of an image.
    *
-   * @param {Object} options
-   * @param {ImageData} options.imageData The Uint8ClampedArray to be filtered.
+   * @param {Object} options 选项对象
+   * @param {ImageData} options.imageData The Uint8ClampedArray to be filtered. 要过滤的 Uint8ClampedArray。
    */
   applyTo2d({ imageData: { data } }: T2DPipelineState) {
     const source = new Color(this.color).getSource();
@@ -176,10 +204,12 @@ export class BlendColor extends BaseFilter<'BlendColor', BlendColorOwnProps> {
   }
 
   /**
+   * 将数据从此滤镜发送到其着色器程序的 uniform。
+   *
    * Send data from this filter to its shader program's uniforms.
    *
-   * @param {WebGLRenderingContext} gl The GL canvas context used to compile this filter's shader.
-   * @param {Object} uniformLocations A map of string uniform names to WebGLUniformLocation objects
+   * @param {WebGLRenderingContext} gl The GL canvas context used to compile this filter's shader. 用于编译此滤镜着色器的 GL 画布上下文。
+   * @param {Object} uniformLocations A map of string uniform names to WebGLUniformLocation objects 字符串 uniform 名称到 WebGLUniformLocation 对象的映射
    */
   sendUniformData(
     gl: WebGLRenderingContext,

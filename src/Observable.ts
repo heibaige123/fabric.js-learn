@@ -1,18 +1,36 @@
+/**
+ * 事件回调函数类型
+ */
 export type TEventCallback<T = any> = (options: T) => any;
 
+/**
+ * 事件注册对象类型
+ */
 type EventRegistryObject<E> = {
   [K in keyof E]?: TEventCallback<E[K]>;
 };
 
 /**
+ * 可观察对象类，提供事件发布/订阅功能
+ *
  * @see {@link http://fabric5.fabricjs.com/fabric-intro-part-2#events}
  * @see {@link http://fabric5.fabricjs.com/events|Events demo}
  */
 export class Observable<EventSpec> {
+  /**
+   * 事件监听器存储对象
+   */
   private __eventListeners: Record<keyof EventSpec, TEventCallback[]> =
     {} as Record<keyof EventSpec, TEventCallback[]>;
 
   /**
+   * 观察指定的事件
+   * @alias on
+   * @param {string} eventName 事件名称 (例如 'after:render')
+   * @param {EventRegistryObject} handlers 键/值对 (例如 {'after:render': handler, 'selection:cleared': handler})
+   * @param {Function} handler 当指定类型的事件发生时接收通知的函数
+   * @return {Function} 取消订阅函数
+   *
    * Observes specified event
    * @alias on
    * @param {string} eventName Event name (eg. 'after:render')
@@ -52,6 +70,13 @@ export class Observable<EventSpec> {
   }
 
   /**
+   * 观察指定的事件 **一次**
+   * @alias once
+   * @param {string} eventName 事件名称 (例如 'after:render')
+   * @param {EventRegistryObject} handlers 键/值对 (例如 {'after:render': handler, 'selection:cleared': handler})
+   * @param {Function} handler 当指定类型的事件发生时接收通知的函数
+   * @return {Function} 取消订阅函数
+   *
    * Observes specified event **once**
    * @alias once
    * @param {string} eventName Event name (eg. 'after:render')
@@ -91,6 +116,11 @@ export class Observable<EventSpec> {
   }
 
   /**
+   * 移除事件监听器
+   * @private
+   * @param {string} eventName 事件名称
+   * @param {Function} [handler] 处理函数
+   *
    * @private
    * @param {string} eventName
    * @param {Function} [handler]
@@ -113,6 +143,12 @@ export class Observable<EventSpec> {
   }
 
   /**
+   * 取消订阅 eventname 的所有事件监听器。
+   * 不要使用这种模式。你可能会杀死内部 fabricJS 事件。
+   * 我们知道我们应该为内部流程提供受保护的事件，但我们还没有
+   * @deprecated
+   * @param {string} eventName 事件名称 (例如 'after:render')
+   *
    * Unsubscribe all event listeners for eventname.
    * Do not use this pattern. You could kill internal fabricJS events.
    * We know we should have protected events for internal flows, but we don't have yet
@@ -121,17 +157,26 @@ export class Observable<EventSpec> {
    */
   off<K extends keyof EventSpec>(eventName: K): void;
   /**
+   * 取消订阅一个事件监听器
+   * @param {string} eventName 事件名称 (例如 'after:render')
+   * @param {TEventCallback} handler 要取消订阅的事件监听器
+   *
    * unsubscribe an event listener
    * @param {string} eventName event name (eg. 'after:render')
    * @param {TEventCallback} handler event listener to unsubscribe
    */
   off<K extends keyof EventSpec>(eventName: K, handler: TEventCallback): void;
   /**
+   * 取消订阅事件监听器
+   * @param handlers 处理程序键/值对 (例如 {'after:render': handler, 'selection:cleared': handler})
+   *
    * unsubscribe event listeners
    * @param handlers handlers key/value pairs (eg. {'after:render': handler, 'selection:cleared': handler})
    */
   off(handlers: EventRegistryObject<EventSpec>): void;
   /**
+   * 取消订阅所有事件监听器
+   *
    * unsubscribe all event listeners
    */
   off(): void;
@@ -160,6 +205,10 @@ export class Observable<EventSpec> {
   }
 
   /**
+   * 触发带有可选选项对象的事件
+   * @param {String} eventName 要触发的事件名称
+   * @param {Object} [options] 选项对象
+   *
    * Fires event with an optional options object
    * @param {String} eventName Event name to fire
    * @param {Object} [options] Options object

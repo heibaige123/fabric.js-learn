@@ -12,25 +12,68 @@ import {
 } from '../util/misc/matrix';
 
 // == begin transform regexp
+/**
+ * 数字的正则表达式部分
+ */
 const p = `(${reNum})`;
+/**
+ * skewX 变换的正则表达式
+ */
 const skewX = String.raw`(skewX)\(${p}\)`;
+/**
+ * skewY 变换的正则表达式
+ */
 const skewY = String.raw`(skewY)\(${p}\)`;
+/**
+ * rotate 变换的正则表达式
+ */
 const rotate = String.raw`(rotate)\(${p}(?: ${p} ${p})?\)`;
+/**
+ * scale 变换的正则表达式
+ */
 const scale = String.raw`(scale)\(${p}(?: ${p})?\)`;
+/**
+ * translate 变换的正则表达式
+ */
 const translate = String.raw`(translate)\(${p}(?: ${p})?\)`;
+/**
+ * matrix 变换的正则表达式
+ */
 const matrix = String.raw`(matrix)\(${p} ${p} ${p} ${p} ${p} ${p}\)`;
+/**
+ * 单个变换的正则表达式
+ */
 const transform = `(?:${matrix}|${translate}|${rotate}|${scale}|${skewX}|${skewY})`;
+/**
+ * 多个变换的正则表达式
+ */
 const transforms = `(?:${transform}*)`;
+/**
+ * 变换列表的正则表达式
+ */
 const transformList = String.raw`^\s*(?:${transforms}?)\s*$`;
 // http://www.w3.org/TR/SVG/coords.html#TransformAttribute
+/**
+ * 匹配变换列表的正则表达式对象
+ */
 const reTransformList = new RegExp(transformList);
+/**
+ * 匹配单个变换的正则表达式对象
+ */
 const reTransform = new RegExp(transform);
+/**
+ * 全局匹配所有变换的正则表达式对象
+ */
 const reTransformAll = new RegExp(transform, 'g');
 // == end transform regexp
 
 /**
+ * 解析 "transform" 属性，返回一个包含 6 个元素的变换矩阵数组
+ *
  * Parses "transform" attribute, returning an array of values
+ * @param attributeValue 包含属性值的字符串
  * @param {String} attributeValue String containing attribute value
+ * @returns 表示变换矩阵的 6 个元素的数组
  * @return {TTransformMatrix} Array of 6 elements representing transformation matrix
  */
 export function parseTransformAttribute(attributeValue: string): TMat2D {

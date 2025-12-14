@@ -3,6 +3,9 @@ import type { InteractiveFabricObject } from '../shapes/Object/InteractiveObject
 import { degreesToRadians } from '../util/misc/radiansDegreesConversion';
 import type { Control } from './Control';
 
+/**
+ * 控件渲染样式覆盖
+ */
 export type ControlRenderingStyleOverride = Partial<
   Pick<
     InteractiveFabricObject,
@@ -15,6 +18,14 @@ export type ControlRenderingStyleOverride = Partial<
   >
 >;
 
+/**
+ * 控件渲染器类型
+ * @param ctx 渲染上下文
+ * @param left 控件中心应所在的 x 坐标
+ * @param top 控件中心应所在的 y 坐标
+ * @param styleOverride FabricObject 控件样式的覆盖
+ * @param fabricObject 我们正在为其渲染控件的 fabric 对象
+ */
 export type ControlRenderer<
   O extends InteractiveFabricObject = InteractiveFabricObject,
 > = (
@@ -26,6 +37,10 @@ export type ControlRenderer<
 ) => void;
 
 /**
+ * 渲染圆形控件，按照 fabric 的特性。
+ * 编写此函数是为了尊重对象属性，如 transparentCorners、cornerSize、cornerColor、cornerStrokeColor
+ * 加上 offsetY 和 offsetX。
+ *
  * Render a round control, as per fabric features.
  * This function is written to respect object properties like transparentCorners, cornerSize
  * cornerColor, cornerStrokeColor
@@ -35,6 +50,11 @@ export type ControlRenderer<
  * @param {Number} top y coordinate where the control center should be
  * @param {Object} styleOverride override for FabricObject controls style
  * @param {FabricObject} fabricObject the fabric object for which we are rendering controls
+ * @param ctx 渲染上下文
+ * @param left 控件中心应所在的 x 坐标
+ * @param top 控件中心应所在的 y 坐标
+ * @param styleOverride FabricObject 控件样式的覆盖
+ * @param fabricObject 我们正在为其渲染控件的 fabric 对象
  */
 export function renderCircleControl(
   this: Control,
@@ -85,6 +105,10 @@ export function renderCircleControl(
 }
 
 /**
+ * 渲染方形控件，按照 fabric 的特性。
+ * 编写此函数是为了尊重对象属性，如 transparentCorners、cornerSize、cornerColor、cornerStrokeColor
+ * 加上 offsetY 和 offsetX。
+ *
  * Render a square control, as per fabric features.
  * This function is written to respect object properties like transparentCorners, cornerSize
  * cornerColor, cornerStrokeColor
@@ -94,6 +118,11 @@ export function renderCircleControl(
  * @param {Number} top y coordinate where the control center should be
  * @param {Object} styleOverride override for FabricObject controls style
  * @param {FabricObject} fabricObject the fabric object for which we are rendering controls
+ * @param ctx 渲染上下文
+ * @param left 控件中心应所在的 x 坐标
+ * @param top 控件中心应所在的 y 坐标
+ * @param styleOverride FabricObject 控件样式的覆盖
+ * @param fabricObject 我们正在为其渲染控件的 fabric 对象
  */
 export function renderSquareControl(
   this: Control,

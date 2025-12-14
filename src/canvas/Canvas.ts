@@ -22,8 +22,17 @@ import type { CanvasOptions, TCanvasOptions } from './CanvasOptions';
 import { SelectableCanvas } from './SelectableCanvas';
 import { TextEditingManager } from './TextEditingManager';
 
+/**
+ * 添加事件监听器的选项
+ */
 const addEventOptions = { passive: false } as EventListenerOptions;
 
+/**
+ * 获取事件的视口坐标和场景坐标
+ * @param canvas Canvas 实例
+ * @param e 指针事件
+ * @returns 包含视口坐标和场景坐标的对象
+ */
 const getEventPoints = (canvas: Canvas, e: TPointerEvent) => {
   const viewportPoint = canvas.getViewportPoint(e);
   const scenePoint = canvas.getScenePoint(e);
@@ -36,15 +45,28 @@ const getEventPoints = (canvas: Canvas, e: TPointerEvent) => {
 // just to be clear, the utils are now deprecated and those are here exactly as minifier helpers
 // because el.addEventListener can't me be minified while a const yes and we use it 47 times in this file.
 // few bytes but why give it away.
+/**
+ * 添加事件监听器
+ * @param el HTML 元素或文档
+ * @param args addEventListener 的参数
+ */
 const addListener = (
   el: HTMLElement | Document,
   ...args: Parameters<HTMLElement['addEventListener']>
 ) => el.addEventListener(...args);
+/**
+ * 移除事件监听器
+ * @param el HTML 元素或文档
+ * @param args removeEventListener 的参数
+ */
 const removeListener = (
   el: HTMLElement | Document,
   ...args: Parameters<HTMLElement['removeEventListener']>
 ) => el.removeEventListener(...args);
 
+/**
+ * 合成事件配置
+ */
 const syntheticEventConfig = {
   mouse: {
     in: 'over',
@@ -64,6 +86,9 @@ const syntheticEventConfig = {
   },
 } as const;
 
+/**
+ * 合成事件上下文类型
+ */
 type TSyntheticEventContext = {
   mouse: { e: TPointerEvent };
   drag: DragEventData;
@@ -71,15 +96,22 @@ type TSyntheticEventContext = {
 
 export class Canvas extends SelectableCanvas implements CanvasOptions {
   /**
+   * 包含拥有 fabric 变换的触摸事件的 id
+   *
    * Contains the id of the touch event that owns the fabric transform
    * @type Number
    * @private
    */
   declare mainTouchId?: number;
 
+  /**
+   * 指示是否启用指针事件
+   */
   declare enablePointerEvents: boolean;
 
   /**
+   * 保存用于事件同步的 setTimeout 计时器的引用
+   *
    * Holds a reference to a setTimeout timer for event synchronization
    * @type number
    * @private
@@ -87,6 +119,8 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   declare private _willAddMouseDown: number;
 
   /**
+   * 保存对正在接收 drag over 事件的 canvas 上的对象的引用。
+   *
    * Holds a reference to an object on the canvas that is receiving the drag over event.
    * @type FabricObject
    * @private
@@ -94,6 +128,8 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   declare private _draggedoverTarget?: FabricObject;
 
   /**
+   * 保存对拖动操作开始的 canvas 上的对象的引用
+   *
    * Holds a reference to an object on the canvas from where the drag operation started
    * @type FabricObject
    * @private
@@ -101,6 +137,9 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   declare private _dragSource?: FabricObject;
 
   /**
+   * 保存对作为当前放置目标的 canvas 上的对象的引用
+   * 可能与 {@link _draggedoverTarget} 不同
+   *
    * Holds a reference to an object on the canvas that is the current drop target
    * May differ from {@link _draggedoverTarget}
    * @todo inspect whether {@link _draggedoverTarget} and {@link _dropTarget} should be merged somehow
@@ -110,6 +149,11 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   declare private _dropTarget: FabricObject<ObjectEvents> | undefined;
 
   /**
+   * 一个布尔值，用于跟踪鼠标按下/松开循环期间的点击状态。
+   * 如果发生鼠标移动，它将变为 false。
+   * 默认为 true，在鼠标移动时变为 false。
+   * 用于确定 mouseUp 是否为点击
+   *
    * a boolean that keeps track of the click state during a cycle of mouse down/up.
    * If a mouse move occurs it becomes false.
    * Is true by default, turns false on mouse move.
@@ -117,8 +161,16 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
    */
   private _isClick: boolean;
 
+  /**
+   * 文本编辑管理器
+   */
   textEditingManager = new TextEditingManager(this);
 
+  /**
+   * 构造函数
+   * @param el Canvas 元素或其 ID
+   * @param options 选项对象
+   */
   constructor(el?: string | HTMLCanvasElement, options: TCanvasOptions = {}) {
     super(el, options);
     // bind event handlers
@@ -157,6 +209,8 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 返回事件前缀 pointer 或 mouse。
+   *
    * return an event prefix pointer or mouse.
    * @private
    */
@@ -164,6 +218,11 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
     return this.enablePointerEvents ? 'pointer' : 'mouse';
   }
 
+  /**
+   * 添加或移除事件监听器
+   * @param functor 添加或移除监听器的函数
+   * @param forTouch 是否针对触摸事件
+   */
   addOrRemove(functor: any, forTouch = false) {
     const canvasElement = this.upperCanvasEl,
       eventTypePrefix = this._getEventPrefix();
@@ -195,6 +254,8 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 移除所有事件监听器，在销毁实例时使用
+   *
    * Removes all event listeners, used when disposing the instance
    */
   removeListeners() {
@@ -229,6 +290,7 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 鼠标滚轮事件处理程序
    * @private
    * @param {Event} [e] Event object fired on wheel event
    */
@@ -239,6 +301,7 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 鼠标移出事件处理程序
    * @private
    * @param {Event} e Event object fired on mousedown
    */
@@ -259,6 +322,9 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 鼠标进入事件处理程序
+   * 当鼠标光标从外部进入 canvas 时使用
+   *
    * @private
    * Used when the mouse cursor enter the canvas from outside
    * @param {Event} e Event object fired on mouseenter
@@ -284,6 +350,9 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 拖动开始事件处理程序
+   * 支持类似原生的文本拖动
+   *
    * supports native like text dragging
    * @private
    * @param {DragEvent} e
@@ -307,6 +376,11 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 渲染拖动效果
+   * 首先清除正在渲染效果的顶部上下文。
+   * 然后渲染效果。
+   * 这样做将为所有情况渲染正确的效果，包括 `source` 和 `target` 之间的重叠。
+   *
    * First we clear top context where the effects are being rendered.
    * Then we render the effects.
    * Doing so will render the correct effect for all cases including an overlap between `source` and `target`.
@@ -349,6 +423,9 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 拖动结束事件处理程序
+   * 支持类似原生的文本拖动
+   *
    * supports native like text dragging
    * https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#finishing_a_drag
    * @private
@@ -379,6 +456,9 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 拖动进行中事件处理程序
+   * 在 canvas 和拖动源上触发 `drag` 事件
+   *
    * fire `drag` event on canvas and drag source
    * @private
    * @param {DragEvent} e
@@ -395,6 +475,9 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 拖动悬停事件处理程序
+   * 阻止默认行为以允许触发 drop 事件
+   *
    * prevent default to allow drop event to be fired
    * https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#specifying_drop_targets
    * @private
@@ -441,6 +524,9 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 拖动进入事件处理程序
+   * 在 `dragover` 目标上触发 `dragleave`
+   *
    * fire `dragleave` on `dragover` targets
    * @private
    * @param {Event} [e] Event object fired on Event.js shake
@@ -459,6 +545,9 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 拖动离开事件处理程序
+   * 在 `dragover` 目标上触发 `dragleave`
+   *
    * fire `dragleave` on `dragover` targets
    * @private
    * @param {Event} [e] Event object fired on Event.js shake
@@ -481,6 +570,11 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 放置事件处理程序
+   * `drop:before` 是一个允许你在 `drop` 事件之前安排逻辑的事件。
+   * 始终首选 `drop` 事件，但如果你需要在事件上运行一些禁用放置的逻辑，
+   * 由于无法处理事件处理程序的顺序，请使用 `drop:before`
+   *
    * `drop:before` is a an event that allows you to schedule logic
    * before the `drop` event. Prefer `drop` event always, but if you need
    * to run some drop-disabling logic on an event, since there is no way
@@ -510,6 +604,7 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 上下文菜单事件处理程序
    * @private
    * @param {Event} e Event object fired on mousedown
    */
@@ -527,6 +622,7 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 点击事件处理程序
    * @private
    * @param {Event} e Event object fired on mousedown
    */
@@ -540,6 +636,10 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 支持手势事件触发
+   * 这是一个保持代码组织的方法，它以一种有效的方式公开私有方法，并仍然保持它们的私有性
+   * 这应该镜像 _handleEvent
+   *
    * This supports gesture event firing
    * It is a method to keep some code organized, it exposes private methods
    * in a way that works and still keep them private
@@ -574,6 +674,9 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 返回事件的 id。
+   * 返回 pointerId 或 identifier，对于鼠标事件返回 0
+   *
    * Return a the id of an event.
    * returns either the pointerId or the identifier or 0 for the mouse event
    * @private
@@ -594,6 +697,8 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 确定事件是否具有被视为主事件的 id
+   *
    * Determines if an event has the id of the event that is considered main
    * @private
    * @param {evt} event Event object
@@ -617,6 +722,7 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 触摸开始事件处理程序
    * @private
    * @param {Event} e Event object fired on mousedown
    */
@@ -668,6 +774,7 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 鼠标按下事件处理程序
    * @private
    * @param {Event} e Event object fired on mousedown
    */
@@ -695,6 +802,7 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 触摸结束事件处理程序
    * @private
    * @param {Event} e Event object fired on mousedown
    */
@@ -737,6 +845,7 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 鼠标抬起事件处理程序
    * @private
    * @param {Event} e Event object fired on mouseup
    */
@@ -769,6 +878,7 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 鼠标移动事件处理程序
    * @private
    * @param {Event} e Event object fired on mousemove
    */
@@ -788,6 +898,7 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 调整大小事件处理程序
    * @private
    */
   _onResize() {
@@ -796,6 +907,8 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 决定是否应在 mouseup 和 mousedown 事件中重绘 canvas。
+   *
    * Decides whether the canvas should be redrawn in mouseup and mousedown events.
    * @private
    * @param {Object} target
@@ -812,6 +925,9 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 定义在 canvas 上释放鼠标时的操作的方法。
+   * 该方法重置 currentTransform 参数，将图像角位置存储在图像对象中，并在顶部渲染 canvas。
+   *
    * Method that defines the actions when mouse is released on canvas.
    * The method resets the currentTransform parameters, store the image corner
    * position in the image object and render the canvas on top.
@@ -919,6 +1035,12 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
     }
   }
 
+  /**
+   * 基本事件处理程序
+   * @private
+   * @param {String} eventType
+   * @param {Object} options
+   */
   _basicEventHandler<T extends keyof (CanvasEvents | ObjectEvents)>(
     eventType: T,
     options: (CanvasEvents & ObjectEvents)[T],
@@ -936,6 +1058,8 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 处理目标和子目标的事件触发
+   *
    * @private
    * Handle event firing for target and subtargets
    * @param {TPointerEvent} e event from mouse
@@ -971,6 +1095,7 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 绘图模式下的鼠标按下事件处理程序
    * @private
    * @param {Event} e Event object fired on mousedown
    */
@@ -988,6 +1113,7 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 绘图模式下的鼠标移动事件处理程序
    * @private
    * @param {Event} e Event object fired on mousemove
    */
@@ -1006,6 +1132,7 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 绘图模式下的鼠标抬起事件处理程序
    * @private
    * @param {Event} e Event object fired on mouseup
    */
@@ -1024,6 +1151,10 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 定义在 canvas 上点击鼠标时的操作的方法。
+   * 该方法初始化 currentTransform 参数并渲染所有 canvas，
+   * 以便当前图像可以放置在顶部 canvas 上，其余图像放置在容器 canvas 上。
+   *
    * Method that defines the actions when mouse is clicked on canvas.
    * The method inits the currentTransform parameters and renders all the
    * canvas so the current image can be placed on the top canvas and the rest
@@ -1129,6 +1260,8 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 重置事件处理期间所需的公共信息缓存
+   *
    * reset cache form common information needed during event processing
    * @private
    */
@@ -1137,6 +1270,8 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 缓存事件处理期间所需的公共信息
+   *
    * Cache common information needed during event processing
    * @private
    * @param {Event} e Event object fired on event
@@ -1158,6 +1293,11 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 定义鼠标悬停在 canvas 上时的操作的方法。
+   * currentTransform 参数将定义用户是否正在旋转/缩放/平移图像，或者两者都不是（仅悬停）。
+   * 组选择也是可能的，并且会取消所有任何其他类型的操作。
+   * 在仅图像变换的情况下，仅渲染顶部 canvas。
+   *
    * Method that defines the actions when mouse is hovering the canvas.
    * The currentTransform parameter will define whether the user is rotating/scaling/translating
    * an image or neither of them (only hovering). A group selection is also possible and would cancel
@@ -1201,6 +1341,8 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 管理 canvas 上 fabric 对象的 mouseout、mouseover 事件
+   *
    * Manage the mouseout, mouseover events for the fabric object on the canvas
    * @param {Fabric.Object} target the target where the target from the mousemove event
    * @param {Event} e Event object fired on mousemove
@@ -1235,6 +1377,8 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 管理 canvas 上 fabric 对象的 dragEnter、dragLeave 事件
+   *
    * Manage the dragEnter, dragLeave events for the fabric objects on the canvas
    * @param {Fabric.Object} target the target where the target from the onDrag event
    * @param {Object} data Event object fired on dragover
@@ -1267,6 +1411,8 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 管理 canvas 上 fabric 对象的合成进入/离开事件
+   *
    * Manage the synthetic in/out events for the fabric objects on the canvas
    * @param {Fabric.Object} target the target where the target from the supported events
    * @param {Object} data Event object fired
@@ -1367,6 +1513,9 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * 根据鼠标悬停的位置设置光标。
+   * 注意：在 Opera 中非常多 bug
+   *
    * Sets the cursor depending on where the canvas is being hovered.
    * Note: very buggy in Opera
    * @param {Event} e Event object
@@ -1409,6 +1558,14 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * ## 处理多重选择
+   * - 切换 `target` 选择（如果未选中则选中，如果已选中则取消选中）
+   * - 在未设置活动对象或活动选择下仅剩一个活动对象的情况下设置活动对象。
+   * ---
+   * - 如果活动对象是活动选择，我们将 `target` 添加到其中/从中移除
+   * - 如果不是，将活动对象和 `target` 添加到活动选择中，并使其成为活动对象。
+   * @TODO rewrite this after find target is refactored
+   *
    * ## Handles multiple selection
    * - toggles `target` selection (selects/deselects `target` if it isn't/is selected respectively)
    * - sets the active object in case it is not set or in case there is a single active object left under active selection.
@@ -1514,6 +1671,12 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * ## 处理选择
+   * - 选择包含在（并且可能相交）选择边界框中的对象
+   * - 设置活动对象
+   * ---
+   * 在鼠标移动后的鼠标抬起时运行
+   *
    * ## Handles selection
    * - selects objects that are contained in (and possibly intersecting) the selection bounding box
    * - sets the active object
@@ -1572,6 +1735,8 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * @override 清除 {@link textEditingManager}
+   *
    * @override clear {@link textEditingManager}
    */
   clear() {
@@ -1580,6 +1745,8 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
+   * @override 清除 {@link textEditingManager}
+   *
    * @override clear {@link textEditingManager}
    */
   destroy() {

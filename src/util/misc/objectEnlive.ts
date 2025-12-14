@@ -13,14 +13,23 @@ import type { FabricObject as BaseFabricObject } from '../../shapes/Object/Objec
 import { FabricError, SignalAbortedError } from '../internals/console';
 import type { Shadow } from '../../Shadow';
 
+/**
+ * 图片加载选项类型
+ */
 export type LoadImageOptions = Abortable & {
   /**
+   * 图片加载的 cors 值，默认为 anonymous
    * cors value for the image loading, default to anonymous
    */
   crossOrigin?: TCrossOrigin;
 };
 
 /**
+ * 从给定的 url 加载图像元素并解析它，或者捕获错误。
+ * @param url 代表图像的 URL
+ * @param [options] 图像加载选项
+ * @returns 加载的图像
+ *
  * Loads image element from given url and resolve it, or catch.
  * @param {String} url URL representing an image
  * @param {LoadImageOptions} [options] image loading options
@@ -63,6 +72,8 @@ export const loadImage = (
 
 export type EnlivenObjectOptions = Abortable & {
   /**
+   * 用于进一步解析对象元素的方法，
+   * 在创建每个 fabric 对象后调用。
    * Method for further parsing of object elements,
    * called after each fabric object created.
    */
@@ -80,6 +91,14 @@ export type EnlivenObjectOptions = Abortable & {
 };
 
 /**
+ * @TODO type this correctly.
+ * 从对象表示创建相应的 fabric 实例
+ * @param objects 要激活的对象
+ * @param [options] 选项
+ * @param [options.reviver] 用于进一步解析对象元素的方法，在创建每个 fabric 对象后调用。
+ * @param [options.signal] 处理中止，参见 https://developer.mozilla.org/en-US/docs/Web/API/AbortController/signal
+ * @returns
+ *
  * @TODO type this correctly.
  * Creates corresponding fabric instances from their object representations
  * @param {Object[]} objects Objects to enliven
@@ -134,6 +153,12 @@ export const enlivenObjects = <
   });
 
 /**
+ * 创建驻留在对象中的相应 fabric 实例，例如 `clipPath`
+ * @param object 具有要激活属性的对象（fill, stroke, clipPath, path）
+ * @param [options] 选项
+ * @param [options.signal] 处理中止，参见 https://developer.mozilla.org/en-US/docs/Web/API/AbortController/signal
+ * @returns 具有激活值的输入对象
+ *
  * Creates corresponding fabric instances residing in an object, e.g. `clipPath`
  * @param {Object} object with properties to enlive ( fill, stroke, clipPath, path )
  * @param {object} [options]

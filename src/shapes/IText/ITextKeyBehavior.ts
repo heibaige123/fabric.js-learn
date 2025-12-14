@@ -11,12 +11,25 @@ import { CHANGED, LEFT, RIGHT } from '../../constants';
 import type { IText } from './IText';
 import type { TextStyleDeclaration } from '../Text/StyledText';
 
+/**
+ * IText 键盘行为抽象类
+ * 处理键盘事件，如按键按下、抬起、输入、组合输入等
+ */
 export abstract class ITextKeyBehavior<
   Props extends TOptions<TextProps> = Partial<TextProps>,
   SProps extends SerializedTextProps = SerializedTextProps,
   EventSpec extends ITextEvents = ITextEvents,
 > extends ITextBehavior<Props, SProps, EventSpec> {
   /**
+   * 用于 keyDown 的功能
+   * 将特殊键映射到实例/原型的函数
+   * 如果你需要 ESC 或 TAB 或箭头有不同的行为，你必须更改
+   * 此映射，设置你在 IText 或你的原型上构建的函数名称。
+   * 映射更改将影响所有实例，除非你只需要某些文本实例
+   * 在这种情况下，你必须克隆此对象并分配给你的实例。
+   * this.keysMap = Object.assign({}, this.keysMap);
+   * 该函数必须在 IText.prototype.myFunction 中，并将接收 event 作为 args[0]
+   *
    * For functionalities on keyDown
    * Map a special key to a function of the instance/prototype
    * If you need different behavior for ESC or TAB or arrows, you have to change
@@ -29,21 +42,37 @@ export abstract class ITextKeyBehavior<
    */
   declare keysMap: TKeyMapIText;
 
+  /**
+   * 用于 RTL（从右到左）语言的 keyDown 功能映射
+   */
   declare keysMapRtl: TKeyMapIText;
 
   /**
+   * 用于 keyUp + ctrl || cmd 的功能
+   *
    * For functionalities on keyUp + ctrl || cmd
    */
   declare ctrlKeysMapUp: TKeyMapIText;
 
   /**
+   * 用于 keyDown + ctrl || cmd 的功能
+   *
    * For functionalities on keyDown + ctrl || cmd
    */
   declare ctrlKeysMapDown: TKeyMapIText;
 
+  /**
+   * 隐藏的 textarea 元素，用于处理输入
+   */
   declare hiddenTextarea: HTMLTextAreaElement | null;
 
   /**
+   * 用于追加 hiddenTextarea 的 DOM 容器。
+   * 附加到 document.body 的替代方案。
+   * 用于减少完整 document.body 树的缓慢重绘，
+   * 以及模态事件捕获不让 textarea 获取焦点的情况。
+   * @type HTMLElement
+   *
    * DOM container to append the hiddenTextarea.
    * An alternative to attaching to the document.body.
    * Useful to reduce laggish redraw of the full document.body tree and
@@ -52,11 +81,22 @@ export abstract class ITextKeyBehavior<
    */
   declare hiddenTextareaContainer?: HTMLElement | null;
 
+  /**
+   * 点击处理程序是否已初始化
+   */
   declare private _clickHandlerInitialized: boolean;
+  /**
+   * 复制操作是否完成
+   */
   declare private _copyDone: boolean;
+  /**
+   * 是否来自粘贴操作
+   */
   declare private fromPaste: boolean;
 
   /**
+   * 初始化隐藏的 textarea（需要在 iOS 中调出键盘）
+   *
    * Initializes hidden textarea (needed to bring up keyboard in iOS)
    */
   initHiddenTextarea() {
@@ -101,6 +141,8 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 重写此方法以自定义文本框失去焦点时的光标行为
+   *
    * Override this method to customize cursor behavior on textbox blur
    */
   blur() {
@@ -108,9 +150,12 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 处理 keydown 事件
+   * 仅用于箭头和修饰键组合。
+   *
    * Handles keydown event
    * only used for arrows and combination of modifier keys.
-   * @param {KeyboardEvent} e Event object
+   * @param {KeyboardEvent} e 事件对象
    */
   onKeyDown(e: KeyboardEvent) {
     if (!this.isEditing) {
@@ -143,10 +188,14 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 处理 keyup 事件
+   * 我们处理 KeyUp 是因为 ie11 和 edge 在复制/粘贴方面有困难
+   * 如果触发了复制/剪切事件，keyup 将被忽略
+   *
    * Handles keyup event
    * We handle KeyUp because ie11 and edge have difficulties copy/pasting
    * if a copy/cut event fired, keyup is dismissed
-   * @param {KeyboardEvent} e Event object
+   * @param {KeyboardEvent} e 事件对象
    */
   onKeyUp(e: KeyboardEvent) {
     if (!this.isEditing || this._copyDone || this.inCompositionMode) {
@@ -168,8 +217,10 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 处理 onInput 事件
+   *
    * Handles onInput event
-   * @param {Event} e Event object
+   * @param {Event} e 事件对象
    */
   onInput(this: this & { hiddenTextarea: HTMLTextAreaElement }, e: Event) {
     const fromPaste = this.fromPaste;
@@ -275,6 +326,8 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 组合输入开始
+   *
    * Composition start
    */
   onCompositionStart() {
@@ -282,12 +335,18 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 组合输入结束
+   *
    * Composition end
    */
   onCompositionEnd() {
     this.inCompositionMode = false;
   }
 
+  /**
+   * 组合输入更新
+   * @param {CompositionEvent} e 组合事件
+   */
   onCompositionUpdate({ target }: CompositionEvent) {
     const { selectionStart, selectionEnd } = target as HTMLTextAreaElement;
     this.compositionStart = selectionStart;
@@ -296,6 +355,8 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 复制选中的文本
+   *
    * Copies selected text
    */
   copy() {
@@ -318,6 +379,8 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 粘贴文本
+   *
    * Pastes text
    */
   paste() {
@@ -325,11 +388,13 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 查找同一行光标前的像素宽度
+   *
    * Finds the width in pixels before the cursor on the same line
    * @private
-   * @param {Number} lineIndex
-   * @param {Number} charIndex
-   * @return {Number} widthBeforeCursor width before cursor
+   * @param {Number} lineIndex 行索引
+   * @param {Number} charIndex 字符索引
+   * @return {Number} widthBeforeCursor 光标前的宽度
    */
   _getWidthBeforeCursor(lineIndex: number, charIndex: number): number {
     let widthBeforeCursor = this._getLineLeftOffset(lineIndex),
@@ -343,9 +408,11 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 获取选区的开始偏移量
+   *
    * Gets start offset of a selection
-   * @param {KeyboardEvent} e Event object
-   * @param {Boolean} isRight
+   * @param {KeyboardEvent} e 事件对象
+   * @param {Boolean} isRight 是否向右
    * @return {Number}
    */
   getDownCursorOffset(e: KeyboardEvent, isRight: boolean): number {
@@ -374,10 +441,13 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 私有方法
+   * 帮助查找偏移量应该从 Start 还是 End 计数
+   *
    * private
    * Helps finding if the offset should be counted from Start or End
-   * @param {KeyboardEvent} e Event object
-   * @param {Boolean} isRight
+   * @param {KeyboardEvent} e 事件对象
+   * @param {Boolean} isRight 是否向右
    * @return {Number}
    */
   _getSelectionForOffset(e: KeyboardEvent, isRight: boolean): number {
@@ -389,8 +459,10 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
-   * @param {KeyboardEvent} e Event object
-   * @param {Boolean} isRight
+   * 获取向上移动光标的偏移量
+   *
+   * @param {KeyboardEvent} e 事件对象
+   * @param {Boolean} isRight 是否向右
    * @return {Number}
    */
   getUpCursorOffset(e: KeyboardEvent, isRight: boolean): number {
@@ -416,6 +488,8 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 对于给定的宽度，找到匹配的字符。
+   *
    * for a given width it founds the matching character.
    * @private
    */
@@ -451,8 +525,10 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 向下移动光标
+   *
    * Moves cursor down
-   * @param {KeyboardEvent} e Event object
+   * @param {KeyboardEvent} e 事件对象
    */
   moveCursorDown(e: KeyboardEvent) {
     if (
@@ -465,8 +541,10 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 向上移动光标
+   *
    * Moves cursor up
-   * @param {KeyboardEvent} e Event object
+   * @param {KeyboardEvent} e 事件对象
    */
   moveCursorUp(e: KeyboardEvent) {
     if (this.selectionStart === 0 && this.selectionEnd === 0) {
@@ -476,9 +554,11 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 向上或向下移动光标，触发事件
+   *
    * Moves cursor up or down, fires the events
-   * @param {String} direction 'Up' or 'Down'
-   * @param {KeyboardEvent} e Event object
+   * @param {String} direction 'Up' 或 'Down'
+   * @param {KeyboardEvent} e 事件对象
    */
   _moveCursorUpOrDown(direction: 'Up' | 'Down', e: KeyboardEvent) {
     const offset = this[`get${direction}CursorOffset`](
@@ -504,8 +584,10 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 带有 shift 键的光标移动
+   *
    * Moves cursor with shift
-   * @param {Number} offset
+   * @param {Number} offset 偏移量
    */
   moveCursorWithShift(offset: number) {
     const newSelection =
@@ -521,8 +603,10 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 不带 shift 键的光标移动
+   *
    * Moves cursor up without shift
-   * @param {Number} offset
+   * @param {Number} offset 偏移量
    */
   moveCursorWithoutShift(offset: number) {
     if (offset < 0) {
@@ -536,8 +620,10 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 向左移动光标
+   *
    * Moves cursor left
-   * @param {KeyboardEvent} e Event object
+   * @param {KeyboardEvent} e 事件对象
    */
   moveCursorLeft(e: KeyboardEvent) {
     if (this.selectionStart === 0 && this.selectionEnd === 0) {
@@ -548,7 +634,7 @@ export abstract class ITextKeyBehavior<
 
   /**
    * @private
-   * @return {Boolean} true if a change happened
+   * @return {Boolean} 如果发生更改则为 true
    *
    * @todo refactor not to use method name composition
    */
@@ -588,8 +674,10 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 向左移动光标而不保留选区
+   *
    * Moves cursor left without keeping selection
-   * @param {KeyboardEvent} e
+   * @param {KeyboardEvent} e 事件对象
    */
   moveCursorLeftWithoutShift(e: KeyboardEvent) {
     let change = true;
@@ -608,8 +696,10 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 向左移动光标并保留选区
+   *
    * Moves cursor left while keeping selection
-   * @param {KeyboardEvent} e
+   * @param {KeyboardEvent} e 事件对象
    */
   moveCursorLeftWithShift(e: KeyboardEvent) {
     if (
@@ -624,8 +714,10 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 向右移动光标
+   *
    * Moves cursor right
-   * @param {KeyboardEvent} e Event object
+   * @param {KeyboardEvent} e 事件对象
    */
   moveCursorRight(e: KeyboardEvent) {
     if (
@@ -638,9 +730,11 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 向左或向右移动光标，触发事件
+   *
    * Moves cursor right or Left, fires event
    * @param {String} direction 'Left', 'Right'
-   * @param {KeyboardEvent} e Event object
+   * @param {KeyboardEvent} e 事件对象
    */
   _moveCursorLeftOrRight(direction: 'Left' | 'Right', e: KeyboardEvent) {
     const actionName = `moveCursor${direction}${
@@ -658,8 +752,10 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 向右移动光标并保留选区
+   *
    * Moves cursor right while keeping selection
-   * @param {KeyboardEvent} e
+   * @param {KeyboardEvent} e 事件对象
    */
   moveCursorRightWithShift(e: KeyboardEvent) {
     if (
@@ -674,8 +770,10 @@ export abstract class ITextKeyBehavior<
   }
 
   /**
+   * 向右移动光标而不保留选区
+   *
    * Moves cursor right without keeping selection
-   * @param {KeyboardEvent} e Event object
+   * @param {KeyboardEvent} e 事件对象
    */
   moveCursorRightWithoutShift(e: KeyboardEvent) {
     let changed = true;

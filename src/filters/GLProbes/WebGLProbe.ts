@@ -3,12 +3,22 @@ import { GLProbe } from './GLProbe';
 import type { GLPrecision } from './GLProbe';
 
 /**
+ * 延迟初始化 WebGL 常量
+ *
  * Lazy initialize WebGL constants
  */
 export class WebGLProbe extends GLProbe {
+  /**
+   * 最大纹理尺寸
+   */
   declare maxTextureSize?: number;
 
   /**
+   * 测试 WebGL 是否支持特定精度
+   * @param gl 用于测试的 WebGL 上下文
+   * @param precision 要测试的精度，可以是以下任意一种
+   * @returns 用户的浏览器 WebGL 是否支持给定精度
+   *
    * Tests if webgl supports certain precision
    * @param {WebGL} Canvas WebGL context to test on
    * @param {GLPrecision} Precision to test can be any of following
@@ -29,6 +39,9 @@ export class WebGLProbe extends GLProbe {
   }
 
   /**
+   * 查询浏览器的 WebGL 支持情况
+   * @param canvas 用于获取上下文的 Canvas 元素
+   *
    * query browser for WebGL
    */
   queryWebGL(canvas: HTMLCanvasElement) {
@@ -43,6 +56,11 @@ export class WebGLProbe extends GLProbe {
     }
   }
 
+  /**
+   * 检查是否支持指定的纹理尺寸
+   * @param textureSize 纹理尺寸
+   * @returns 如果支持则返回 true
+   */
   isSupported(textureSize: number) {
     return !!this.maxTextureSize && this.maxTextureSize >= textureSize;
   }

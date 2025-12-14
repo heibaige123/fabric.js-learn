@@ -9,29 +9,71 @@ import { classRegistry } from '../ClassRegistry';
 import { createCanvasElement } from '../util/misc/dom';
 import type { XY } from '../Point';
 
+/**
+ * 调整大小类型
+ */
 export type TResizeType = 'bilinear' | 'hermite' | 'sliceHack' | 'lanczos';
 
+/**
+ * Resize 滤镜的自有属性
+ */
 export type ResizeOwnProps = {
+  /**
+   * 调整大小类型
+   */
   resizeType: TResizeType;
+  /**
+   * X 轴缩放因子
+   */
   scaleX: number;
+  /**
+   * Y 轴缩放因子
+   */
   scaleY: number;
+  /**
+   * Lanczos 滤镜的 lobes 参数
+   */
   lanczosLobes: number;
 };
 
+/**
+ * Resize 滤镜的序列化属性
+ */
 export type ResizeSerializedProps = ResizeOwnProps;
 
+/**
+ * Resize 滤镜的默认值
+ */
 export const resizeDefaultValues: ResizeOwnProps = {
+  /**
+   * 默认调整大小类型
+   */
   resizeType: 'hermite',
+  /**
+   * 默认 X 轴缩放因子
+   */
   scaleX: 1,
+  /**
+   * 默认 Y 轴缩放因子
+   */
   scaleY: 1,
+  /**
+   * 默认 Lanczos lobes 参数
+   */
   lanczosLobes: 3,
 };
 
+/**
+ * 2D 调整大小期间的 Resize 类型
+ */
 type ResizeDuring2DResize = Resize & {
   rcpScaleX: number;
   rcpScaleY: number;
 };
 
+/**
+ * WebGL 调整大小期间的 Resize 类型
+ */
 type ResizeDuringWEBGLResize = Resize & {
   rcpScaleX: number;
   rcpScaleY: number;
@@ -45,6 +87,8 @@ type ResizeDuringWEBGLResize = Resize & {
 };
 
 /**
+ * 调整图像大小滤镜类
+ *
  * Resize image filter class
  * @example
  * const filter = new Resize();
@@ -53,6 +97,10 @@ type ResizeDuringWEBGLResize = Resize & {
  */
 export class Resize extends BaseFilter<'Resize', ResizeOwnProps> {
   /**
+   * 调整大小类型
+   * 对于 webgl，resizeType 只是 lanczos，对于 canvas2d 可以是：
+   * bilinear, hermite, sliceHack, lanczos。
+   *
    * Resize type
    * for webgl resizeType is just lanczos, for canvas2d can be:
    * bilinear, hermite, sliceHack, lanczos.
@@ -60,18 +108,24 @@ export class Resize extends BaseFilter<'Resize', ResizeOwnProps> {
   declare resizeType: ResizeOwnProps['resizeType'];
 
   /**
+   * 调整大小的缩放因子，x 轴
+   *
    * Scale factor for resizing, x axis
    * @param {Number} scaleX
    */
   declare scaleX: ResizeOwnProps['scaleX'];
 
   /**
+   * 调整大小的缩放因子，y 轴
+   *
    * Scale factor for resizing, y axis
    * @param {Number} scaleY
    */
   declare scaleY: ResizeOwnProps['scaleY'];
 
   /**
+   * lanczos 滤镜的 LanczosLobes 参数，对 resizeType lanczos 有效
+   *
    * LanczosLobes parameter for lanczos filter, valid for resizeType lanczos
    * @param {Number} lanczosLobes
    */
@@ -84,10 +138,12 @@ export class Resize extends BaseFilter<'Resize', ResizeOwnProps> {
   static uniformLocations = ['uDelta', 'uTaps'];
 
   /**
+   * 将数据从此滤镜发送到其着色器程序的 uniform。
+   *
    * Send data from this filter to its shader program's uniforms.
    *
-   * @param {WebGLRenderingContext} gl The GL canvas context used to compile this filter's shader.
-   * @param {Object} uniformLocations A map of string uniform names to WebGLUniformLocation objects
+   * @param {WebGLRenderingContext} gl The GL canvas context used to compile this filter's shader. 用于编译此滤镜着色器的 GL 画布上下文。
+   * @param {Object} uniformLocations A map of string uniform names to WebGLUniformLocation objects 字符串 uniform 名称到 WebGLUniformLocation 对象的映射
    */
   sendUniformData(
     this: ResizeDuringWEBGLResize,
@@ -101,21 +157,37 @@ export class Resize extends BaseFilter<'Resize', ResizeOwnProps> {
     gl.uniform1fv(uniformLocations.uTaps, this.taps);
   }
 
+  /**
+   * 获取滤镜窗口大小
+   * @returns {number} 滤镜窗口大小
+   */
   getFilterWindow(this: ResizeDuringWEBGLResize) {
     const scale = this.tempScale;
     return Math.ceil(this.lanczosLobes / scale);
   }
 
+  /**
+   * 获取缓存键
+   * @returns {string} 缓存键
+   */
   getCacheKey(this: ResizeDuringWEBGLResize): string {
     const filterWindow = this.getFilterWindow();
     return `${this.type}_${filterWindow}`;
   }
 
+  /**
+   * 获取片段着色器源码
+   * @returns {string} 片段着色器源码
+   */
   getFragmentSource(this: ResizeDuringWEBGLResize): string {
     const filterWindow = this.getFilterWindow();
     return this.generateShader(filterWindow);
   }
 
+  /**
+   * 获取 taps
+   * @returns {number[]} taps 数组
+   */
   getTaps(this: ResizeDuringWEBGLResize) {
     const lobeFunction = this.lanczosCreate(this.lanczosLobes),
       scale = this.tempScale,
@@ -128,8 +200,10 @@ export class Resize extends BaseFilter<'Resize', ResizeOwnProps> {
   }
 
   /**
+   * 从必要的步骤数生成顶点和着色器源
+   *
    * Generate vertex and shader sources from the necessary steps numbers
-   * @param {Number} filterWindow
+   * @param {Number} filterWindow 滤镜窗口大小
    */
   generateShader(filterWindow: number) {
     const offsets = new Array(filterWindow);
@@ -158,6 +232,10 @@ export class Resize extends BaseFilter<'Resize', ResizeOwnProps> {
     `;
   }
 
+  /**
+   * 为 WebGL 应用滤镜
+   * @param options WebGL 管道状态
+   */
   applyToForWebgl(this: ResizeDuringWEBGLResize, options: TWebGLPipelineState) {
     options.passes++;
     this.width = options.sourceWidth;
@@ -181,16 +259,19 @@ export class Resize extends BaseFilter<'Resize', ResizeOwnProps> {
   }
 
   /**
+   * 将调整大小滤镜应用于图像
+   * 根据 options.webgl 标志确定是使用 WebGL 还是 Canvas2D。
+   *
    * Apply the resize filter to the image
    * Determines whether to use WebGL or Canvas2D based on the options.webgl flag.
    *
-   * @param {Object} options
-   * @param {Number} options.passes The number of filters remaining to be executed
-   * @param {Boolean} options.webgl Whether to use webgl to render the filter.
-   * @param {WebGLTexture} options.sourceTexture The texture setup as the source to be filtered.
-   * @param {WebGLTexture} options.targetTexture The texture where filtered output should be drawn.
-   * @param {WebGLRenderingContext} options.context The GL context used for rendering.
-   * @param {Object} options.programCache A map of compiled shader programs, keyed by filter type.
+   * @param {Object} options 选项对象
+   * @param {Number} options.passes The number of filters remaining to be executed 剩余要执行的滤镜数量
+   * @param {Boolean} options.webgl Whether to use webgl to render the filter. 是否使用 webgl 渲染滤镜
+   * @param {WebGLTexture} options.sourceTexture The texture setup as the source to be filtered. 设置为要过滤的源的纹理
+   * @param {WebGLTexture} options.targetTexture The texture where filtered output should be drawn. 过滤后的输出应绘制到的纹理
+   * @param {WebGLRenderingContext} options.context The GL context used for rendering. 用于渲染的 GL 上下文
+   * @param {Object} options.programCache A map of compiled shader programs, keyed by filter type. 已编译着色器程序的映射，以滤镜类型为键
    */
   applyTo(options: TWebGLPipelineState | T2DPipelineState) {
     if (isWebGLPipelineState(options)) {
@@ -200,10 +281,19 @@ export class Resize extends BaseFilter<'Resize', ResizeOwnProps> {
     }
   }
 
+  /**
+   * 是否为中性状态
+   * @returns {boolean} 是否为中性状态
+   */
   isNeutralState() {
     return this.scaleX === 1 && this.scaleY === 1;
   }
 
+  /**
+   * 创建 Lanczos 函数
+   * @param lobes lobes 参数
+   * @returns Lanczos 函数
+   */
   lanczosCreate(lobes: number) {
     return (x: number) => {
       if (x >= lobes || x <= -lobes) {
@@ -218,6 +308,10 @@ export class Resize extends BaseFilter<'Resize', ResizeOwnProps> {
     };
   }
 
+  /**
+   * 应用于 2D 上下文
+   * @param options 2D 管道状态
+   */
   applyTo2d(this: ResizeDuring2DResize, options: T2DPipelineState) {
     const imageData = options.imageData,
       scaleX = this.scaleX,
@@ -248,13 +342,15 @@ export class Resize extends BaseFilter<'Resize', ResizeOwnProps> {
   }
 
   /**
+   * sliceByTwo 滤镜
+   *
    * Filter sliceByTwo
-   * @param {Object} canvasEl Canvas element to apply filter to
-   * @param {Number} oW Original Width
-   * @param {Number} oH Original Height
-   * @param {Number} dW Destination Width
-   * @param {Number} dH Destination Height
-   * @returns {ImageData}
+   * @param {Object} canvasEl Canvas element to apply filter to 画布元素
+   * @param {Number} oW Original Width 原始宽度
+   * @param {Number} oH Original Height 原始高度
+   * @param {Number} dW Destination Width 目标宽度
+   * @param {Number} dH Destination Height 目标高度
+   * @returns {ImageData} 图像数据
    */
   sliceByTwo(
     options: T2DPipelineState,
@@ -313,13 +409,15 @@ export class Resize extends BaseFilter<'Resize', ResizeOwnProps> {
   }
 
   /**
+   * lanczosResize 滤镜
+   *
    * Filter lanczosResize
-   * @param {Object} canvasEl Canvas element to apply filter to
-   * @param {Number} oW Original Width
-   * @param {Number} oH Original Height
-   * @param {Number} dW Destination Width
-   * @param {Number} dH Destination Height
-   * @returns {ImageData}
+   * @param {Object} canvasEl Canvas element to apply filter to 画布元素
+   * @param {Number} oW Original Width 原始宽度
+   * @param {Number} oH Original Height 原始高度
+   * @param {Number} dW Destination Width 目标宽度
+   * @param {Number} dH Destination Height 目标高度
+   * @returns {ImageData} 图像数据
    */
   lanczosResize(
     this: ResizeDuring2DResize,
@@ -404,13 +502,15 @@ export class Resize extends BaseFilter<'Resize', ResizeOwnProps> {
   }
 
   /**
+   * 双线性过滤
+   *
    * bilinearFiltering
-   * @param {Object} canvasEl Canvas element to apply filter to
-   * @param {Number} oW Original Width
-   * @param {Number} oH Original Height
-   * @param {Number} dW Destination Width
-   * @param {Number} dH Destination Height
-   * @returns {ImageData}
+   * @param {Object} canvasEl Canvas element to apply filter to 画布元素
+   * @param {Number} oW Original Width 原始宽度
+   * @param {Number} oH Original Height 原始高度
+   * @param {Number} dW Destination Width 目标宽度
+   * @param {Number} dH Destination Height 目标高度
+   * @returns {ImageData} 图像数据
    */
   bilinearFiltering(
     this: ResizeDuring2DResize,
@@ -467,13 +567,15 @@ export class Resize extends BaseFilter<'Resize', ResizeOwnProps> {
   }
 
   /**
+   * Hermite 快速调整大小
+   *
    * hermiteFastResize
-   * @param {Object} canvasEl Canvas element to apply filter to
-   * @param {Number} oW Original Width
-   * @param {Number} oH Original Height
-   * @param {Number} dW Destination Width
-   * @param {Number} dH Destination Height
-   * @returns {ImageData}
+   * @param {Object} canvasEl Canvas element to apply filter to 画布元素
+   * @param {Number} oW Original Width 原始宽度
+   * @param {Number} oH Original Height 原始高度
+   * @param {Number} dW Destination Width 目标宽度
+   * @param {Number} dH Destination Height 目标高度
+   * @returns {ImageData} 图像数据
    */
   hermiteFastResize(
     this: ResizeDuring2DResize,

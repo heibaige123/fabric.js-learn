@@ -1,6 +1,8 @@
 import { FILL, STROKE } from '../constants';
 
 /**
+ * 从所有 SVG 元素解析的属性
+ *
  * Attributes parsed from all SVG elements
  * @type array
  */

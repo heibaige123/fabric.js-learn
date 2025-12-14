@@ -2,7 +2,12 @@ import type { XY } from '../../Point';
 import type { TBBox } from '../../typedefs';
 
 /**
+ * 从给定的点计算边界框（left, top, width, height）
+ *
  * Calculates bounding box (left, top, width, height) from given `points`
+ * @param points 点数组
+ * @returns 包含 left, top, width, height 属性的对象
+ *
  * @param {XY[]} points
  * @return {Object} Object with left, top, width, height properties
  */

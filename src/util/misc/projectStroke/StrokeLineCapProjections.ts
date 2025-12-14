@@ -6,6 +6,9 @@ import { StrokeProjectionsBase } from './StrokeProjectionsBase';
 import type { TProjection, TProjectStrokeOnPointsOptions } from './types';
 
 /**
+ * 负责查找开放路径起点/终点的每种线帽类型的投影的类
+ * @see {@link [Open path projections at #8344](https://github.com/fabricjs/fabric.js/pull/8344#1-open-path)}
+ *
  * class in charge of finding projections for each type of line cap for start/end of an open path
  * @see {@link [Open path projections at #8344](https://github.com/fabricjs/fabric.js/pull/8344#1-open-path)}
  *
@@ -19,10 +22,14 @@ import type { TProjection, TProjectStrokeOnPointsOptions } from './types';
  */
 export class StrokeLineCapProjections extends StrokeProjectionsBase {
   /**
+   * 边缘点
+   *
    * edge point
    */
   declare A: Point;
   /**
+   * 边缘点旁边的点
+   *
    * point next to edge point
    */
   declare T: Point;
@@ -33,6 +40,13 @@ export class StrokeLineCapProjections extends StrokeProjectionsBase {
     this.T = new Point(T);
   }
 
+  /**
+   * 计算正交投影
+   * @param from 起始点
+   * @param to 结束点
+   * @param magnitude 大小
+   * @returns 正交投影向量
+   */
   calcOrthogonalProjection(
     from: Point,
     to: Point,
@@ -43,6 +57,9 @@ export class StrokeLineCapProjections extends StrokeProjectionsBase {
   }
 
   /**
+   * 开放路径起点/终点 - 线帽：Butt
+   * 计算：为了找到投影，只需找到与描边正交的点
+   *
    * OPEN PATH START/END - Line cap: Butt
    * Calculation: to find the projections, just find the points orthogonal to the stroke
    *
@@ -56,6 +73,9 @@ export class StrokeLineCapProjections extends StrokeProjectionsBase {
   }
 
   /**
+   * 开放路径起点/终点 - 线帽：Round
+   * 计算：与描边连接 `round` 相同
+   *
    * OPEN PATH START/END - Line cap: Round
    * Calculation: same as stroke line join `round`
    *
@@ -91,6 +111,9 @@ export class StrokeLineCapProjections extends StrokeProjectionsBase {
   }
 
   /**
+   * 开放路径起点/终点 - 线帽：Square
+   * 计算：在向量 `AT` 的相反方向上将矩形点投影到描边上
+   *
    * OPEN PATH START/END - Line cap: Square
    * Calculation: project a rectangle of points on the stroke in the opposite direction of the vector `AT`
    *
@@ -128,6 +151,10 @@ export class StrokeLineCapProjections extends StrokeProjectionsBase {
     return projections.map((p) => this.applySkew(p));
   }
 
+  /**
+   * 根据线帽类型投影点
+   * @returns
+   */
   protected projectPoints() {
     switch (this.options.strokeLineCap) {
       case 'round':
@@ -139,6 +166,10 @@ export class StrokeLineCapProjections extends StrokeProjectionsBase {
     }
   }
 
+  /**
+   * 根据线帽类型投影点并返回投影对象
+   * @returns 投影对象数组
+   */
   public project(): TProjection[] {
     return this.projectPoints().map((point) => ({
       originPoint: this.A,

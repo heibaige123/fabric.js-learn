@@ -14,16 +14,41 @@ import type { ControlRenderingStyleOverride } from './controlRendering';
 import { fireEvent } from './fireEvent';
 import { commonEventInfo } from './util';
 
+/**
+ * 路径修改操作名称
+ */
 const ACTION_NAME: TModificationEvents = 'modifyPath' as const;
 
+/**
+ * 变换锚点类型
+ */
 type TTransformAnchor = Transform;
 
+/**
+ * 路径点控件样式
+ */
 export type PathPointControlStyle = {
+  /**
+   * 控件填充颜色
+   */
   controlFill?: string;
+  /**
+   * 控件描边颜色
+   */
   controlStroke?: string;
+  /**
+   * 连接虚线数组
+   */
   connectionDashArray?: number[];
 };
 
+/**
+ * 计算路径点位置
+ * @param pathObject 路径对象
+ * @param commandIndex 命令索引
+ * @param pointIndex 点索引
+ * @returns 路径点位置
+ */
 const calcPathPointPosition = (
   pathObject: Path,
   commandIndex: number,
@@ -42,6 +67,15 @@ const calcPathPointPosition = (
   );
 };
 
+/**
+ * 移动路径点
+ * @param pathObject 路径对象
+ * @param x 目标 x 坐标
+ * @param y 目标 y 坐标
+ * @param commandIndex 命令索引
+ * @param pointIndex 点索引
+ * @returns 如果发生移动，则为 true
+ */
 const movePathPoint = (
   pathObject: Path,
   x: number,
@@ -84,6 +118,9 @@ const movePathPoint = (
 };
 
 /**
+ * 此函数定位控件。
+ * 它将用于绘制和交互。
+ *
  * This function locates the controls.
  * It'll be used both for drawing and for interaction.
  */
@@ -98,6 +135,11 @@ function pathPositionHandler(
 }
 
 /**
+ * 此函数定义控件的作用。
+ * 在单击控件并拖动后，每次鼠标移动都会调用它。
+ * 该函数接收鼠标事件、当前变换对象和画布坐标中的当前位置作为参数。
+ * `transform.target` 是对当前正在变换的对象的引用。
+ *
  * This function defines what the control does.
  * It'll be called on every mouse move after a control has been clicked and is being dragged.
  * The function receives as argument the mouse event, the current transform object
@@ -130,18 +172,50 @@ function pathActionHandler(
   return actionPerformed;
 }
 
+/**
+ * 从上一个命令获取索引
+ * @param previousCommandType 上一个命令类型
+ * @returns 索引
+ */
 const indexFromPrevCommand = (previousCommandType: TSimpleParseCommandType) =>
   previousCommandType === 'C' ? 5 : previousCommandType === 'Q' ? 3 : 1;
 
+/**
+ * 路径点控件类
+ */
 class PathPointControl extends Control {
+  /**
+   * 命令索引
+   */
   declare commandIndex: number;
+  /**
+   * 点索引
+   */
   declare pointIndex: number;
+  /**
+   * 控件填充颜色
+   */
   declare controlFill: string;
+  /**
+   * 控件描边颜色
+   */
   declare controlStroke: string;
+  /**
+   *
+   * @param options 选项
+   */
   constructor(options?: Partial<PathPointControl>) {
     super(options);
   }
 
+  /**
+   * 渲染控件
+   * @param ctx  渲染上下文
+   * @param left  控件中心应所在的 x 坐标
+   * @param top  控件中心应所在的 y 坐标
+   * @param styleOverride  FabricObject 控件样式的覆盖
+   * @param fabricObject  我们正在为其渲染控件的 fabric 对象
+   */
   render(
     ctx: CanvasRenderingContext2D,
     left: number,
@@ -159,14 +233,35 @@ class PathPointControl extends Control {
   }
 }
 
+/**
+ * 路径控制点控件类
+ */
 class PathControlPointControl extends PathPointControl {
+  /**
+   * 连接虚线数组
+   */
   declare connectionDashArray?: number[];
+  /**
+   * 连接到的命令索引
+   */
   declare connectToCommandIndex: number;
+  /**
+   * 连接到的点索引
+   */
   declare connectToPointIndex: number;
   constructor(options?: Partial<PathControlPointControl>) {
     super(options);
   }
 
+  /**
+   * 渲染控件
+   * @param this  PathControlPointControl 实例
+   * @param ctx  渲染上下文
+   * @param left 控件中心应所在的 x 坐标
+   * @param top 控件中心应所在的 y 坐标
+   * @param styleOverride FabricObject 控件样式的覆盖
+   * @param fabricObject 我们正在为其渲染控件的 fabric 对象
+   */
   render(
     this: PathControlPointControl,
     ctx: CanvasRenderingContext2D,
@@ -214,6 +309,16 @@ class PathControlPointControl extends PathPointControl {
   }
 }
 
+/**
+ * 创建控件
+ * @param commandIndexPos 命令索引位置
+ * @param pointIndexPos 点索引位置
+ * @param isControlPoint 是否为控制点
+ * @param options 选项
+ * @param connectToCommandIndex 连接到的命令索引
+ * @param connectToPointIndex 连接到的点索引
+ * @returns 控件实例
+ */
 const createControl = (
   commandIndexPos: number,
   pointIndexPos: number,
@@ -237,6 +342,12 @@ const createControl = (
     ...(isControlPoint ? options.controlPointStyle : options.pointStyle),
   } as Partial<PathControlPointControl>);
 
+/**
+ * 创建路径控件
+ * @param path 路径对象
+ * @param options 选项
+ * @returns 控件记录
+ */
 export function createPathControls(
   path: Path,
   options: Partial<Control> & {

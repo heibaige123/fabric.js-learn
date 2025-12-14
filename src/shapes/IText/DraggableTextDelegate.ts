@@ -12,6 +12,15 @@ import { getDocumentFromElement } from '../../util/dom_misc';
 import { CHANGED, NONE } from '../../constants';
 
 /**
+ * #### IText/Textbox 拖拽生命周期
+ * - {@link start} 从 `mousedown` {@link IText#_mouseDownHandler} 调用，并通过测试 {@link isPointerOverSelection} 确定是否应开始拖拽
+ * - 如果为 true，则阻止 `mousedown` {@link IText#_mouseDownHandler} 以保持选择
+ * - 如果指针移动，画布会触发大量 mousemove {@link Canvas#_onMouseMove}，我们确保**不**阻止这些事件（{@link IText#shouldStartDragging}），以便窗口开始拖拽会话
+ * - 一旦/如果会话开始，画布会在活动对象上调用 {@link onDragStart} 以确定是否应发生拖拽
+ * - 画布触发相关的拖拽事件，这些事件由在此范围内定义的处理程序处理
+ * - {@link end} 从 `mouseup` {@link IText#mouseUpHandler} 调用，阻止 IText 默认点击行为
+ * - 如果拖拽会话没有发生，{@link end} 处理点击，因为在 `mousedown` 期间阻止了执行此操作的逻辑
+ *
  * #### Dragging IText/Textbox Lifecycle
  * - {@link start} is called from `mousedown` {@link IText#_mouseDownHandler} and determines if dragging should start by testing {@link isPointerOverSelection}
  * - if true `mousedown` {@link IText#_mouseDownHandler} is blocked to keep selection
@@ -22,15 +31,42 @@ import { CHANGED, NONE } from '../../constants';
  * - in case the drag session didn't occur, {@link end} handles a click, since logic to do so was blocked during `mousedown`
  */
 export class DraggableTextDelegate {
+  /**
+   * 目标 IText 对象
+   */
   readonly target: IText;
+  /**
+   * 指针是否在选区上方
+   */
   private __mouseDownInPlace = false;
+  /***
+   * 拖拽是否已启动
+   */
   private __dragStartFired = false;
+  /**
+   * 指针是否在拖拽上方
+   */
   private __isDraggingOver = false;
+  /**
+   * 拖拽开始时的选区
+   */
   private __dragStartSelection?: {
+    /**
+     * 选区开始索引
+     */
     selectionStart: number;
+    /**
+     * 选区结束索引
+     */
     selectionEnd: number;
   };
+  /**
+   * 拖拽图像清理器
+   */
   private __dragImageDisposer?: VoidFunction;
+  /**
+   * 释放资源
+   */
   private _dispose?: () => void;
 
   constructor(target: IText) {
@@ -48,6 +84,11 @@ export class DraggableTextDelegate {
     };
   }
 
+  /**
+   * 检查指针是否在选区上方
+   * @param e 指针事件
+   * @returns 如果指针在选区上方则为 true
+   */
   isPointerOverSelection(e: TPointerEvent) {
     const target = this.target;
     const newSelection = target.getSelectionStartFromPointer(e);
@@ -60,13 +101,18 @@ export class DraggableTextDelegate {
   }
 
   /**
+   * 覆盖此方法以禁用拖拽并默认为 mousedown 逻辑
+   *
    * @public override this method to disable dragging and default to mousedown logic
+   * @param e 指针事件
    */
   start(e: TPointerEvent) {
     return (this.__mouseDownInPlace = this.isPointerOverSelection(e));
   }
 
   /**
+   * 覆盖此方法以禁用拖拽而不丢弃选区
+   *
    * @public override this method to disable dragging without discarding selection
    */
   isActive() {
@@ -74,8 +120,11 @@ export class DraggableTextDelegate {
   }
 
   /**
+   * 结束交互并在点击的情况下设置光标
+   *
    * Ends interaction and sets cursor in case of a click
    * @returns true if was active
+   * @param e 指针事件
    */
   end(e: TPointerEvent) {
     const active = this.isActive();
@@ -92,13 +141,22 @@ export class DraggableTextDelegate {
     return active;
   }
 
+  /**
+   * 获取拖拽开始时的选区
+   * @returns 拖拽开始时的选区
+   */
   getDragStartSelection() {
     return this.__dragStartSelection;
   }
 
   /**
+   * 覆盖以自定义拖拽图像
+   * https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/setDragImage
+   *
    * Override to customize the drag image
    * https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/setDragImage
+   * @param e 拖拽事件
+   * @param selection 选区范围
    */
   setDragImage(
     e: DragEvent,
@@ -165,7 +223,10 @@ export class DraggableTextDelegate {
   }
 
   /**
+   * 确定 {@link target} 是否应该/不应该成为拖拽源
+   *
    * @returns {boolean} determines whether {@link target} should/shouldn't become a drag source
+   * @param e 拖拽事件
    */
   onDragStart(e: DragEvent): boolean {
     this.__dragStartFired = true;
@@ -200,8 +261,11 @@ export class DraggableTextDelegate {
   }
 
   /**
+   * 使用 {@link targetCanDrop} 以尊重覆盖
+   *
    * use {@link targetCanDrop} to respect overriding
    * @returns {boolean} determines whether {@link target} should/shouldn't become a drop target
+   * @param e 拖拽事件
    */
   canDrop(e: DragEvent): boolean {
     if (
@@ -225,12 +289,19 @@ export class DraggableTextDelegate {
   }
 
   /**
+   * 为了尊重覆盖 {@link IText#canDrop}，我们调用它而不是直接调用 {@link canDrop}
+   *
    * in order to respect overriding {@link IText#canDrop} we call that instead of calling {@link canDrop} directly
+   * @param e 拖拽事件
    */
   protected targetCanDrop(e: DragEvent) {
     return this.target.canDrop(e);
   }
 
+  /**
+   * 拖拽进入处理程序
+   * @param ev 拖拽事件数据
+   */
   dragEnterHandler({ e }: DragEventData) {
     const canDrop = this.targetCanDrop(e);
     if (!this.__isDraggingOver && canDrop) {
@@ -238,6 +309,10 @@ export class DraggableTextDelegate {
     }
   }
 
+  /**
+   * 拖拽悬停处理程序
+   * @param ev 拖拽事件数据
+   */
   dragOverHandler(ev: DragEventData) {
     const { e } = ev;
     const canDrop = this.targetCanDrop(e);
@@ -256,6 +331,9 @@ export class DraggableTextDelegate {
     }
   }
 
+  /**
+   * 拖拽离开处理程序
+   */
   dragLeaveHandler() {
     if (this.__isDraggingOver || this.isActive()) {
       this.__isDraggingOver = false;
@@ -263,9 +341,14 @@ export class DraggableTextDelegate {
   }
 
   /**
+   * 覆盖 {@link DragEvent#dataTransfer} 的 `text/plain | application/fabric` 类型
+   * 以便分别更改放置值或自定义样式，通过监听 `drop:before` 事件
+   * https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#performing_a_drop
+   *
    * Override the `text/plain | application/fabric` types of {@link DragEvent#dataTransfer}
    * in order to change the drop value or to customize styling respectively, by listening to the `drop:before` event
    * https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#performing_a_drop
+   * @param ev 放置事件数据
    */
   dropHandler(ev: DropEventData) {
     const { e } = ev;
@@ -336,9 +419,14 @@ export class DraggableTextDelegate {
   }
 
   /**
+   * 仅在放置后（如果发生）在拖拽源上触发
+   * 处理拖拽源的更改，以防放置在另一个对象上或取消
+   * https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#finishing_a_drag
+   *
    * fired only on the drag source after drop (if occurred)
    * handle changes to the drag source in case of a drop on another object or a cancellation
    * https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Drag_operations#finishing_a_drag
+   * @param ev 拖拽事件数据
    */
   dragEndHandler({ e }: DragEventData) {
     if (this.isActive() && this.__dragStartFired) {
@@ -381,6 +469,9 @@ export class DraggableTextDelegate {
     this.__isDraggingOver = false;
   }
 
+  /**
+   * 释放资源
+   */
   dispose() {
     this._dispose && this._dispose();
   }

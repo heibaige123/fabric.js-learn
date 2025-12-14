@@ -3,10 +3,15 @@ import type { FabricObject } from '../../shapes/Object/FabricObject';
 import type { AnimationBase } from './AnimationBase';
 
 /**
+ * 保存所有正在运行的动画的数组
+ *
  * Array holding all running animations
  */
 class AnimationRegistry extends Array<AnimationBase> {
   /**
+   * 使用动画上下文移除单个动画
+   * @param context 动画上下文
+   *
    * Remove a single animation using an animation context
    * @param {AnimationBase} context
    */
@@ -16,6 +21,9 @@ class AnimationRegistry extends Array<AnimationBase> {
   }
 
   /**
+   * 在下一帧取消所有正在运行的动画
+   * @returns 被取消的动画数组
+   *
    * Cancel all running animations on the next frame
    */
   cancelAll() {
@@ -25,6 +33,10 @@ class AnimationRegistry extends Array<AnimationBase> {
   }
 
   /**
+   * 在下一帧取消附加到画布的所有正在运行的动画
+   * @param canvas 画布实例
+   * @returns 被取消的动画数组
+   *
    * Cancel all running animations attached to a canvas on the next frame
    * @param {StaticCanvas} canvas
    */
@@ -43,6 +55,10 @@ class AnimationRegistry extends Array<AnimationBase> {
   }
 
   /**
+   * 在下一帧取消目标的所有正在运行的动画
+   * @param target 动画目标
+   * @returns 被取消的动画数组
+   *
    * Cancel all running animations for target on the next frame
    * @param target
    */
@@ -56,4 +72,7 @@ class AnimationRegistry extends Array<AnimationBase> {
   }
 }
 
+/**
+ * 正在运行的动画注册表实例
+ */
 export const runningAnimations = new AnimationRegistry();

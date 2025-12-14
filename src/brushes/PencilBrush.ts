@@ -8,6 +8,9 @@ import { BaseBrush } from './BaseBrush';
 import type { TSimplePathData } from '../util/path/typedefs';
 
 /**
+ * 检查 SVG 路径数据是否为空
+ * @param pathData SVG 路径命令
+ *
  * @private
  * @param {TSimplePathData} pathData SVG path commands
  * @returns {boolean}
@@ -16,8 +19,13 @@ function isEmptySVGPath(pathData: TSimplePathData): boolean {
   return joinPath(pathData) === 'M 0 0 Q 0 0 0 0 L 0 0';
 }
 
+/**
+ * 铅笔画笔类
+ */
 export class PencilBrush extends BaseBrush {
   /**
+   * 丢弃彼此距离小于 `decimate` 像素的点
+   *
    * Discard points that are less than `decimate` pixel distant from each other
    * @type Number
    * @default 0.4
@@ -25,6 +33,9 @@ export class PencilBrush extends BaseBrush {
   decimate = 0.4;
 
   /**
+   * 在最后记录的点与当前指针之间绘制直线
+   * 用于 `shift` 功能
+   *
    * Draws a straight line between last recorded point to current pointer
    * Used for `shift` functionality
    *
@@ -34,26 +45,53 @@ export class PencilBrush extends BaseBrush {
   drawStraightLine = false;
 
   /**
+   * 使画笔绘制直线的事件修饰键。
+   * 如果为 `null` 或 'none' 或任何其他非修饰键的字符串，则禁用该功能。
+   *
    * The event modifier key that makes the brush draw a straight line.
    * If `null` or 'none' or any other string that is not a modifier key the feature is disabled.
    * @type {ModifierKey | undefined | null}
    */
   straightLineKey: ModifierKey | undefined | null = 'shiftKey';
 
+  /**
+   * 线帽样式
+   */
   declare protected _points: Point[];
+  /**
+   * 是否包含直线
+   */
   declare protected _hasStraightLine: boolean;
+  /**
+   * 上一个结束点
+   */
   declare protected oldEnd?: Point;
 
+  /**
+   *
+   * @param canvas 上下文
+   */
   constructor(canvas: Canvas) {
     super(canvas);
     this._points = [];
     this._hasStraightLine = false;
   }
 
+  /**
+   * 判断是否需要完整渲染
+   * @returns
+   */
   needsFullRender() {
     return super.needsFullRender() || this._hasStraightLine;
   }
 
+  /**
+   * 绘制线段
+   * @param ctx 渲染上下文
+   * @param p1 起点
+   * @param p2 终点
+   * @returns 中点
+   */
   static drawSegment(ctx: CanvasRenderingContext2D, p1: Point, p2: Point) {
     const midPoint = p1.midPointFrom(p2);
     ctx.quadraticCurveTo(p1.x, p1.y, midPoint.x, midPoint.y);
@@ -61,6 +99,10 @@ export class PencilBrush extends BaseBrush {
   }
 
   /**
+   * 鼠标按下时调用
+   * @param pointer 指针位置
+   * @param event 事件数据
+   *
    * Invoked on mouse down
    * @param {Point} pointer
    */
@@ -77,6 +119,10 @@ export class PencilBrush extends BaseBrush {
   }
 
   /**
+   * 鼠标移动时调用
+   * @param pointer 指针位置
+   * @param event 事件数据
+   *
    * Invoked on mouse move
    * @param {Point} pointer
    */
@@ -116,6 +162,9 @@ export class PencilBrush extends BaseBrush {
   }
 
   /**
+   * 鼠标松开时调用
+   * @param event 事件数据
+   *
    * Invoked on mouse up
    */
   onMouseUp({ e }: TEvent) {
@@ -130,6 +179,10 @@ export class PencilBrush extends BaseBrush {
   }
 
   /**
+   * 准备绘制
+   * @private
+   * @param pointer 相对于画布的实际鼠标位置
+   *
    * @private
    * @param {Point} pointer Actual mouse position related to the canvas.
    */
@@ -140,6 +193,10 @@ export class PencilBrush extends BaseBrush {
   }
 
   /**
+   * 添加点
+   * @private
+   * @param point 要添加到点数组的点
+   *
    * @private
    * @param {Point} point Point to be added to points array
    */
@@ -159,6 +216,9 @@ export class PencilBrush extends BaseBrush {
   }
 
   /**
+   * 清除点数组并设置 contextTop 画布样式。
+   * @private
+   *
    * Clear points array and set contextTop canvas style.
    * @private
    */
@@ -170,6 +230,10 @@ export class PencilBrush extends BaseBrush {
   }
 
   /**
+   * 使用 quadraticCurveTo 在 topCanvas 上绘制平滑路径
+   * @private
+   * @param ctx 渲染上下文
+   *
    * Draw a smooth path on the topCanvas using quadraticCurveTo
    * @private
    * @param {CanvasRenderingContext2D} [ctx]
@@ -206,6 +270,10 @@ export class PencilBrush extends BaseBrush {
   }
 
   /**
+   * 将点转换为 SVG 路径
+   * @param points 点数组
+   * @returns SVG 路径命令
+   *
    * Converts points to SVG path
    * @param {Point[]} points Array of points
    * @return {TSimplePathData} SVG path commands
@@ -216,6 +284,10 @@ export class PencilBrush extends BaseBrush {
   }
 
   /**
+   * 创建要添加到画布的 Path 对象
+   * @param pathData 路径数据
+   * @returns 要添加到画布的 Path
+   *
    * Creates a Path object to add on canvas
    * @param {TSimplePathData} pathData Path data
    * @return {Path} Path to add on canvas
@@ -239,6 +311,11 @@ export class PencilBrush extends BaseBrush {
   }
 
   /**
+   * 使用 decimate 值抽取点数组
+   * @param points 点数组
+   * @param distance 距离
+   * @returns 抽取后的点数组
+   *
    * Decimate points array with the decimate value
    */
   decimatePoints(points: Point[], distance: number) {
@@ -268,6 +345,10 @@ export class PencilBrush extends BaseBrush {
   }
 
   /**
+   * 在 contextTop 画布上绘制路径后的 mouseup 事件
+   * 我们使用捕获的点创建一个新的 Path 对象
+   * 并将其添加到画布。
+   *
    * On mouseup after drawing the path on contextTop canvas
    * we use the points captured to create an new Path object
    * and add it to the canvas.

@@ -9,6 +9,9 @@ import type { SprayBrushPoint } from './typedefs';
 import { CENTER } from '../constants';
 
 /**
+ * 获取唯一的矩形
+ * @param rects 矩形数组
+ * @returns 唯一的矩形数组
  *
  * @param rects
  * @returns
@@ -28,48 +31,73 @@ function getUniqueRects(rects: Rect[]) {
   return uniqueRectsArray;
 }
 
+/**
+ * 喷雾画笔类
+ */
 export class SprayBrush extends BaseBrush {
   /**
+   * 喷雾宽度
+   *
    * Width of a spray
    * @type Number
    */
   width = 10;
 
   /**
+   * 喷雾密度（每块的点数）
+   *
    * Density of a spray (number of dots per chunk)
    * @type Number
    */
   density = 20;
 
   /**
+   * 喷雾点的宽度
+   *
    * Width of spray dots
    * @type Number
    */
   dotWidth = 1;
 
   /**
+   * 喷雾点宽度的变化量
+   *
    * Width variance of spray dots
    * @type Number
    */
   dotWidthVariance = 1;
 
   /**
+   * 点的不透明度是否应随机
+   *
    * Whether opacity of a dot should be random
    * @type Boolean
    */
   randomOpacity = false;
 
   /**
+   * 是否应移除重叠的点（矩形）（出于性能原因）
+   *
    * Whether overlapping dots (rectangles) should be removed (for performance reasons)
    * @type Boolean
    */
   optimizeOverlapping = true;
 
+  /**
+   * 喷雾块数组
+   */
   declare private sprayChunks: SprayBrushPoint[][];
 
+  /**
+   * 当前喷雾块点数组
+   */
   declare private sprayChunk: SprayBrushPoint[];
 
   /**
+   * 构造函数
+   * @param canvas 画布实例
+   * @returns 喷雾画笔实例
+   *
    * Constructor
    * @param {Canvas} canvas
    * @return {SprayBrush} Instance of a spray brush
@@ -81,6 +109,9 @@ export class SprayBrush extends BaseBrush {
   }
 
   /**
+   * 鼠标按下时调用
+   * @param pointer 指针位置
+   *
    * Invoked on mouse down
    * @param {Point} pointer
    */
@@ -94,6 +125,9 @@ export class SprayBrush extends BaseBrush {
   }
 
   /**
+   * 鼠标移动时调用
+   * @param pointer 指针位置
+   *
    * Invoked on mouse move
    * @param {Point} pointer
    */
@@ -106,6 +140,8 @@ export class SprayBrush extends BaseBrush {
   }
 
   /**
+   * 鼠标松开时调用
+   *
    * Invoked on mouse up
    */
   onMouseUp() {
@@ -150,6 +186,10 @@ export class SprayBrush extends BaseBrush {
     this.canvas.requestRenderAll();
   }
 
+  /**
+   * 渲染喷雾块
+   * @param sprayChunck 喷雾块点数组
+   */
   renderChunck(sprayChunck: SprayBrushPoint[]) {
     const ctx = this.canvas.contextTop;
     ctx.fillStyle = this.color;
@@ -166,6 +206,8 @@ export class SprayBrush extends BaseBrush {
   }
 
   /**
+   * 渲染所有喷雾块
+   *
    * Render all spray chunks
    */
   _render() {
@@ -181,6 +223,9 @@ export class SprayBrush extends BaseBrush {
   }
 
   /**
+   * 添加喷雾块
+   * @param pointer 指针位置
+   *
    * @param {Point} pointer
    */
   addSprayChunk(pointer: Point) {

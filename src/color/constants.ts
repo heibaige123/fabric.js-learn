@@ -1,4 +1,7 @@
 /**
+ * 匹配 RGB 或 RGBA 格式颜色的正则表达式 (例如: `rgb(0, 0, 0)`, `rgba(255, 100, 10, 0.5)`, `rgba( 255 , 100 , 10 , 0.5 )`, `rgb(1,1,1)`, `rgba(100%, 60%, 10%, 0.5)`)
+ * 也匹配新规范中的 rgba(r g b / a)
+ *
  * Regex matching color in RGB or RGBA formats (ex: `rgb(0, 0, 0)`, `rgba(255, 100, 10, 0.5)`, `rgba( 255 , 100 , 10 , 0.5 )`, `rgb(1,1,1)`, `rgba(100%, 60%, 10%, 0.5)`)
  * Also matching rgba(r g b / a) as per new specs
  * https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/rgb
@@ -59,6 +62,9 @@ export const reRGBa = () =>
   /^rgba?\(\s?(\d{0,3}(?:\.\d+)?%?)\s?[\s|,]\s?(\d{0,3}(?:\.\d+)?%?)\s?[\s|,]\s?(\d{0,3}(?:\.\d+)?%?)\s?(?:\s?[,/]\s?(\d{0,3}(?:\.\d+)?%?)\s?)?\)$/i;
 
 /**
+ * 匹配 HSL 或 HSLA 格式颜色的正则表达式 (例如: hsl(0deg 0%, 0%), hsla(160, 100, 10, 0.5), hsla( 180 , 100 , 10 , 0.5 ), hsl(1,1,1))
+ * 也匹配新规范中的 hsla(h s l / a)
+ *
  * Regex matching color in HSL or HSLA formats (ex: hsl(0deg 0%, 0%), hsla(160, 100, 10, 0.5), hsla( 180 , 100 , 10 , 0.5 ), hsl(1,1,1))
  * Also matching hsla(h s l / a) as per new specs
  * https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/hsl
@@ -115,6 +121,8 @@ export const reHSLa = () =>
   /^hsla?\(\s?([+-]?\d{0,3}(?:\.\d+)?(?:deg|turn|rad)?)\s?[\s|,]\s?(\d{0,3}(?:\.\d+)?%?)\s?[\s|,]\s?(\d{0,3}(?:\.\d+)?%?)\s?(?:\s?[,/]\s?(\d*(?:\.\d+)?%?)\s?)?\)$/i;
 
 /**
+ * 匹配 HEX 格式颜色的正则表达式 (例如: #FF5544CC, #FF5555, 010155, aff)
+ *
  * Regex matching color in HEX format (ex: #FF5544CC, #FF5555, 010155, aff)
  */
 export const reHex = () => /^#?(([0-9a-f]){3,4}|([0-9a-f]{2}){3,4})$/i;

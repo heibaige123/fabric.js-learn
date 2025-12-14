@@ -6,6 +6,15 @@ import {
   getScrollLeftTop,
 } from '../../util/dom_misc';
 
+/**
+ * 设置 Canvas 元素的尺寸
+ * @param el Canvas 元素
+ * @param ctx Canvas 2D 上下文
+ * @param size 尺寸对象
+ * @param size.width 宽度
+ * @param size.height 高度
+ * @param retinaScaling 视网膜缩放比例，默认为 1
+ */
 export const setCanvasDimensions = (
   el: HTMLCanvasElement,
   ctx: CanvasRenderingContext2D,
@@ -21,11 +30,27 @@ export const setCanvasDimensions = (
   }
 };
 
+/**
+ * CSS 尺寸类型定义
+ */
 export type CSSDimensions = {
+  /**
+   * 宽度
+   */
   width: number | string;
+  /**
+   * 高度
+   */
   height: number | string;
 };
 
+/**
+ * 设置元素的 CSS 尺寸
+ * @param el HTML 元素
+ * @param dimensions 尺寸对象
+ * @param dimensions.width 宽度
+ * @param dimensions.height 高度
+ */
 export const setCSSDimensions = (
   el: HTMLElement,
   { width, height }: Partial<CSSDimensions>,
@@ -36,8 +61,12 @@ export const setCSSDimensions = (
 };
 
 /**
+ * 返回给定元素的偏移量
+ *
  * Returns offset for a given element
+ * @param element 要获取偏移量的元素
  * @param {HTMLElement} element Element to get offset for
+ * @returns 包含 "left" 和 "top" 属性的对象
  * @return {Object} Object with "left" and "top" properties
  */
 export function getElementOffset(element: HTMLElement) {
@@ -72,8 +101,12 @@ export function getElementOffset(element: HTMLElement) {
 }
 
 /**
+ * 使元素不可选中
+ *
  * Makes element unselectable
+ * @param element 要设置为不可选中的元素
  * @param {HTMLElement} element Element to make unselectable
+ * @returns 传入的元素
  * @return {HTMLElement} Element that was passed in
  */
 export function makeElementUnselectable(element: HTMLElement) {

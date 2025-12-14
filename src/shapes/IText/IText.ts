@@ -22,59 +22,173 @@ import type { FabricObject } from '../Object/FabricObject';
 import { createCanvasElementFor } from '../../util/misc/dom';
 import { applyCanvasTransform } from '../../util/internals/applyCanvasTransform';
 
+/**
+ * 光标边界接口
+ */
 export type CursorBoundaries = {
+  /**
+   * 光标左侧位置
+   */
   left: number;
+  /**
+   * 光标顶部位置
+   */
   top: number;
+  /**
+   * 光标左侧偏移量
+   */
   leftOffset: number;
+  /**
+   * 光标顶部偏移量
+   */
   topOffset: number;
 };
 
+/**
+ * 光标渲染数据接口
+ */
 export type CursorRenderingData = {
+  /**
+   * 光标颜色
+   */
   color: string;
+  /**
+   * 光标不透明度
+   */
   opacity: number;
+  /**
+   * 光标左侧位置
+   */
   left: number;
+  /**
+   * 光标顶部位置
+   */
   top: number;
+  /**
+   * 光标宽度
+   */
   width: number;
+  /**
+   * 光标高度
+   */
   height: number;
 };
 
 // Declare IText protected properties to workaround TS
+/**
+ * 受保护的默认值
+ */
 const protectedDefaultValues = {
+  /**
+   * 选区方向
+   */
   _selectionDirection: null,
+  /**
+   * 正则表达式，用于匹配空格字符
+   */
   _reSpace: /\s|\r?\n/,
+  /**
+   * 是否处于输入法组合模式
+   */
   inCompositionMode: false,
 };
 
+/**
+ * IText 默认值
+ */
 export const iTextDefaultValues: Partial<TClassProperties<IText>> = {
+  /**
+   * 选区开始索引
+   */
   selectionStart: 0,
+  /**
+   * 选区结束索引
+   */
   selectionEnd: 0,
+  /**
+   * 选区颜色
+   */
   selectionColor: 'rgba(17,119,255,0.3)',
+  /**
+   * 是否正在编辑
+   */
   isEditing: false,
+  /**
+   * 是否可编辑
+   */
   editable: true,
+  /**
+   * 编辑时的边框颜色
+   */
   editingBorderColor: 'rgba(102,153,255,0.25)',
+  /**
+   * 光标宽度
+   */
   cursorWidth: 2,
+  /**
+   * 光标颜色
+   */
   cursorColor: '',
+  /**
+   * 光标闪烁延迟
+   */
   cursorDelay: 1000,
+  /**
+   * 光标闪烁持续时间
+   */
   cursorDuration: 600,
+  /**
+   * 是否缓存
+   */
   caching: true,
+  /**
+   * 隐藏的 textarea 容器
+   */
   hiddenTextareaContainer: null,
+  /**
+   * 按键映射
+   */
   keysMap,
+  /**
+   * RTL 按键映射
+   */
   keysMapRtl,
+  /**
+   * 按下 Ctrl 键时的映射
+   */
   ctrlKeysMapDown,
+  /**
+   * 松开 Ctrl 键时的映射
+   */
   ctrlKeysMapUp,
   ...protectedDefaultValues,
 };
 
 // @TODO this is not complete
+/**
+ * IText 独有的属性接口
+ */
 interface UniqueITextProps {
+  /**
+   * 文本选区开始的索引（如果没有选区，则为光标位置）
+   */
   selectionStart: number;
+  /**
+   * 文本选区结束的索引
+   */
   selectionEnd: number;
 }
 
+/**
+ * 序列化的 IText 属性接口
+ */
 export interface SerializedITextProps
   extends SerializedTextProps,
     UniqueITextProps {}
 
+/**
+ * IText 属性接口
+ */
 export interface ITextProps extends TextProps, UniqueITextProps {}
 
 /**
@@ -88,6 +202,37 @@ export interface ITextProps extends TextProps, UniqueITextProps {}
  * @fires copy
  * @fires cut
  * @fires paste
+ *
+ * #### 支持的组合键
+ * ```
+ *   移动光标:                       left, right, up, down
+ *   选择字符:                       shift + left, shift + right
+ *   垂直选择文本:                   shift + up, shift + down
+ *   按单词移动光标:                 alt + left, alt + right
+ *   选择单词:                       shift + alt + left, shift + alt + right
+ *   移动光标到行首/行尾:            cmd + left, cmd + right 或 home, end
+ *   选择直到行首/行尾:              cmd + shift + left, cmd + shift + right 或 shift + home, shift + end
+ *   跳转到文本开头/结尾:            cmd + up, cmd + down
+ *   选择直到文本开头/结尾:          cmd + shift + up, cmd + shift + down 或 shift + pgUp, shift + pgDown
+ *   删除字符:                       backspace
+ *   删除单词:                       alt + backspace
+ *   删除行:                         cmd + backspace
+ *   向后删除:                       delete
+ *   复制文本:                       ctrl/cmd + c
+ *   粘贴文本:                       ctrl/cmd + v
+ *   剪切文本:                       ctrl/cmd + x
+ *   全选文本:                       ctrl/cmd + a
+ *   退出编辑                        tab 或 esc
+ * ```
+ *
+ * #### 支持的鼠标/触摸组合
+ * ```
+ *   定位光标:                       click/touch
+ *   创建选区:                       click/touch & drag
+ *   创建选区:                       click & shift + click
+ *   选择单词:                       double click
+ *   选择行:                         triple click
+ * ```
  *
  * #### Supported key combinations
  * ```
@@ -129,52 +274,69 @@ export class IText<
   implements UniqueITextProps
 {
   /**
+   * 文本选区开始的索引（如果没有选区，则为光标位置）
    * Index where text selection starts (or where cursor is when there is no selection)
    * @type Number
    */
   declare selectionStart: number;
 
   /**
+   * 文本选区结束的索引
    * Index where text selection ends
    * @type Number
    */
   declare selectionEnd: number;
 
+  /**
+   * 组合输入开始索引
+   */
   declare compositionStart: number;
 
+  /**
+   * 组合输入结束索引
+   */
   declare compositionEnd: number;
 
   /**
+   * 文本选区的颜色
    * Color of text selection
    * @type String
    */
   declare selectionColor: string;
 
   /**
+   * 指示文本是否处于编辑模式
    * Indicates whether text is in editing mode
    * @type Boolean
    */
   declare isEditing: boolean;
 
   /**
+   * 指示文本是否可编辑
    * Indicates whether a text can be edited
    * @type Boolean
    */
   declare editable: boolean;
 
   /**
+   * 文本对象处于编辑模式时的边框颜色
    * Border color of text object while it's in editing mode
    * @type String
    */
   declare editingBorderColor: string;
 
   /**
+   * 光标宽度（像素）
    * Width of cursor (in px)
    * @type Number
    */
   declare cursorWidth: number;
 
   /**
+   * 编辑模式下的文本光标颜色。
+   * 如果未设置（默认），将使用当前位置的文本颜色。
+   * 如果设置为 fabric 可以理解的颜色值，它将代替当前位置的文本颜色使用。
+   *
    * Color of text cursor color in editing mode.
    * if not set (default) will take color from the text.
    * if set to a color value that fabric can understand, it will
@@ -184,33 +346,53 @@ export class IText<
   declare cursorColor: string;
 
   /**
+   * 光标闪烁之间的延迟（毫秒）
    * Delay between cursor blink (in ms)
    * @type Number
    */
   declare cursorDelay: number;
 
   /**
+   * 光标淡入的持续时间（毫秒）
    * Duration of cursor fade in (in ms)
    * @type Number
    */
   declare cursorDuration: number;
 
+  /**
+   * 组合输入时的文本颜色
+   */
   declare compositionColor: string;
 
   /**
+   * 指示是否可以缓存内部文本字符宽度
    * Indicates whether internal text char widths can be cached
    * @type Boolean
    */
   declare caching: boolean;
 
+  /**
+   * IText 自身的默认值
+   */
   static ownDefaults = iTextDefaultValues;
 
+  /**
+   * 获取默认值
+   * @returns 默认值对象
+   */
   static getDefaults(): Record<string, any> {
     return { ...super.getDefaults(), ...IText.ownDefaults };
   }
 
+  /**
+   * 对象类型
+   */
   static type = 'IText';
 
+  /**
+   * 获取对象类型
+   * @returns 对象类型字符串
+   */
   get type() {
     const type = super.type;
     // backward compatibility
@@ -218,9 +400,10 @@ export class IText<
   }
 
   /**
+   * 构造函数
    * Constructor
-   * @param {String} text Text string
-   * @param {Object} [options] Options object
+   * @param {String} text 文本字符串
+   * @param {Object} [options] 选项对象
    */
   constructor(text: string, options?: Props) {
     super(text, { ...IText.ownDefaults, ...options } as Props);
@@ -228,10 +411,11 @@ export class IText<
   }
 
   /**
+   * 编辑时处理方式不同
    * While editing handle differently
    * @private
-   * @param {string} key
-   * @param {*} value
+   * @param {string} key 键
+   * @param {*} value 值
    */
   _set(key: string, value: any) {
     if (this.isEditing && this._savedProps && key in this._savedProps) {
@@ -248,8 +432,9 @@ export class IText<
   }
 
   /**
+   * 设置选区开始（选区的左边界）
    * Sets selection start (left boundary of a selection)
-   * @param {Number} index Index to set selection start to
+   * @param {Number} index 设置选区开始的索引
    */
   setSelectionStart(index: number) {
     index = Math.max(index, 0);
@@ -257,8 +442,9 @@ export class IText<
   }
 
   /**
+   * 设置选区结束（选区的右边界）
    * Sets selection end (right boundary of a selection)
-   * @param {Number} index Index to set selection end to
+   * @param {Number} index 设置选区结束的索引
    */
   setSelectionEnd(index: number) {
     index = Math.min(index, this.text.length);
@@ -266,7 +452,11 @@ export class IText<
   }
 
   /**
+   * 更新属性并触发事件
    * @private
+   * @param {String} property 属性名称 ('selectionStart' or 'selectionEnd')
+   * @param {Number} index 属性的新位置
+   *
    * @param {String} property 'selectionStart' or 'selectionEnd'
    * @param {Number} index new position of property
    */
@@ -282,6 +472,7 @@ export class IText<
   }
 
   /**
+   * 触发选区更改事件
    * Fires the even of selection changed
    * @private
    */
@@ -291,6 +482,11 @@ export class IText<
   }
 
   /**
+   * 初始化文本尺寸。在给定上下文中渲染所有文本
+   * 或在离屏画布上使用 measureText 获取文本宽度。
+   * 使用适当的值更新 this.width 和 this.height。
+   * 不返回尺寸。
+   *
    * Initialize text dimensions. Render all text on given context
    * or on a offscreen canvas to get the text width with measureText.
    * Updates this.width and this.height with the proper values.
@@ -303,12 +499,15 @@ export class IText<
   }
 
   /**
+   * 获取当前选区/光标（在开始位置）的样式
+   * 如果未提供 startIndex 或 endIndex，将使用 selectionStart 或 selectionEnd。
+   *
    * Gets style of a current selection/cursor (at the start position)
    * if startIndex or endIndex are not provided, selectionStart or selectionEnd will be used.
-   * @param {Number} startIndex Start index to get styles at
-   * @param {Number} endIndex End index to get styles at, if not specified selectionEnd or startIndex + 1
-   * @param {Boolean} [complete] get full style or not
-   * @return {Array} styles an array with one, zero or more Style objects
+   * @param {Number} startIndex 获取样式的起始索引
+   * @param {Number} endIndex 获取样式的结束索引，如果未指定则为 selectionEnd 或 startIndex + 1
+   * @param {Boolean} [complete] 是否获取完整样式
+   * @return {Array} 样式数组，包含一个、零个或多个样式对象
    */
   getSelectionStyles(
     startIndex: number = this.selectionStart || 0,
@@ -319,10 +518,12 @@ export class IText<
   }
 
   /**
+   * 设置当前选区的样式，如果不存在选区，则不设置任何内容。
+   *
    * Sets style of a current selection, if no selection exist, do not set anything.
-   * @param {Object} [styles] Styles object
-   * @param {Number} [startIndex] Start index to get styles at
-   * @param {Number} [endIndex] End index to get styles at, if not specified selectionEnd or startIndex + 1
+   * @param {Object} [styles] 样式对象
+   * @param {Number} [startIndex] 获取样式的起始索引
+   * @param {Number} [endIndex] 获取样式的结束索引，如果未指定则为 selectionEnd 或 startIndex + 1
    */
   setSelectionStyles(
     styles: object,
@@ -333,9 +534,11 @@ export class IText<
   }
 
   /**
+   * 返回光标（或选区开始）的 2d 表示（lineIndex 和 charIndex）
+   *
    * Returns 2d representation (lineIndex and charIndex) of cursor (or selection start)
-   * @param {Number} [selectionStart] Optional index. When not given, current selectionStart is used.
-   * @param {Boolean} [skipWrapping] consider the location for unwrapped lines. useful to manage styles.
+   * @param {Number} [selectionStart] 可选索引。如果未给出，则使用当前 selectionStart。
+   * @param {Boolean} [skipWrapping] 考虑未换行行的位置。用于管理样式。
    */
   get2DCursorLocation(
     selectionStart = this.selectionStart,
@@ -345,8 +548,9 @@ export class IText<
   }
 
   /**
+   * 渲染
    * @private
-   * @param {CanvasRenderingContext2D} ctx Context to render on
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
    */
   render(ctx: CanvasRenderingContext2D) {
     super.render(ctx);
@@ -357,8 +561,11 @@ export class IText<
   }
 
   /**
+   * 转换为 Canvas 元素
    * @override block cursor/selection logic while rendering the exported canvas
    * @todo this workaround should be replaced with a more robust solution
+   * @param {ObjectToCanvasElementOptions} [options] 选项
+   * @returns {HTMLCanvasElement} Canvas 元素
    */
   toCanvasElement(options?: ObjectToCanvasElementOptions): HTMLCanvasElement {
     const isEditing = this.isEditing;
@@ -369,6 +576,9 @@ export class IText<
   }
 
   /**
+   * 渲染光标或选区（取决于存在什么）
+   * 它在 contextTop 上进行。如果 contextTop 不可用，则不执行任何操作。
+   *
    * Renders cursor or selection (depending on what exists)
    * it does on the contextTop. If contextTop is not available, do nothing.
    */
@@ -432,11 +642,16 @@ export class IText<
   }
 
   /**
+   * 查找并返回应用于当前 FabricObject 实例的父组的剪切路径数组。
+   * 向上遍历对象的层次结构（从当前对象到画布的根），
+   * 检查每个父对象是否存在非绝对定位的 `clipPath`。
+   *
    * Finds and returns an array of clip paths that are applied to the parent
    * group(s) of the current FabricObject instance. The object's hierarchy is
    * traversed upwards (from the current object towards the root of the canvas),
    * checking each parent object for the presence of a `clipPath` that is not
    * absolutely positioned.
+   * @returns {FabricObject[]} 剪切路径数组
    */
   findAncestorsWithClipPath(): FabricObject[] {
     const clipPathAncestors: FabricObject[] = [];
@@ -453,12 +668,16 @@ export class IText<
   }
 
   /**
+   * 返回光标边界（left, top, leftOffset, topOffset）
+   * left/top 是整个文本框的 left/top
+   * leftOffset/topOffset 是相对于文本框 left/top 点的偏移量
+   *
    * Returns cursor boundaries (left, top, leftOffset, topOffset)
    * left/top are left/top of entire text box
    * leftOffset/topOffset are offset from that left/top point of a text box
    * @private
-   * @param {number} [index] index from start
-   * @param {boolean} [skipCaching]
+   * @param {number} [index] 起始索引
+   * @param {boolean} [skipCaching] 是否跳过缓存
    */
   _getCursorBoundaries(
     index: number = this.selectionStart,
@@ -476,10 +695,12 @@ export class IText<
   }
 
   /**
+   * 缓存并返回相对于实例中心点的光标 left/top 偏移量
+   *
    * Caches and returns cursor left/top offset relative to instance's center point
    * @private
-   * @param {number} index index from start
-   * @param {boolean} [skipCaching]
+   * @param {number} index 起始索引
+   * @param {boolean} [skipCaching] 是否跳过缓存
    */
   _getCursorBoundariesOffsets(
     index: number,
@@ -495,9 +716,11 @@ export class IText<
   }
 
   /**
+   * 计算相对于实例中心点的光标 left/top 偏移量
+   *
    * Calculates cursor left/top offset relative to instance's center point
    * @private
-   * @param {number} index index from start
+   * @param {number} index 起始索引
    */
   __getCursorBoundariesOffsets(index: number) {
     let topOffset = 0,
@@ -538,9 +761,14 @@ export class IText<
   }
 
   /**
+   * 在 context Top 上渲染光标，在动画周期之外，按需渲染
+   * 用于拖放效果。
+   * 如果 contextTop 不可用，则不执行任何操作。
+   *
    * Renders cursor on context Top, outside the animation cycle, on request
    * Used for the drag/drop effect.
    * If contextTop is not available, do nothing.
+   * @param {number} selectionStart 选区开始索引
    */
   renderCursorAt(selectionStart: number) {
     this._renderCursor(
@@ -551,19 +779,33 @@ export class IText<
   }
 
   /**
+   * 渲染光标
    * Renders cursor
-   * @param {Object} boundaries
-   * @param {CanvasRenderingContext2D} ctx transformed context to draw on
+   * @param {Object} boundaries 边界对象
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
    */
   renderCursor(ctx: CanvasRenderingContext2D, boundaries: CursorBoundaries) {
     this._renderCursor(ctx, boundaries, this.selectionStart);
   }
 
   /**
+   * 返回给定选区开始位置渲染光标所需的数据
+   * left, top 是相对于对象的，而 width 和 height 是预缩放的
+   * 以便在画布缩放和对象缩放时看起来一致，
+   * 所以它们取决于画布和对象缩放
+   *
    * Return the data needed to render the cursor for given selection start
    * The left,top are relative to the object, while width and height are prescaled
    * to look think with canvas zoom and object scaling,
    * so they depend on canvas and object scaling
+   *
+   * Return the data needed to render the cursor for given selection start
+   * The left,top are relative to the object, while width and height are prescaled
+   * to look think with canvas zoom and object scaling,
+   * so they depend on canvas and object scaling
+   * @param {number} [selectionStart] 选区开始索引
+   * @param {CursorBoundaries} [boundaries] 光标边界
+   * @returns {CursorRenderingData} 光标渲染数据
    */
   getCursorRenderingData(
     selectionStart: number = this.selectionStart,
@@ -596,8 +838,11 @@ export class IText<
   }
 
   /**
+   * 在给定的 selectionStart 处渲染光标。
    * Render the cursor at the given selectionStart.
-   * @param {CanvasRenderingContext2D} ctx transformed context to draw on
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   * @param {CursorBoundaries} boundaries 光标边界
+   * @param {number} selectionStart 选区开始索引
    */
   _renderCursor(
     ctx: CanvasRenderingContext2D,
@@ -612,9 +857,10 @@ export class IText<
   }
 
   /**
+   * 渲染文本选区
    * Renders text selection
-   * @param {Object} boundaries Object with left/top/leftOffset/topOffset
-   * @param {CanvasRenderingContext2D} ctx transformed context to draw on
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   * @param {Object} boundaries 边界对象，包含 left/top/leftOffset/topOffset
    */
   renderSelection(ctx: CanvasRenderingContext2D, boundaries: CursorBoundaries) {
     const selection = {
@@ -629,6 +875,7 @@ export class IText<
   }
 
   /**
+   * 渲染拖拽开始文本选区
    * Renders drag start text selection
    */
   renderDragSourceEffect() {
@@ -641,17 +888,22 @@ export class IText<
     );
   }
 
+  /**
+   * 渲染拖放目标效果
+   * @param {DragEvent} e 拖拽事件
+   */
   renderDropTargetEffect(e: DragEvent) {
     const dragSelection = this.getSelectionStartFromPointer(e);
     this.renderCursorAt(dragSelection);
   }
 
   /**
+   * 渲染文本选区
    * Renders text selection
    * @private
-   * @param {{ selectionStart: number, selectionEnd: number }} selection
-   * @param {Object} boundaries Object with left/top/leftOffset/topOffset
-   * @param {CanvasRenderingContext2D} ctx transformed context to draw on
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   * @param {{ selectionStart: number, selectionEnd: number }} selection 选区对象
+   * @param {Object} boundaries 边界对象，包含 left/top/leftOffset/topOffset
    */
   _renderSelection(
     ctx: CanvasRenderingContext2D,
@@ -734,11 +986,16 @@ export class IText<
   }
 
   /**
+   * 高级函数，用于了解光标的高度。
+   * currentChar 是光标前面的字符
+   * 返回当前光标处字符的 fontSize
+   * 库未使用，供最终用户使用
+   *
    * High level function to know the height of the cursor.
    * the currentChar is the one that precedes the cursor
    * Returns fontSize of char at the current cursor
    * Unused from the library, is for the end user
-   * @return {Number} Character font size
+   * @return {Number} 字符字体大小
    */
   getCurrentCharFontSize(): number {
     const cp = this._getCurrentCharIndex();
@@ -746,12 +1003,18 @@ export class IText<
   }
 
   /**
+   * 高级函数，用于了解光标的颜色。
+   * currentChar 是光标前面的字符
+   * 返回当前光标处字符的颜色（填充）
+   * 如果文本对象具有用于填充的图案或渐变，它将返回该图案或渐变。
+   * 库未使用，供最终用户使用
+   *
    * High level function to know the color of the cursor.
    * the currentChar is the one that precedes the cursor
    * Returns color (fill) of char at the current cursor
    * if the text object has a pattern or gradient for filler, it will return that.
    * Unused by the library, is for the end user
-   * @return {String | TFiller} Character color (fill)
+   * @return {String | TFiller} 字符颜色（填充）
    */
   getCurrentCharColor(): string | TFiller | null {
     const cp = this._getCurrentCharIndex();
@@ -759,8 +1022,10 @@ export class IText<
   }
 
   /**
+   * 返回 getCurrent.. 函数的光标位置
    * Returns the cursor position for the getCurrent.. functions
    * @private
+   * @returns {{ l: number, c: number }} 光标位置对象（行索引和字符索引）
    */
   _getCurrentCharIndex() {
     const cursorPosition = this.get2DCursorLocation(this.selectionStart, true),
@@ -769,6 +1034,9 @@ export class IText<
     return { l: cursorPosition.lineIndex, c: charIndex };
   }
 
+  /**
+   * 销毁
+   */
   dispose() {
     this.exitEditingImpl();
     this.draggableTextDelegate.dispose();

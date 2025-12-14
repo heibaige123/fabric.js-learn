@@ -3,18 +3,27 @@ import { type FabricImage } from '../shapes/Image';
 import { isJSDOM } from '../../vitest.extend';
 import TEST_IMAGE_GIF from '../../test/fixtures/test_image.gif';
 
+/**
+ * 用于测试的 SVG 字符串
+ */
 export const CANVAS_SVG =
   '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n' +
   '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="200" height="200" viewBox="0 0 200 200" xml:space="preserve">\n<desc>Created with Fabric.js ' +
   version +
   '</desc>\n<defs>\n</defs>\n</svg>';
 
+/**
+ * 带有 viewBox 属性的 SVG 字符串
+ */
 export const CANVAS_SVG_VIEWBOX =
   '<?xml version="1.0" encoding="UTF-8" standalone="no" ?>\n<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">\n' +
   '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="200" height="200" viewBox="100 100 300 300" xml:space="preserve">\n<desc>Created with Fabric.js ' +
   version +
   '</desc>\n<defs>\n</defs>\n</svg>';
 
+/**
+ * 包含矩形对象的 JSON 数据
+ */
 export const RECT_JSON = {
   version: version,
   objects: [
@@ -58,6 +67,9 @@ export const RECT_JSON = {
   overlay: 'rgba(0,0,0,0.2)',
 };
 
+/**
+ * 包含路径对象的无数据 JSON 数据（sourcePath）
+ */
 export const PATH_DATALESS_JSON = {
   version: version,
   objects: [
@@ -98,6 +110,9 @@ export const PATH_DATALESS_JSON = {
   ],
 };
 
+/**
+ * 包含路径对象的 JSON 数据
+ */
 export const PATH_JSON = {
   version: version,
   objects: [
@@ -156,6 +171,9 @@ export const PATH_JSON = {
   overlay: 'rgba(0,0,0,0.2)',
 };
 
+/**
+ * 不包含默认值的路径对象 JSON 数据
+ */
 export const PATH_WITHOUT_DEFAULTS_JSON = {
   version: version,
   objects: [
@@ -203,6 +221,9 @@ export const PATH_WITHOUT_DEFAULTS_JSON = {
   overlay: 'rgba(0,0,0,0.2)',
 };
 
+/**
+ * 包含带有 padding 和自定义属性的矩形对象的 JSON 数据
+ */
 export const RECT_JSON_WITH_PADDING = {
   version: version,
   objects: [
@@ -246,10 +267,22 @@ export const RECT_JSON_WITH_PADDING = {
   ],
 };
 
+/**
+ * 测试图片的源路径
+ */
 export const IMG_SRC = isJSDOM() ? 'test_image.gif' : TEST_IMAGE_GIF;
+/**
+ * 测试图片的宽度
+ */
 export const IMG_WIDTH = 276;
+/**
+ * 测试图片的高度
+ */
 export const IMG_HEIGHT = 110;
 
+/**
+ * 参考图片对象配置
+ */
 export const REFERENCE_IMG_OBJECT: Partial<
   FabricImage & { version: string; src: string; crossOrigin: null }
 > = {

@@ -6,36 +6,68 @@ import type { Group } from './shapes/Group';
 import type { InteractiveFabricObject } from './shapes/Object/InteractiveObject';
 import type { FabricObject } from './shapes/Object/FabricObject';
 
+/**
+ * 检查对象是否为集合（Group 或 ActiveSelection）
+ * @param {FabricObject} fabricObject 要检查的对象
+ * @returns {boolean} 如果是集合则返回 true
+ */
 export const isCollection = (
   fabricObject?: FabricObject,
 ): fabricObject is Group | ActiveSelection => {
   return !!fabricObject && Array.isArray((fabricObject as Group)._objects);
 };
 
+/**
+ * 创建集合混入
+ * @param {Constructor} Base 基类
+ * @returns {Collection} 集合类
+ */
 export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
+  /**
+   * 集合类
+   */
   class Collection extends Base {
     /**
+     * 对象列表
+     *
      * @type {FabricObject[]}
      * @TODO needs to end up in the constructor too
      */
     _objects: FabricObject[] = [];
 
+    /**
+     * 对象添加时的回调
+     * @param {FabricObject} object 被添加的对象
+     */
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _onObjectAdded(object: FabricObject) {
       // subclasses should override this method
     }
 
+    /**
+     * 对象移除时的回调
+     * @param {FabricObject} object 被移除的对象
+     */
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _onObjectRemoved(object: FabricObject) {
       // subclasses should override this method
     }
 
+    /**
+     * 堆栈顺序改变时的回调
+     * @param {FabricObject} object 改变顺序的对象
+     */
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _onStackOrderChanged(object: FabricObject) {
       // subclasses should override this method
     }
 
     /**
+     * 向集合添加对象
+     * 对象应该是 FabricObject 的实例（或继承自 FabricObject）
+     * @param {...FabricObject[]} objects 要添加的对象
+     * @returns {number} 新的数组长度
+     *
      * Adds objects to collection
      * Objects should be instances of (or inherit from) FabricObject
      * @param {...FabricObject[]} objects to add
@@ -48,6 +80,11 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
     }
 
     /**
+     * 在指定索引处向集合插入对象
+     * @param {number} index 插入对象的索引
+     * @param {...FabricObject[]} objects 要插入的对象
+     * @returns {number} 新的数组长度
+     *
      * Inserts an object into collection at specified index
      * @param {number} index Index to insert object at
      * @param {...FabricObject[]} objects Object(s) to insert
@@ -60,6 +97,11 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
     }
 
     /**
+     * 从集合中移除对象，然后渲染画布（如果 `renderOnAddRemove` 不为 `false`）
+     * @private
+     * @param {...FabricObject[]} objects 要移除的对象
+     * @returns {FabricObject[]} 已移除的对象
+     *
      * Removes objects from a collection, then renders canvas (if `renderOnAddRemove` is not `false`)
      * @private
      * @param {...FabricObject[]} objects objects to remove
@@ -81,6 +123,13 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
     }
 
     /**
+     * 对此组中的每个对象执行给定函数
+     * getObjects().forEach 的简单快捷方式，在 es6 之前比较复杂，
+     * 现在只是一个快捷方式。
+     * @param {Function} callback
+     *                   回调函数，第一个参数为当前对象，
+     *                   第二个参数为索引，第三个参数为所有对象的数组。
+     *
      * Executes given function for each object in this group
      * A simple shortcut for getObjects().forEach, before es6 was more complicated,
      * now is just a shortcut.
@@ -101,6 +150,10 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
     }
 
     /**
+     * 返回此实例的子对象数组
+     * @param {...String} [types] 指定时，仅返回这些类型的对象
+     * @return {Array} 对象数组
+     *
      * Returns an array of children objects of this instance
      * @param {...String} [types] When specified, only objects of these types are returned
      * @return {Array}
@@ -113,6 +166,10 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
     }
 
     /**
+     * 返回指定索引处的对象
+     * @param {Number} index 索引
+     * @return {Object} 指定索引处的对象
+     *
      * Returns object at specified index
      * @param {Number} index
      * @return {Object} object at index
@@ -122,6 +179,9 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
     }
 
     /**
+     * 如果集合不包含任何对象，则返回 true
+     * @return {Boolean} 如果集合为空则返回 true
+     *
      * Returns true if collection contains no objects
      * @return {Boolean} true if collection is empty
      */
@@ -130,6 +190,9 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
     }
 
     /**
+     * 返回集合的大小（即：包含其对象的数组的长度）
+     * @return {Number} 集合大小
+     *
      * Returns a size of a collection (i.e: length of an array containing its objects)
      * @return {Number} Collection size
      */
@@ -138,6 +201,13 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
     }
 
     /**
+     * 如果集合包含某个对象，则返回 true。\
+     * **出于性能原因，建议使用 {@link FabricObject#isDescendantOf}**
+     * 而不是 `a.contains(b)`，请使用 `b.isDescendantOf(a)`
+     * @param {Object} object 要检查的对象
+     * @param {Boolean} [deep=false] `true` 检查所有后代，`false` 仅检查 `_objects`
+     * @return {Boolean} 如果集合包含该对象，则返回 `true`
+     *
      * Returns true if collection contains an object.\
      * **Prefer using {@link FabricObject#isDescendantOf} for performance reasons**
      * instead of `a.contains(b)` use `b.isDescendantOf(a)`
@@ -159,6 +229,9 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
     }
 
     /**
+     * 返回集合复杂度的数字表示
+     * @return {Number} 复杂度
+     *
      * Returns number representation of a collection complexity
      * @return {Number} complexity
      */
@@ -170,6 +243,10 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
     }
 
     /**
+     * 将一个对象或多选的对象移动到绘制对象堆栈的底部
+     * @param {fabric.Object} object 要发送到背面的对象
+     * @returns {boolean} 如果发生更改则返回 true
+     *
      * Moves an object or the objects of a multiple selection
      * to the bottom of the stack of drawn objects
      * @param {fabric.Object} object Object to send to back
@@ -186,6 +263,10 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
     }
 
     /**
+     * 将一个对象或多选的对象移动到绘制对象堆栈的顶部
+     * @param {fabric.Object} object 要发送到顶部的对象
+     * @returns {boolean} 如果发生更改则返回 true
+     *
      * Moves an object or the objects of a multiple selection
      * to the top of the stack of drawn objects
      * @param {fabric.Object} object Object to send
@@ -202,6 +283,13 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
     }
 
     /**
+     * 在绘制对象堆栈中向下移动对象或选择
+     * 可选参数 `intersecting` 允许将对象移动到第一个相交对象的后面。
+     * 相交是通过边界框计算的。如果未找到相交，则堆栈不会发生变化。
+     * @param {fabric.Object} object 要发送的对象
+     * @param {boolean} [intersecting] 如果为 `true`，则将对象发送到下一个较低的相交对象后面
+     * @returns {boolean} 如果发生更改则返回 true
+     *
      * Moves an object or a selection down in stack of drawn objects
      * An optional parameter, `intersecting` allows to move the object in behind
      * the first intersecting object. Where intersection is calculated with
@@ -228,6 +316,13 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
     }
 
     /**
+     * 在绘制对象堆栈中向上移动对象或选择
+     * 可选参数 `intersecting` 允许将对象移动到第一个相交对象的前面。
+     * 相交是通过边界框计算的。如果未找到相交，则堆栈不会发生变化。
+     * @param {fabric.Object} object 要发送的对象
+     * @param {boolean} [intersecting] 如果为 `true`，则将对象发送到下一个较高的相交对象前面
+     * @returns {boolean} 如果发生更改则返回 true
+     *
      * Moves an object or a selection up in stack of drawn objects
      * An optional parameter, intersecting allows to move the object in front
      * of the first intersecting object. Where intersection is calculated with
@@ -254,6 +349,11 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
     }
 
     /**
+     * 将对象移动到绘制对象堆栈中的指定级别
+     * @param {fabric.Object} object 要发送的对象
+     * @param {number} index 要移动到的位置
+     * @returns {boolean} 如果发生更改则返回 true
+     *
      * Moves an object to specified level in stack of drawn objects
      * @param {fabric.Object} object Object to send
      * @param {number} index Position to move to
@@ -269,6 +369,13 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
       return true;
     }
 
+    /**
+     * 查找新的较低索引
+     * @param {FabricObject} object 对象
+     * @param {number} idx 当前索引
+     * @param {boolean} [intersecting] 是否检查相交
+     * @returns {number} 新索引
+     */
     findNewLowerIndex(
       object: FabricObject,
       idx: number,
@@ -292,6 +399,13 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
       return newIdx;
     }
 
+    /**
+     * 查找新的较高索引
+     * @param {FabricObject} object 对象
+     * @param {number} idx 当前索引
+     * @param {boolean} [intersecting] 是否检查相交
+     * @returns {number} 新索引
+     */
     findNewUpperIndex(
       object: FabricObject,
       idx: number,
@@ -316,6 +430,13 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
     }
 
     /**
+     * 给定一个边界框，返回集合中包含在该边界框内的所有对象。
+     * 如果 `includeIntersecting` 为 true，则也返回与边界框相交的对象。
+     * 这旨在与选择一起使用。不是通用方法。
+     * @param {TBBox} bbox 场景坐标中的边界框
+     * @param {{ includeIntersecting?: boolean }} options 包含 includeIntersecting 的对象
+     * @returns 包含在边界框中的对象数组，按堆栈顺序从上到下排列
+     *
      * Given a bounding box, return all the objects of the collection that are contained in the bounding box.
      * If `includeIntersecting` is true, return also the objects that intersect the bounding box as well.
      * This is meant to work with selection. Is not a generic method.

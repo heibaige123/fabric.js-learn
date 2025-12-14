@@ -10,19 +10,30 @@ import type { WebGLFilterBackend } from './WebGLFilterBackend';
 import { classRegistry } from '../ClassRegistry';
 import { fragmentSource, vertexSource } from './shaders/blendImage';
 
+/**
+ * 图像混合模式类型
+ */
 export type TBlendImageMode = 'multiply' | 'mask';
 
+/**
+ * BlendImage 滤镜的自有属性
+ */
 type BlendImageOwnProps = {
   mode: TBlendImageMode;
   alpha: number;
 };
 
+/**
+ * BlendImage 滤镜的默认值
+ */
 export const blendImageDefaultValues: BlendImageOwnProps = {
   mode: 'multiply',
   alpha: 1,
 };
 
 /**
+ * 图像混合滤镜类
+ *
  * Image Blend filter class
  * @example
  * const filter = new filters.BlendColor({
@@ -40,11 +51,17 @@ export const blendImageDefaultValues: BlendImageOwnProps = {
  */
 export class BlendImage extends BaseFilter<'BlendImage', BlendImageOwnProps> {
   /**
+   * 用于混合操作的图像。
+   *
    * Image to make the blend operation with.
    **/
   declare image: FabricImage;
 
   /**
+   * 滤镜的混合模式：'multiply' 或 'mask'。
+   * 'multiply' 将滤镜图像的每个通道（R、G、B 和 A）的值乘以基础图像中的对应值。
+   * 'mask' 将仅查看滤镜图像的 alpha 通道，并将这些值应用于基础图像的 alpha 通道。
+   *
    * Blend mode for the filter: either 'multiply' or 'mask'. 'multiply' will
    * multiply the values of each channel (R, G, B, and A) of the filter image by
    * their corresponding values in the base image. 'mask' will only look at the
@@ -55,6 +72,9 @@ export class BlendImage extends BaseFilter<'BlendImage', BlendImageOwnProps> {
   declare mode: BlendImageOwnProps['mode'];
 
   /**
+   * alpha 值。表示混合图像操作的强度。
+   * 未实现。
+   *
    * alpha value. represent the strength of the blend image operation.
    * not implemented.
    **/
@@ -66,18 +86,34 @@ export class BlendImage extends BaseFilter<'BlendImage', BlendImageOwnProps> {
 
   static uniformLocations = ['uTransformMatrix', 'uImage'];
 
+  /**
+   * 获取缓存键
+   * @returns 缓存键字符串
+   */
   getCacheKey() {
     return `${this.type}_${this.mode}`;
   }
 
+  /**
+   * 获取片段着色器源码
+   * @returns 片段着色器源码字符串
+   */
   getFragmentSource(): string {
     return fragmentSource[this.mode];
   }
 
+  /**
+   * 获取顶点着色器源码
+   * @returns 顶点着色器源码字符串
+   */
   getVertexSource(): string {
     return vertexSource;
   }
 
+  /**
+   * 应用于 WebGL 上下文
+   * @param options WebGL 管道状态
+   */
   applyToWebGL(options: TWebGLPipelineState) {
     const gl = options.context,
       texture = this.createTexture(options.filterBackend, this.image);
@@ -86,15 +122,23 @@ export class BlendImage extends BaseFilter<'BlendImage', BlendImageOwnProps> {
     this.unbindAdditionalTexture(gl, gl.TEXTURE1);
   }
 
+  /**
+   * 创建纹理
+   * @param backend WebGL 滤镜后端
+   * @param image Fabric 图像对象
+   * @returns WebGL 纹理
+   */
   createTexture(backend: WebGLFilterBackend, image: FabricImage) {
     return backend.getCachedTexture(image.cacheKey, image.getElement());
   }
 
   /**
+   * 计算变换矩阵以适应要混合的图像
+   *
    * Calculate a transformMatrix to adapt the image to blend over
-   * @param {Object} options
-   * @param {WebGLRenderingContext} options.context The GL context used for rendering.
-   * @param {Object} options.programCache A map of compiled shader programs, keyed by filter type.
+   * @param {Object} options 选项
+   * @param {WebGLRenderingContext} options.context The GL context used for rendering. 用于渲染的 GL 上下文。
+   * @param {Object} options.programCache A map of compiled shader programs, keyed by filter type. 已编译着色器程序的映射，以滤镜类型为键。
    */
   calculateMatrix() {
     const image = this.image,
@@ -113,10 +157,12 @@ export class BlendImage extends BaseFilter<'BlendImage', BlendImageOwnProps> {
   }
 
   /**
+   * 将混合操作应用于表示图像像素的 Uint8ClampedArray。
+   *
    * Apply the Blend operation to a Uint8ClampedArray representing the pixels of an image.
    *
-   * @param {Object} options
-   * @param {ImageData} options.imageData The Uint8ClampedArray to be filtered.
+   * @param {Object} options 选项
+   * @param {ImageData} options.imageData The Uint8ClampedArray to be filtered. 要过滤的 Uint8ClampedArray。
    */
   applyTo2d({
     imageData: { data, width, height },
@@ -170,10 +216,12 @@ export class BlendImage extends BaseFilter<'BlendImage', BlendImageOwnProps> {
   }
 
   /**
+   * 将数据从此滤镜发送到其着色器程序的 uniform。
+   *
    * Send data from this filter to its shader program's uniforms.
    *
-   * @param {WebGLRenderingContext} gl The GL canvas context used to compile this filter's shader.
-   * @param {Object} uniformLocations A map of string uniform names to WebGLUniformLocation objects
+   * @param {WebGLRenderingContext} gl The GL canvas context used to compile this filter's shader. 用于编译此滤镜着色器的 GL 画布上下文。
+   * @param {Object} uniformLocations A map of string uniform names to WebGLUniformLocation objects 字符串 uniform 名称到 WebGLUniformLocation 对象的映射
    */
   sendUniformData(
     gl: WebGLRenderingContext,
@@ -185,10 +233,14 @@ export class BlendImage extends BaseFilter<'BlendImage', BlendImageOwnProps> {
   }
 
   /**
+   * 返回实例的对象表示
+   * TODO: 更好地处理缺少图像的可能性。
+   * 目前，没有图像的 BlendImage 滤镜不能与 fromObject 一起使用
+   *
    * Returns object representation of an instance
    * TODO: Handle the possibility of missing image better.
    * As of now a BlendImage filter without image can't be used with fromObject
-   * @return {Object} Object representation of an instance
+   * @return {Object} Object representation of an instance 实例的对象表示
    */
   toObject(): {
     type: 'BlendImage';
@@ -201,10 +253,12 @@ export class BlendImage extends BaseFilter<'BlendImage', BlendImageOwnProps> {
   }
 
   /**
+   * 从对象表示创建滤镜实例
+   *
    * Create filter instance from an object representation
-   * @param {object} object Object to create an instance from
-   * @param {object} [options]
-   * @param {AbortSignal} [options.signal] handle aborting image loading, see https://developer.mozilla.org/en-US/docs/Web/API/AbortController/signal
+   * @param {object} object Object to create an instance from 用于创建实例的对象
+   * @param {object} [options] 选项
+   * @param {AbortSignal} [options.signal] handle aborting image loading, see https://developer.mozilla.org/en-US/docs/Web/API/AbortController/signal 处理中止图像加载
    * @returns {Promise<BlendImage>}
    */
   static async fromObject(

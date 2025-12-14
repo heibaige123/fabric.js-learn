@@ -50,9 +50,16 @@ import type { Pattern } from '../../Pattern';
 import type { CSSRules } from '../../parser/typedefs';
 import { normalizeWs } from '../../util/internals/normalizeWhiteSpace';
 
+/**
+ * 共享的画布上下文，用于测量文本宽度和高度。
+ * 该上下文创建一次并重用，以避免为每个测量操作创建新画布元素的开销。
+ */
 let measuringContext: CanvasRenderingContext2D | null;
 
 /**
+ * 返回用于测量文本字符串的上下文。
+ * 如果已创建，则将其存储以供重用
+ *
  * Return a context for measurement of text string.
  * if created it gets stored for reuse
  */
@@ -67,10 +74,19 @@ function getMeasuringContext() {
   return measuringContext;
 }
 
+/**
+ * 路径侧边类型
+ */
 export type TPathSide = 'left' | 'right';
 
+/**
+ * 路径对齐类型
+ */
 export type TPathAlign = 'baseline' | 'center' | 'ascender' | 'descender';
 
+/**
+ * 文本行信息接口
+ */
 export type TextLinesInfo = {
   lines: string[];
   graphemeLines: string[][];
@@ -78,6 +94,9 @@ export type TextLinesInfo = {
   _unwrappedLines: string[][];
 };
 
+/**
+ * 文本对齐类型
+ */
 export type TextAlign =
   | typeof LEFT
   | typeof CENTER
@@ -87,9 +106,16 @@ export type TextAlign =
   | typeof JUSTIFY_CENTER
   | typeof JUSTIFY_RIGHT;
 
+/**
+ * 字体样式类型
+ */
 export type FontStyle = '' | typeof NORMAL | 'italic' | 'oblique';
 
 /**
+ * 测量并返回单个字素的信息。
+ * 需要已填充先前字素的信息
+ * 覆盖以自定义测量
+ *
  * Measure and return the info of a single grapheme.
  * needs the the info of previous graphemes already filled
  * Override to customize measuring
@@ -106,35 +132,98 @@ export type GraphemeBBox = {
 };
 
 // @TODO this is not complete
+/**
+ * 文本独有的属性接口
+ */
 interface UniqueTextProps {
+  /**
+   * 字符间距
+   */
   charSpacing: number;
+  /**
+   * 行高
+   */
   lineHeight: number;
+  /**
+   * 字体大小
+   */
   fontSize: number;
+  /**
+   * 字体粗细
+   */
   fontWeight: string | number;
+  /**
+   * 字体族
+   */
   fontFamily: string;
+  /**
+   * 字体样式
+   */
   fontStyle: FontStyle;
+  /**
+   * 路径侧边
+   */
   pathSide: TPathSide;
+  /**
+   * 路径对齐
+   */
   pathAlign: TPathAlign;
+  /**
+   * 下划线
+   */
   underline: boolean;
+  /**
+   * 上划线
+   */
   overline: boolean;
+  /**
+   * 删除线
+   */
   linethrough: boolean;
+  /**
+   * 文本对齐
+   */
   textAlign: TextAlign;
+  /**
+   * 文本方向
+   */
   direction: CanvasDirection;
+  /**
+   * 路径
+   */
   path?: Path;
+  /**
+   * 文本装饰厚度
+   */
   textDecorationThickness: number;
 }
 
+/**
+ * 序列化的文本属性接口
+ */
 export interface SerializedTextProps
   extends SerializedObjectProps,
     UniqueTextProps {
+  /**
+   * 样式
+   */
   styles: TextStyleArray | TextStyle;
 }
 
+/**
+ * 文本属性接口
+ */
 export interface TextProps extends FabricObjectProps, UniqueTextProps {
+  /**
+   * 样式
+   */
   styles: TextStyle;
 }
 
 /**
+ * 文本类
+ * @see {@link http://fabric5.fabricjs.com/fabric-intro-part-2#text}
+ *
  * Text class
  * @see {@link http://fabric5.fabricjs.com/fabric-intro-part-2#text}
  */
@@ -147,6 +236,8 @@ export class FabricText<
   implements UniqueTextProps
 {
   /**
+   * 更改时需要重新计算文本布局的属性
+   *
    * Properties that requires a text layout recalculation when changed
    * @type string[]
    * @protected
@@ -159,6 +250,9 @@ export class FabricText<
   declare _reNewline: RegExp;
 
   /**
+   * 使用此正则表达式过滤非换行符的空格。
+   * 主要用于文本“两端对齐”时。
+   *
    * Use this regular expression to filter for whitespaces that is not a new line.
    * Mostly used when text is 'justify' aligned.
    * @private
@@ -166,6 +260,9 @@ export class FabricText<
   declare _reSpacesAndTabs: RegExp;
 
   /**
+   * 使用此正则表达式过滤非换行符的空格。
+   * 主要用于文本“两端对齐”时。
+   *
    * Use this regular expression to filter for whitespace that is not a new line.
    * Mostly used when text is 'justify' aligned.
    * @private
@@ -173,51 +270,72 @@ export class FabricText<
   declare _reSpaceAndTab: RegExp;
 
   /**
+   * 使用此正则表达式过滤连续的非空格组。
+   * 主要用于文本“两端对齐”时。
+   *
    * Use this regular expression to filter consecutive groups of non spaces.
    * Mostly used when text is 'justify' aligned.
    * @private
    */
   declare _reWords: RegExp;
 
+  /**
+   * 文本内容
+   */
   declare text: string;
 
   /**
+   * 字体大小（以像素为单位）
+   *
    * Font size (in pixels)
    * @type Number
    */
   declare fontSize: number;
 
   /**
+   * 字体粗细（例如 bold, normal, 400, 600, 800）
+   *
    * Font weight (e.g. bold, normal, 400, 600, 800)
    * @type {(Number|String)}
    */
   declare fontWeight: string | number;
 
   /**
+   * 字体族
+   *
    * Font family
    * @type String
    */
   declare fontFamily: string;
 
   /**
+   * 文本装饰下划线。
+   *
    * Text decoration underline.
    * @type Boolean
    */
   declare underline: boolean;
 
   /**
+   * 文本装饰上划线。
+   *
    * Text decoration overline.
    * @type Boolean
    */
   declare overline: boolean;
 
   /**
+   * 文本装饰删除线。
+   *
    * Text decoration linethrough.
    * @type Boolean
    */
   declare linethrough: boolean;
 
   /**
+   * 文本对齐方式。可能的值："left", "center", "right", "justify",
+   * "justify-left", "justify-center" 或 "justify-right"。
+   *
    * Text alignment. Possible values: "left", "center", "right", "justify",
    * "justify-left", "justify-center" or "justify-right".
    * @type TextAlign
@@ -225,27 +343,37 @@ export class FabricText<
   declare textAlign: TextAlign;
 
   /**
+   * 字体样式。可能的值："", "normal", "italic" 或 "oblique"。
+   *
    * Font style . Possible values: "", "normal", "italic" or "oblique".
    * @type FontStyle
    */
   declare fontStyle: FontStyle;
 
   /**
+   * 行高
+   *
    * Line height
    * @type Number
    */
   declare lineHeight: number;
 
   /**
+   * 上标模式对象（最小重叠）
+   *
    * Superscript schema object (minimum overlap)
    */
   declare superscript: {
     /**
+     * 字体大小因子
+     *
      * fontSize factor
      * @default 0.6
      */
     size: number;
     /**
+     * 基线偏移因子（向上）
+     *
      * baseline-shift factor (upwards)
      * @default -0.35
      */
@@ -253,15 +381,21 @@ export class FabricText<
   };
 
   /**
+   * 下标模式对象（最小重叠）
+   *
    * Subscript schema object (minimum overlap)
    */
   declare subscript: {
     /**
+     * 字体大小因子
+     *
      * fontSize factor
      * @default 0.6
      */
     size: number;
     /**
+     * 基线偏移因子（向下）
+     *
      * baseline-shift factor (downwards)
      * @default 0.11
      */
@@ -269,14 +403,25 @@ export class FabricText<
   };
 
   /**
+   * 文本行的背景颜色
+   *
    * Background color of text lines
    * @type String
    */
   declare textBackgroundColor: string;
 
+  /**
+   * 样式
+   */
   declare styles: TextStyle;
 
   /**
+   * 文本应遵循的路径。
+   * 自 4.6.0 起，路径将自动绘制。
+   * 如果你想让路径可见，给它一个 stroke 和 strokeWidth 或 fill 值
+   * 如果你想让它隐藏，将 visible = false 分配给路径。
+   * 此功能处于 BETA 阶段，尚不支持 SVG 导入/导出。
+   *
    * Path that the text should follow.
    * since 4.6.0 the path will be drawn automatically.
    * if you want to make the path visible, give it a stroke and strokeWidth or fill value
@@ -300,6 +445,14 @@ export class FabricText<
   declare path?: Path;
 
   /**
+   * 下划线、上划线和删除线的文本装饰厚度
+   * 厚度以 fontSize 的千分比 (em) 表示。
+   * 原始值为 1/15，转换为 66.6667 千分比。
+   * 选择度量单位是为了与 charSpacing 对齐。
+   * 您可以毫无问题地减小厚度，而较大的下划线或上划线可能会超出文本的边界框。
+   * 为了解决这个问题，需要对代码进行更大的重构，目前超出了范围。
+   * 如果您需要在第一行文本上使用如此大的上划线或在最后一行文本上使用大的下划线，请考虑禁用缓存作为解决方法
+   *
    * The text decoration tickness for underline, overline and strikethrough
    * The tickness is expressed in thousandths of fontSize ( em ).
    * The original value was 1/15 that translates to 66.6667 thousandths.
@@ -314,12 +467,18 @@ export class FabricText<
   declare textDecorationThickness: number;
 
   /**
+   * 文本路径起始位置的偏移量
+   * 仅当文本具有路径时使用
+   *
    * Offset amount for text path starting position
    * Only used when text has a path
    */
   declare pathStartOffset: number;
 
   /**
+   * 文本应绘制在路径的哪一侧。
+   * 仅当文本具有路径时使用
+   *
    * Which side of the path the text should be drawn on.
    * Only used when text has a path
    * @type {TPathSide} 'left|right'
@@ -327,6 +486,10 @@ export class FabricText<
   declare pathSide: TPathSide;
 
   /**
+   * 文本如何与路径对齐。此属性确定每个字符相对于路径的垂直位置。
+   * （"baseline", "center", "ascender", "descender" 之一）
+   * 此功能处于 BETA 阶段，其行为可能会更改
+   *
    * How text is aligned to the path. This property determines
    * the perpendicular position of each character relative to the path.
    * (one of "baseline", "center", "ascender", "descender")
@@ -346,12 +509,17 @@ export class FabricText<
   declare offsets: { underline: number; linethrough: number; overline: number };
 
   /**
+   * 文本行与字体大小的比例（以像素为单位）
+   *
    * Text Line proportion to font Size (in pixels)
    * @type Number
    */
   declare _fontSizeMult: number;
 
   /**
+   * 字符之间的额外空间
+   * 以千分之 em 单位表示
+   *
    * additional space between characters
    * expressed in thousands of em unit
    * @type Number
@@ -359,12 +527,20 @@ export class FabricText<
   declare charSpacing: number;
 
   /**
+   * 基线偏移，仅样式，对于主文本对象保持为 0
+   *
    * Baseline shift, styles only, keep at 0 for the main text object
    * @type {Number}
    */
   declare deltaY: number;
 
   /**
+   * 警告：实验性。尚未支持
+   * 确定文本的方向。
+   * 必须与 textAlign 和 originX 一起手动设置以获得正确的体验。
+   * 一些有趣的未来链接
+   * https://www.w3.org/International/questions/qa-bidi-unicode-controls
+   *
    * WARNING: EXPERIMENTAL. NOT SUPPORTED YET
    * determine the direction of the text.
    * This has to be set manually together with textAlign and originX for proper
@@ -377,6 +553,10 @@ export class FabricText<
   declare direction: CanvasDirection;
 
   /**
+   * 包含字符边界框
+   * 此变量被认为是受保护的。
+   * 但由于目前 mixin 的实现方式，我们不能将其保留为私有
+   *
    * contains characters bounding boxes
    * This variable is considered to be protected.
    * But for how mixins are implemented right now, we can't leave it private
@@ -385,6 +565,8 @@ export class FabricText<
   __charBounds: GraphemeBBox[][] = [];
 
   /**
+   * 测量文本时使用此大小。为了避免 IE11 舍入误差
+   *
    * use this size when measuring text. To avoid IE11 rounding errors
    * @type {Number}
    * @readonly
@@ -393,12 +575,17 @@ export class FabricText<
   declare CACHE_FONT_SIZE: number;
 
   /**
+   * 包含最小文本宽度以避免获得 0
+   *
    * contains the min text width to avoid getting 0
    * @type {Number}
    */
   declare MIN_TEXT_WIDTH: number;
 
   /**
+   * 包含对象的文本，按屏幕上显示的行划分。
+   * 换行将独立于换行符划分文本
+   *
    * contains the the text of the object, divided in lines as they are displayed
    * on screen. Wrapping will divide the text independently of line breaks
    * @type {string[]}
@@ -406,28 +593,66 @@ export class FabricText<
   declare textLines: string[];
 
   /**
+   * 与 textLines 相同，但每行是由 splitByGrapheme 分割的字素数组
+   *
    * same as textlines, but each line is an array of graphemes as split by splitByGrapheme
    * @type {string[]}
    */
   declare _textLines: string[][];
 
+  /**
+   * 未换行的文本行
+   */
   declare _unwrappedTextLines: string[][];
+  /**
+   * 文本数组
+   */
   declare _text: string[];
+  /**
+   * 光标宽度
+   */
   declare cursorWidth: number;
+  /**
+   * 行高数组
+   */
   declare __lineHeights: number[];
+  /**
+   * 行宽数组
+   */
   declare __lineWidths: number[];
+  /**
+   * 是否已初始化
+   */
   declare initialized?: true;
 
+  /**
+   * 缓存属性
+   */
   static cacheProperties = [...cacheProperties, ...additionalProps];
 
+  /**
+   * 自身默认值
+   */
   static ownDefaults = textDefaultValues;
 
+  /**
+   * 类型
+   */
   static type = 'Text';
 
+  /**
+   * 获取默认值
+   * @returns 默认值对象
+   */
   static getDefaults(): Record<string, any> {
     return { ...super.getDefaults(), ...FabricText.ownDefaults };
   }
 
+  /**
+   * 构造函数
+   * @param text 文本内容
+   * @param options 选项
+   */
   constructor(text: string, options?: Props) {
     super();
     Object.assign(this, FabricText.ownDefaults);
@@ -445,6 +670,8 @@ export class FabricText<
   }
 
   /**
+   * 如果文本有路径，它将添加路径和文本计算所需的额外信息
+   *
    * If text has a path, it will add the extra information needed
    * for path and text calculations
    */
@@ -456,6 +683,9 @@ export class FabricText<
   }
 
   /**
+   * 将文本分割为文本行和字素行。
+   * @private
+   *
    * @private
    * Divides text into lines of text and lines of graphemes.
    */
@@ -469,6 +699,10 @@ export class FabricText<
   }
 
   /**
+   * 初始化或更新文本尺寸。
+   * 使用适当的值更新 this.width and this.height。
+   * 不返回尺寸。
+   *
    * Initialize or update text dimensions.
    * Updates this.width and this.height with the proper values.
    * Does not return dimensions.
@@ -492,6 +726,8 @@ export class FabricText<
   }
 
   /**
+   * 扩大空格框并移动其他框
+   *
    * Enlarge space boxes and shift the others
    */
   enlargeSpaces() {
@@ -534,6 +770,11 @@ export class FabricText<
   }
 
   /**
+   * 检测文本行是否以硬换行符结束
+   * text 和 itext 没有换行，返回 false
+   * @param lineIndex 行索引
+   * @returns 是否为换行结束
+   *
    * Detect if the text line is ended with an hard break
    * text and itext do not have wrapping, return false
    * @return {Boolean}
@@ -543,6 +784,12 @@ export class FabricText<
   }
 
   /**
+   * 检测一行是否有换行符，因此我们在移动和计算样式时需要考虑它。
+   * 对于 text 和 Itext，它总是返回 1。Textbox 有自己的实现
+   * @param lineIndex 行索引
+   * @param skipWrapping 是否跳过换行
+   * @returns 换行符偏移量
+   *
    * Detect if a line has a linebreak and so we need to account for it when moving
    * and counting style.
    * It return always 1 for text and Itext. Textbox has its own implementation
@@ -554,9 +801,11 @@ export class FabricText<
   }
 
   /**
+   * 返回光标的 2d 表示（lineIndex 和 charIndex）
+   *
    * Returns 2d representation (lineIndex and charIndex) of cursor
-   * @param {Number} selectionStart
-   * @param {Boolean} [skipWrapping] consider the location for unwrapped lines. useful to manage styles.
+   * @param {Number} selectionStart 选区开始位置
+   * @param {Boolean} [skipWrapping] 考虑未换行行的位置。用于管理样式。
    */
   get2DCursorLocation(selectionStart: number, skipWrapping?: boolean) {
     const lines = skipWrapping ? this._unwrappedTextLines : this._textLines;
@@ -581,6 +830,9 @@ export class FabricText<
   }
 
   /**
+   * 返回实例的字符串表示形式
+   * @returns 文本对象的字符串表示形式
+   *
    * Returns string representation of an instance
    * @return {String} String representation of text object
    */
@@ -591,6 +843,10 @@ export class FabricText<
   }
 
   /**
+   * 返回创建足够大以容纳要缓存的对象的缓存画布所需的尺寸和缩放级别。
+   * @private
+   * @returns 缓存画布尺寸
+   *
    * Return the dimension and the zoom level needed to create a cache canvas
    * big enough to host the object to be cached.
    * @private
@@ -610,6 +866,10 @@ export class FabricText<
   }
 
   /**
+   * 渲染
+   * @private
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   *
    * @private
    * @param {CanvasRenderingContext2D} ctx Context to render on
    */
@@ -625,6 +885,10 @@ export class FabricText<
   }
 
   /**
+   * 渲染文本
+   * @private
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   *
    * @private
    * @param {CanvasRenderingContext2D} ctx Context to render on
    */
@@ -639,6 +903,12 @@ export class FabricText<
   }
 
   /**
+   * 使用对象属性或 charStyle 设置上下文的字体参数
+   * @private
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   * @param {Object} [charStyle] 具有字体样式属性的对象
+   * @param {Boolean} [forMeasuring] 是否用于测量
+   *
    * Set the font parameter of the context with the object properties or with charStyle
    * @private
    * @param {CanvasRenderingContext2D} ctx Context to render on
@@ -671,6 +941,10 @@ export class FabricText<
   }
 
   /**
+   * 计算并返回测量每行的文本宽度。
+   * @private
+   * @returns 文本对象的最大宽度
+   *
    * calculate and return the text Width measuring each line.
    * @private
    * @param {CanvasRenderingContext2D} ctx Context to render on
@@ -689,6 +963,15 @@ export class FabricText<
   }
 
   /**
+   * 渲染文本行
+   * @private
+   * @param {String} method 方法名称 ("fillText" 或 "strokeText")
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   * @param {String} line 要渲染的文本
+   * @param {Number} left 文本的左侧位置
+   * @param {Number} top 文本的顶部位置
+   * @param {Number} lineIndex 文本中行的索引
+   *
    * @private
    * @param {String} method Method name ("fillText" or "strokeText")
    * @param {CanvasRenderingContext2D} ctx Context to render on
@@ -709,6 +992,10 @@ export class FabricText<
   }
 
   /**
+   * 渲染行的文本背景，注意样式
+   * @private
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   *
    * Renders the text background for lines, taking care of style
    * @private
    * @param {CanvasRenderingContext2D} ctx Context to render on
@@ -787,6 +1074,14 @@ export class FabricText<
   }
 
   /**
+   * 测量并返回单个字符的宽度。
+   * 可能被覆盖以适应不同的测量逻辑或挂钩一些外部库进行字符测量
+   * @private
+   * @param {String} _char 要测量的字符
+   * @param {Object} charStyle 要测量的字符的样式
+   * @param {String} [previousChar] 上一个字符
+   * @param {Object} [prevCharStyle] 上一个字符的样式
+   *
    * measure and return the width of a single character.
    * possibly overridden to accommodate different measure logic or
    * to hook some external lib for character measurement
@@ -855,6 +1150,11 @@ export class FabricText<
   }
 
   /**
+   * 计算给定位置字符的高度
+   * @param {Number} line 行索引号
+   * @param {Number} _char 字符索引号
+   * @returns {Number} 字符的 fontSize
+   *
    * Computes height of character at given position
    * @param {Number} line the line index number
    * @param {Number} _char the character index number
@@ -865,6 +1165,9 @@ export class FabricText<
   }
 
   /**
+   * 测量文本行，测量所有字符。
+   * @param {Number} lineIndex 行号
+   *
    * measure a text line measuring all characters.
    * @param {Number} lineIndex line number
    */
@@ -880,6 +1183,11 @@ export class FabricText<
   }
 
   /**
+   * 测量一行的每个字素，填充 __charBounds
+   * @param {Number} lineIndex 行索引
+   * @returns {Object} object.width 字符总宽度
+   * @returns {Object} object.numOfSpaces 匹配 this._reSpacesAndTabs 的字符长度
+   *
    * measure every grapheme of a line, populating __charBounds
    * @param {Number} lineIndex
    * @return {Object} object.width total width of characters
@@ -951,6 +1259,12 @@ export class FabricText<
   }
 
   /**
+   * 计算跟随路径的字符的角度和左、上位置。
+   * 它将其附加到 graphemeInfo 以便稍后在渲染时重用
+   * @private
+   * @param {Number} positionInPath 要测量的路径位置
+   * @param {GraphemeBBox} graphemeInfo 当前字素框信息
+   *
    * Calculate the angle  and the left,top position of the char that follow a path.
    * It appends it to graphemeInfo to be reused later at rendering
    * @private
@@ -970,6 +1284,13 @@ export class FabricText<
   }
 
   /**
+   * 获取字素框
+   * @param {String} grapheme 要测量的字素
+   * @param {Number} lineIndex 字符所在行的索引
+   * @param {Number} charIndex 行中的位置
+   * @param {String} [prevGrapheme] 待测量字符之前的字符
+   * @param {Boolean} [skipLeft] 是否跳过左侧计算
+   * @returns {GraphemeBBox} 字素边界框
    *
    * @param {String} grapheme to be measured
    * @param {Number} lineIndex index of the line where the char is
@@ -1015,6 +1336,12 @@ export class FabricText<
   }
 
   /**
+   * 计算 'lineIndex' 处的行高，
+   * 不带 lineHeigth 乘法因子
+   * @private
+   * @param {Number} lineIndex 要计算的行索引
+   * @returns {Number} 行高
+   *
    * Calculate height of line at 'lineIndex',
    * without the lineHeigth multiplication factor
    * @private
@@ -1038,6 +1365,10 @@ export class FabricText<
   }
 
   /**
+   * 计算 'lineIndex' 处的行高
+   * @param {Number} lineIndex 要计算的行索引
+   * @returns {Number} 行高
+   *
    * Calculate height of line at 'lineIndex'
    * @param {Number} lineIndex index of line to calculate
    * @return {Number}
@@ -1047,6 +1378,8 @@ export class FabricText<
   }
 
   /**
+   * 计算文本框高度
+   *
    * Calculate text box height
    */
   calcTextHeight() {
@@ -1059,6 +1392,10 @@ export class FabricText<
   }
 
   /**
+   * 获取左侧偏移量
+   * @private
+   * @returns {Number} 左侧偏移量
+   *
    * @private
    * @return {Number} Left offset
    */
@@ -1067,6 +1404,10 @@ export class FabricText<
   }
 
   /**
+   * 获取顶部偏移量
+   * @private
+   * @returns {Number} 顶部偏移量
+   *
    * @private
    * @return {Number} Top offset
    */
@@ -1075,6 +1416,11 @@ export class FabricText<
   }
 
   /**
+   * 渲染文本通用方法
+   * @private
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   * @param {String} method 方法名称 ("fillText" 或 "strokeText")
+   *
    * @private
    * @param {CanvasRenderingContext2D} ctx Context to render on
    * @param {String} method Method name ("fillText" or "strokeText")
@@ -1102,6 +1448,10 @@ export class FabricText<
   }
 
   /**
+   * 渲染文本填充
+   * @private
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   *
    * @private
    * @param {CanvasRenderingContext2D} ctx Context to render on
    */
@@ -1114,6 +1464,10 @@ export class FabricText<
   }
 
   /**
+   * 渲染文本描边
+   * @private
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   *
    * @private
    * @param {CanvasRenderingContext2D} ctx Context to render on
    */
@@ -1135,6 +1489,15 @@ export class FabricText<
   }
 
   /**
+   * 渲染字符
+   * @private
+   * @param {String} method fillText 或 strokeText。
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   * @param {Array} line 行内容，按字素分割为数组
+   * @param {Number} left 左侧位置
+   * @param {Number} top 顶部位置
+   * @param {Number} lineIndex 行索引
+   *
    * @private
    * @param {String} method fillText or strokeText.
    * @param {CanvasRenderingContext2D} ctx Context to render on
@@ -1245,6 +1608,14 @@ export class FabricText<
   }
 
   /**
+   * 此函数尝试修补 canvas 渐变上缺失的 gradientTransform。
+   * 转换上下文以转换渐变，也会转换描边。
+   * 我们想要转换渐变但不转换描边操作，所以我们在模式上创建一个转换后的渐变，然后使用模式代替渐变。
+   * 此方法有缺点：速度慢，分辨率低，当尺寸受限时需要补丁。
+   * @private
+   * @param {TFiller} filler fabric 渐变实例
+   * @returns {CanvasPattern} 用作填充/描边样式的模式
+   *
    * This function try to patch the missing gradientTransform on canvas gradients.
    * transforming a context to transform the gradient, is going to transform the stroke too.
    * we want to transform the gradient but not the stroke operation, so we create
@@ -1279,6 +1650,13 @@ export class FabricText<
     return pCtx.createPattern(pCanvas, 'no-repeat')!;
   }
 
+  /**
+   * 处理填充器
+   * @param ctx 渲染上下文
+   * @param property 属性名称
+   * @param filler 填充器
+   * @returns 偏移量
+   */
   handleFiller<T extends 'fill' | 'stroke'>(
     ctx: CanvasRenderingContext2D,
     property: `${T}Style`,
@@ -1313,6 +1691,11 @@ export class FabricText<
   }
 
   /**
+   * 此函数为描边样式准备画布，描边和描边宽度需要按定义传入
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   * @param {CompleteTextStyleDeclaration} style 具有描边和描边宽度的样式
+   * @returns 偏移量
+   *
    * This function prepare the canvas for a stroke style, and stroke and strokeWidth
    * need to be sent in as defined
    * @param {CanvasRenderingContext2D} ctx
@@ -1335,6 +1718,11 @@ export class FabricText<
   }
 
   /**
+   * 此函数为填充样式准备画布，填充需要按定义传入
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   * @param {CompleteTextStyleDeclaration} style 具有填充定义的样式
+   * @returns 偏移量
+   *
    * This function prepare the canvas for a ill style, and fill
    * need to be sent in as defined
    * @param {CanvasRenderingContext2D} ctx
@@ -1346,6 +1734,16 @@ export class FabricText<
   }
 
   /**
+   * 渲染字符
+   * @private
+   * @param {String} method fillText 或 strokeText
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   * @param {Number} lineIndex 行索引
+   * @param {Number} charIndex 字符索引
+   * @param {String} _char 字符
+   * @param {Number} left 左坐标
+   * @param {Number} top 顶坐标
+   *
    * @private
    * @param {String} method
    * @param {CanvasRenderingContext2D} ctx Context to render on
@@ -1407,6 +1805,10 @@ export class FabricText<
   }
 
   /**
+   * 将字符转换为“上标”
+   * @param {Number} start 选区开始
+   * @param {Number} end 选区结束
+   *
    * Turns the character into a 'superior figure' (i.e. 'superscript')
    * @param {Number} start selection start
    * @param {Number} end selection end
@@ -1416,6 +1818,10 @@ export class FabricText<
   }
 
   /**
+   * 将字符转换为“下标”
+   * @param {Number} start 选区开始
+   * @param {Number} end 选区结束
+   *
    * Turns the character into an 'inferior figure' (i.e. 'subscript')
    * @param {Number} start selection start
    * @param {Number} end selection end
@@ -1425,6 +1831,12 @@ export class FabricText<
   }
 
   /**
+   * 在给定位置应用“schema”
+   * @private
+   * @param {Number} start 选区开始
+   * @param {Number} end 选区结束
+   * @param {Number} schema 模式
+   *
    * Applies 'schema' at given position
    * @private
    * @param {Number} start selection start
@@ -1454,6 +1866,11 @@ export class FabricText<
   }
 
   /**
+   * 获取行左侧偏移量
+   * @private
+   * @param {Number} lineIndex 文本行索引
+   * @returns {Number} 行左侧偏移量
+   *
    * @private
    * @param {Number} lineIndex index text line
    * @return {Number} Line left offset
@@ -1498,6 +1915,9 @@ export class FabricText<
   }
 
   /**
+   * 清除缓存
+   * @private
+   *
    * @private
    */
   _clearCache() {
@@ -1508,6 +1928,12 @@ export class FabricText<
   }
 
   /**
+   * 测量给定索引的单行。用于计算初始文本边界框。
+   * 值被计算并存储在 __lineWidths 缓存中。
+   * @private
+   * @param {Number} lineIndex 行号
+   * @returns {Number} 行宽
+   *
    * Measure a single line given its index. Used to calculate the initial
    * text bounding box. The values are calculated and stored in __lineWidths cache.
    * @private
@@ -1524,6 +1950,10 @@ export class FabricText<
     return width;
   }
 
+  /**
+   * 获取字符间距的宽度
+   * @returns 字符间距宽度
+   */
   _getWidthOfCharSpacing() {
     if (this.charSpacing !== 0) {
       return (this.fontSize * this.charSpacing) / 1000;
@@ -1532,6 +1962,12 @@ export class FabricText<
   }
 
   /**
+   * 检索给定字符位置的属性值
+   * @param {Number} lineIndex 行号
+   * @param {Number} charIndex 字符号
+   * @param {String} property 属性名
+   * @returns 'property' 的值
+   *
    * Retrieves the value of property at given character position
    * @param {Number} lineIndex the line number
    * @param {Number} charIndex the character number
@@ -1548,6 +1984,11 @@ export class FabricText<
   }
 
   /**
+   * 渲染文本装饰
+   * @private
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   * @param {String} type 装饰类型 ('underline' | 'linethrough' | 'overline')
+   *
    * @private
    * @param {CanvasRenderingContext2D} ctx Context to render on
    */
@@ -1671,6 +2112,10 @@ export class FabricText<
   }
 
   /**
+   * 返回 canvas 上下文的字体声明字符串
+   * @param {Object} [styleObject] 样式对象
+   * @returns {String} 格式化为 canvas 上下文的字体声明
+   *
    * return font declaration string for canvas context
    * @param {Object} [styleObject] object
    * @returns {String} font declaration formatted for canvas context.
@@ -1705,6 +2150,9 @@ export class FabricText<
   }
 
   /**
+   * 在指定上下文中渲染文本实例
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   *
    * Renders text instance on a specified context
    * @param {CanvasRenderingContext2D} ctx Context to render on
    */
@@ -1727,6 +2175,12 @@ export class FabricText<
   }
 
   /**
+   * 重写此方法以自定义字素分割
+   * @todo `graphemeSplit` 工具需要以某种方式注入。
+   * 注入正确的工具比在原型链中间重写文本更舒适
+   * @param {string} value
+   * @returns {string[]} 字素数组
+   *
    * Override this method to customize grapheme splitting
    * @todo the util `graphemeSplit` needs to be injectable in some way.
    * is more comfortable to inject the correct util rather than having to override text
@@ -1739,6 +2193,10 @@ export class FabricText<
   }
 
   /**
+   * 将文本作为行数组返回。
+   * @param {String} text 要分割的文本
+   * @returns 文本中的行
+   *
    * Returns the text as an array of lines.
    * @param {String} text text to split
    * @returns  Lines in the text
@@ -1762,6 +2220,10 @@ export class FabricText<
   }
 
   /**
+   * 返回实例的对象表示
+   * @param {Array} [propertiesToInclude] 您可能希望在输出中额外包含的任何属性
+   * @return {Object} 实例的对象表示
+   *
    * Returns object representation of an instance
    * @param {Array} [propertiesToInclude] Any properties that you might want to additionally include in the output
    * @return {Object} Object representation of an instance
@@ -1776,7 +2238,12 @@ export class FabricText<
       ...(this.path ? { path: this.path.toObject() } : {}),
     };
   }
-
+  /**
+   * 设置属性值
+   * @param key 属性名称或属性对象
+   * @param value 属性值
+   * @returns
+   */
   set(key: string | any, value?: any) {
     const { textLayoutProperties } = this.constructor as typeof FabricText;
     super.set(key, value);
@@ -1805,6 +2272,9 @@ export class FabricText<
   }
 
   /**
+   * 返回实例的复杂度
+   * @return {Number} 复杂度
+   *
    * Returns complexity of an instance
    * @return {Number} complexity
    */
@@ -1813,6 +2283,9 @@ export class FabricText<
   }
 
   /**
+   * 通用字体系列列表
+   * @see https://developer.mozilla.org/en-US/docs/Web/CSS/font-family#generic-name
+   *
    * List of generic font families
    * @see https://developer.mozilla.org/en-US/docs/Web/CSS/font-family#generic-name
    */
@@ -1835,6 +2308,9 @@ export class FabricText<
   /* _FROM_SVG_START_ */
 
   /**
+   * 解析 SVG 元素时要考虑的属性名称列表（由 {@link FabricText.fromElement} 使用）
+   * @see: http://www.w3.org/TR/SVG/text.html#TextElement
+   *
    * List of attribute names to account for when parsing SVG element (used by {@link FabricText.fromElement})
    * @see: http://www.w3.org/TR/SVG/text.html#TextElement
    */
@@ -1853,6 +2329,10 @@ export class FabricText<
   );
 
   /**
+   * 从 SVG 元素返回 FabricText 实例（<b>尚未实现</b>）
+   * @param {HTMLElement} element 要解析的元素
+   * @param {Object} [options] 选项对象
+   *
    * Returns FabricText instance from an SVG element (<b>not yet implemented</b>)
    * @param {HTMLElement} element Element to parse
    * @param {Object} [options] Options object
@@ -1928,6 +2408,10 @@ export class FabricText<
   /* _FROM_SVG_END_ */
 
   /**
+   * 从对象表示返回 FabricText 实例
+   * @param {Object} object 用于创建实例的普通 js 对象
+   * @returns {Promise<FabricText>}
+   *
    * Returns FabricText instance from an object representation
    * @param {Object} object plain js Object to create an instance from
    * @returns {Promise<FabricText>}

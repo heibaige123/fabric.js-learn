@@ -1,4 +1,6 @@
 /**
+ * 148 个颜色名称与 HEX 代码的映射表
+ *
  * Map of the 148 color names with HEX code
  * @see: https://www.w3.org/TR/css3-color/#svg-color
  */

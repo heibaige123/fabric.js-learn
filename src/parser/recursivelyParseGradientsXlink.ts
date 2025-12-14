@@ -1,3 +1,6 @@
+/**
+ * 渐变属性列表
+ */
 const gradientsAttrs = [
   'gradientTransform',
   'x1',
@@ -11,8 +14,17 @@ const gradientsAttrs = [
   'fx',
   'fy',
 ];
+/**
+ * xlink:href 属性名
+ */
 const xlinkAttr = 'xlink:href';
 
+/**
+ * 递归解析渐变的 xlink 引用，将引用的属性和子节点复制到当前渐变元素中
+ * @param doc SVG 文档对象
+ * @param gradient 当前渐变元素
+ * @returns void
+ */
 export function recursivelyParseGradientsXlink(
   doc: Document,
   gradient: Element,

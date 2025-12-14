@@ -10,6 +10,14 @@ import { Canvas } from './Canvas';
 import { CENTER, ROTATING, ROTATE, SCALE } from '../constants';
 
 /**
+ * 使用 Event.js 库添加对多点触控手势的支持。
+ * 触发以下自定义事件：
+ * - touch:gesture
+ * - touch:drag
+ * - touch:orientation
+ * - touch:shake
+ * - touch:longpress
+ *
  * Adds support for multi-touch gestures using the Event.js library.
  * Fires the following custom events:
  * - touch:gesture
@@ -20,9 +28,13 @@ import { CENTER, ROTATING, ROTATE, SCALE } from '../constants';
  */
 Object.assign(Canvas.prototype, {
   /**
+   * 定义当在对象上检测到 Event.js 手势时的操作。目前仅支持双指手势。
+   *
    * Method that defines actions when an Event.js gesture is detected on an object. Currently only supports
    * 2 finger gestures.
+   * @param e Event.js 的事件对象
    * @param {Event} e Event object by Event.js
+   * @param self Event.js 的事件代理对象
    * @param {Event} self Event proxy object by Event.js
    */
   __onTransformGesture: function (e, self) {
@@ -52,7 +64,13 @@ Object.assign(Canvas.prototype, {
       self: self,
     });
   },
+  /**
+   * 手势参数
+   */
   __gesturesParams: null,
+  /**
+   * 手势渲染器
+   */
   __gesturesRenderer: function () {
     if (this.__gesturesParams === null || this._currentTransform === null) {
       return;
@@ -78,9 +96,13 @@ Object.assign(Canvas.prototype, {
   },
 
   /**
+   * 定义当检测到 Event.js 拖动时的操作。
+   *
    * Method that defines actions when an Event.js drag is detected.
    *
+   * @param e Event.js 的事件对象
    * @param {Event} e Event object by Event.js
+   * @param self Event.js 的事件代理对象
    * @param {Event} self Event proxy object by Event.js
    */
   __onDrag: function (e, self) {
@@ -91,9 +113,13 @@ Object.assign(Canvas.prototype, {
   },
 
   /**
+   * 定义当检测到 Event.js 方向改变事件时的操作。
+   *
    * Method that defines actions when an Event.js orientation event is detected.
    *
+   * @param e Event.js 的事件对象
    * @param {Event} e Event object by Event.js
+   * @param self Event.js 的事件代理对象
    * @param {Event} self Event proxy object by Event.js
    */
   __onOrientationChange: function (e, self) {
@@ -104,9 +130,13 @@ Object.assign(Canvas.prototype, {
   },
 
   /**
+   * 定义当检测到 Event.js 摇动事件时的操作。
+   *
    * Method that defines actions when an Event.js shake event is detected.
    *
+   * @param e Event.js 的事件对象
    * @param {Event} e Event object by Event.js
+   * @param self Event.js 的事件代理对象
    * @param {Event} self Event proxy object by Event.js
    */
   __onShake: function (e, self) {
@@ -117,9 +147,13 @@ Object.assign(Canvas.prototype, {
   },
 
   /**
+   * 定义当检测到 Event.js 长按事件时的操作。
+   *
    * Method that defines actions when an Event.js longpress event is detected.
    *
+   * @param e Event.js 的事件对象
    * @param {Event} e Event object by Event.js
+   * @param self Event.js 的事件代理对象
    * @param {Event} self Event proxy object by Event.js
    */
   __onLongPress: function (e, self) {
@@ -130,8 +164,12 @@ Object.assign(Canvas.prototype, {
   },
 
   /**
+   * 处理手势事件
+   *
    * @private
+   * @param e Event.js 手势触发的事件对象
    * @param {Event} [e] Event object fired on Event.js gesture
+   * @param self 内部事件对象
    * @param {Event} [self] Inner Event object
    */
   _onGesture: function (e, self) {
@@ -139,8 +177,12 @@ Object.assign(Canvas.prototype, {
   },
 
   /**
+   * 处理拖动事件
+   *
    * @private
+   * @param e Event.js 拖动触发的事件对象
    * @param {Event} [e] Event object fired on Event.js drag
+   * @param self 内部事件对象
    * @param {Event} [self] Inner Event object
    */
   _onDrag: function (e, self) {
@@ -148,8 +190,12 @@ Object.assign(Canvas.prototype, {
   },
 
   /**
+   * 按比例缩放对象
+   *
    * Scales an object by a factor
+   * @param s 应用于当前缩放级别的缩放因子
    * @param {Number} s The scale factor to apply to the current scale level
+   * @param e Event.js 的事件对象
    * @param {Event} e Event object by Event.js
    */
   _scaleObjectBy: function (s, e) {
@@ -161,8 +207,12 @@ Object.assign(Canvas.prototype, {
   },
 
   /**
+   * 按角度旋转对象
+   *
    * Rotates object by an angle
+   * @param curAngle 旋转角度（度）
    * @param {Number} curAngle The angle of rotation in degrees
+   * @param e Event.js 的事件对象
    * @param {Event} e Event object by Event.js
    */
   _rotateObjectByAngle: function (curAngle, e) {
@@ -180,8 +230,12 @@ Object.assign(Canvas.prototype, {
   },
 
   /**
+   * 处理方向改变事件
+   *
    * @private
+   * @param e Event.js 方向改变触发的事件对象
    * @param {Event} [e] Event object fired on Event.js orientation change
+   * @param self 内部事件对象
    * @param {Event} [self] Inner Event object
    */
   _onOrientationChange: function (e, self) {
@@ -189,8 +243,12 @@ Object.assign(Canvas.prototype, {
   },
 
   /**
+   * 处理摇动事件
+   *
    * @private
+   * @param e Event.js 摇动触发的事件对象
    * @param {Event} [e] Event object fired on Event.js shake
+   * @param self 内部事件对象
    * @param {Event} [self] Inner Event object
    */
   _onShake: function (e, self) {
@@ -198,8 +256,12 @@ Object.assign(Canvas.prototype, {
   },
 
   /**
+   * 处理长按事件
+   *
    * @private
+   * @param e Event.js 长按触发的事件对象
    * @param {Event} [e] Event object fired on Event.js shake
+   * @param self 内部事件对象
    * @param {Event} [self] Inner Event object
    */
   _onLongPress: function (e, self) {

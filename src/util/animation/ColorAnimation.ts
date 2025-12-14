@@ -9,6 +9,14 @@ import type {
   TOnAnimationChangeCallback,
 } from './types';
 
+/**
+ * 默认的颜色缓动函数
+ * @param timeElapsed 经过的时间
+ * @param startValue 起始值
+ * @param byValue 变化量
+ * @param duration 持续时间
+ * @returns 当前值
+ */
 const defaultColorEasing: TEasingFunction = (
   timeElapsed,
   startValue,
@@ -19,6 +27,11 @@ const defaultColorEasing: TEasingFunction = (
   return startValue + byValue * durationProgress;
 };
 
+/**
+ * 包装颜色回调函数，将 RGBA 数组转换为 RGBA 字符串
+ * @param callback 原始回调函数
+ * @returns 包装后的回调函数
+ */
 const wrapColorCallback = <R>(
   callback?: TOnAnimationChangeCallback<string, R>,
 ) =>
@@ -26,7 +39,14 @@ const wrapColorCallback = <R>(
   ((rgba: TRGBAColorSource, valueProgress: number, durationProgress: number) =>
     callback(new Color(rgba).toRgba(), valueProgress, durationProgress));
 
+/**
+ * 颜色动画类
+ */
 export class ColorAnimation extends AnimationBase<TRGBAColorSource> {
+  /**
+   * 构造函数
+   * @param options 颜色动画选项
+   */
   constructor({
     startValue,
     endValue,
@@ -50,6 +70,12 @@ export class ColorAnimation extends AnimationBase<TRGBAColorSource> {
       abort: wrapColorCallback(abort),
     });
   }
+
+  /**
+   * 计算当前时间点的颜色值
+   * @param timeElapsed 经过的时间（毫秒）
+   * @returns 包含当前颜色值和进度的对象
+   */
   protected calculate(timeElapsed: number) {
     const [r, g, b, a] = this.startValue.map((value, i) =>
       this.easing(timeElapsed, value, this.byValue[i], this.duration, i),

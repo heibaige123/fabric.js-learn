@@ -8,8 +8,14 @@ import type { TCopyPasteData, TFabricEnv } from './types';
 
 const { implForWrapper: jsdomImplForWrapper } = utils;
 
+/**
+ * 复制粘贴数据存储对象
+ */
 const copyPasteData: TCopyPasteData = {};
 
+/**
+ * JSDOM 窗口实例
+ */
 const { window: JSDOMWindow } = new JSDOM(
   decodeURIComponent(
     '%3C!DOCTYPE%20html%3E%3Chtml%3E%3Chead%3E%3C%2Fhead%3E%3Cbody%3E%3C%2Fbody%3E%3C%2Fhtml%3E',
@@ -21,11 +27,20 @@ const { window: JSDOMWindow } = new JSDOM(
   },
 );
 
+/**
+ * 获取 Node Canvas 实例
+ * @param canvasEl HTMLCanvasElement 元素
+ * @returns NodeCanvas 实例
+ */
 export const getNodeCanvas = (canvasEl: HTMLCanvasElement) => {
   const impl = jsdomImplForWrapper(canvasEl);
   return (impl._canvas || impl._image) as NodeCanvas;
 };
 
+/**
+ * 释放元素资源
+ * @param element 要释放的元素
+ */
 export const dispose = (element: Element) => {
   const impl = jsdomImplForWrapper(element);
   if (impl) {
@@ -38,6 +53,10 @@ export const dispose = (element: Element) => {
   }
 };
 
+/**
+ * 获取 Node 环境配置
+ * @returns Fabric 环境对象
+ */
 export const getEnv = (): TFabricEnv => {
   return {
     document: JSDOMWindow.document,

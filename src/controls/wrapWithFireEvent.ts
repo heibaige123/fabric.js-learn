@@ -7,6 +7,8 @@ import { fireEvent } from './fireEvent';
 import { commonEventInfo } from './util';
 
 /**
+ * 包装一个动作处理程序，如果执行了动作，则触发一个事件
+ *
  * Wrap an action handler with firing an event if the action is performed
  * @param {TModificationEvents} eventName the event we want to fire
  * @param {TransformActionHandler<T>} actionHandler the function to wrap

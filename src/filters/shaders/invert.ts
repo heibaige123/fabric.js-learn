@@ -1,3 +1,6 @@
+/**
+ * 反转滤镜的片元着色器源码
+ */
 export const fragmentSource = `
   precision highp float;
   uniform sampler2D uTexture;

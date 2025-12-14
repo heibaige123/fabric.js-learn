@@ -15,9 +15,15 @@ import { calcVectorRotation, createVector } from '../util/misc/vectors';
 import type { TOCoord } from '../shapes/Object/InteractiveObject';
 import { sendPointToPlane } from '../util/misc/planeChange';
 
+/**
+ * 禁止光标样式
+ */
 export const NOT_ALLOWED_CURSOR = 'not-allowed';
 
 /**
+ * 从角落获取动作
+ *
+ * Get action from corner
  * @param {Boolean} alreadySelected true if target is already selected
  * @param {String} corner a string representing the corner ml, mr, tl ...
  * @param {Event} e Event object
@@ -37,6 +43,8 @@ export const getActionFromCorner = (
 };
 
 /**
+ * 检查变换是否居中
+ *
  * Checks if transform is centered
  * @param {Object} transform transform data
  * @return {Boolean} true if transform is centered
@@ -48,10 +56,20 @@ export function isTransformCentered(transform: Transform) {
   );
 }
 
+/**
+ * 反转原点
+ *
+ * Invert origin
+ */
 export function invertOrigin(origin: TOriginX | TOriginY) {
   return -resolveOrigin(origin) + 0.5;
 }
 
+/**
+ * 检查对象是否被锁定
+ *
+ * Check if the object is locked
+ */
 export const isLocked = (
   target: FabricObject,
   lockingKey:
@@ -65,6 +83,11 @@ export const isLocked = (
     | 'lockScalingFlip',
 ) => target[lockingKey];
 
+/**
+ * 通用事件信息
+ *
+ * Common event info
+ */
 export const commonEventInfo: TransformAction<
   Transform,
   BasicTransformEvent
@@ -77,6 +100,8 @@ export const commonEventInfo: TransformAction<
 };
 
 /**
+ * 结合控件位置和对象角度，查找相对于对象中心的控件方向。
+ *
  * Combine control position and object angle to find the control direction compared
  * to the object center.
  * @param {FabricObject} fabricObject the fabric object for which we are rendering controls
@@ -99,6 +124,8 @@ export function findCornerQuadrant(
 }
 
 /**
+ * 返回局部坐标中的归一化点（相对于中心旋转）
+ *
  * @returns the normalized point (rotated relative to center) in local coordinates
  */
 function normalizePoint(
@@ -125,6 +152,8 @@ function normalizePoint(
 }
 
 /**
+ * 将点转换为给定原点的偏移量
+ *
  * Transforms a point to the offset from the given origin
  * @param {Object} transform
  * @param {String} originX

@@ -4,13 +4,27 @@ import type { Canvas } from '../canvas/Canvas';
 import { PencilBrush } from './PencilBrush';
 import type { TSimplePathData } from '../util/path/typedefs';
 
+/**
+ * 图案画笔类
+ */
 export class PatternBrush extends PencilBrush {
+  /**
+   * 图片源
+   */
   declare source?: CanvasImageSource;
 
+  /**
+   *
+   * @param canvas 上下文
+   */
   constructor(canvas: Canvas) {
     super(canvas);
   }
 
+  /**
+   * 获取图案源
+   * @returns
+   */
   getPatternSrc() {
     const dotWidth = 20,
       dotDistance = 5,
@@ -36,6 +50,9 @@ export class PatternBrush extends PencilBrush {
   }
 
   /**
+   * 创建 "pattern" 实例属性
+   * @param ctx 渲染上下文
+   *
    * Creates "pattern" instance property
    * @param {CanvasRenderingContext2D} ctx
    */
@@ -44,6 +61,9 @@ export class PatternBrush extends PencilBrush {
   }
 
   /**
+   * 设置画笔样式
+   * @param ctx 渲染上下文
+   *
    * Sets brush styles
    * @param {CanvasRenderingContext2D} ctx
    */
@@ -54,6 +74,9 @@ export class PatternBrush extends PencilBrush {
   }
 
   /**
+   * 创建路径
+   * @param pathData 路径数据
+   *
    * Creates path
    */
   createPath(pathData: TSimplePathData) {

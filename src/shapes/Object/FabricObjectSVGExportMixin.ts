@@ -10,12 +10,15 @@ export class FabricObjectSVGExportMixin {
   /**
    * When an object is being exported as SVG as a clippath, a reference inside the SVG is needed.
    * This reference is a UID in the fabric namespace and is temporary stored here.
+   * 当对象作为 clippath 导出为 SVG 时，需要 SVG 内部的引用。
+   * 此引用是 fabric 命名空间中的 UID，并临时存储在此处。
    * @type {String}
    */
   declare clipPathId?: string;
 
   /**
    * Returns styles-string for svg-export
+   * 返回 svg 导出的样式字符串
    * @param {Boolean} skipShadow a boolean to skip shadow filter output
    * @return {String}
    */
@@ -72,6 +75,7 @@ export class FabricObjectSVGExportMixin {
 
   /**
    * Returns filter for svg shadow
+   * 返回 svg 阴影的过滤器
    * @return {String}
    */
   getSvgFilter(this: FabricObjectSVGExportMixin & FabricObject) {
@@ -80,6 +84,7 @@ export class FabricObjectSVGExportMixin {
 
   /**
    * Returns id attribute for svg output
+   * 返回 svg 输出的 id 属性
    * @return {String}
    */
   getSvgCommons(
@@ -98,6 +103,7 @@ export class FabricObjectSVGExportMixin {
 
   /**
    * Returns transform-string for svg-export
+   * 返回 svg 导出的变换字符串
    * @param {Boolean} use the full transform or the single object one.
    * @return {String}
    */
@@ -115,6 +121,9 @@ export class FabricObjectSVGExportMixin {
    * Returns svg representation of an instance
    * This function is implemented in each subclass
    * This is just because typescript otherwise cryies all the time
+   * 返回实例的 svg 表示
+   * 此函数在每个子类中实现
+   * 这只是因为 typescript 否则会一直报错
    * @return {Array} an array of strings with the specific svg representation
    * of the instance
    */
@@ -124,6 +133,7 @@ export class FabricObjectSVGExportMixin {
 
   /**
    * Returns svg representation of an instance
+   * 返回实例的 svg 表示
    * @param {TSVGReviver} [reviver] Method for further parsing of svg representation.
    * @return {String} svg representation of an instance
    */
@@ -138,6 +148,7 @@ export class FabricObjectSVGExportMixin {
 
   /**
    * Returns svg clipPath representation of an instance
+   * 返回实例的 svg clipPath 表示
    * @param {TSVGReviver} [reviver] Method for further parsing of svg representation.
    * @return {String} svg representation of an instance
    */

@@ -2,11 +2,26 @@ import { ColorMatrix } from './ColorMatrix';
 import { classRegistry } from '../ClassRegistry';
 import type { TMatColorMatrix } from './typedefs';
 
+/**
+ * 固定滤镜的自有属性
+ */
 type FixedFiltersOwnProps = {
+  /**
+   * 是否仅处理颜色
+   */
   colorsOnly: boolean;
 };
 
+/**
+ * 创建颜色矩阵滤镜类
+ * @param key 滤镜名称
+ * @param matrix 颜色矩阵
+ * @returns 创建的颜色矩阵滤镜类
+ */
 export function createColorMatrixFilter(key: string, matrix: TMatColorMatrix) {
+  /**
+   * 动态创建的颜色矩阵滤镜类
+   */
   const newClass = class extends ColorMatrix<
     typeof key,
     FixedFiltersOwnProps,
@@ -19,6 +34,10 @@ export function createColorMatrixFilter(key: string, matrix: TMatColorMatrix) {
       matrix,
     };
 
+    /**
+     * 返回实例的对象表示
+     * @returns 实例的对象表示
+     */
     toObject(): { type: string } & FixedFiltersOwnProps {
       return { type: this.type, colorsOnly: this.colorsOnly };
     }
@@ -27,6 +46,9 @@ export function createColorMatrixFilter(key: string, matrix: TMatColorMatrix) {
   return newClass as typeof ColorMatrix<typeof key, FixedFiltersOwnProps>;
 }
 
+/**
+ * Brownie 滤镜
+ */
 export const Brownie = createColorMatrixFilter(
   'Brownie',
   [
@@ -35,6 +57,9 @@ export const Brownie = createColorMatrixFilter(
   ],
 );
 
+/**
+ * Vintage 滤镜
+ */
 export const Vintage = createColorMatrixFilter(
   'Vintage',
   [
@@ -43,6 +68,9 @@ export const Vintage = createColorMatrixFilter(
   ],
 );
 
+/**
+ * Kodachrome 滤镜
+ */
 export const Kodachrome = createColorMatrixFilter(
   'Kodachrome',
   [
@@ -51,6 +79,9 @@ export const Kodachrome = createColorMatrixFilter(
   ],
 );
 
+/**
+ * Technicolor 滤镜
+ */
 export const Technicolor = createColorMatrixFilter(
   'Technicolor',
   [
@@ -59,6 +90,9 @@ export const Technicolor = createColorMatrixFilter(
   ],
 );
 
+/**
+ * Polaroid 滤镜
+ */
 export const Polaroid = createColorMatrixFilter(
   'Polaroid',
   [
@@ -67,6 +101,9 @@ export const Polaroid = createColorMatrixFilter(
   ],
 );
 
+/**
+ * Sepia 滤镜
+ */
 export const Sepia = createColorMatrixFilter(
   'Sepia',
   [
@@ -75,6 +112,9 @@ export const Sepia = createColorMatrixFilter(
   ],
 );
 
+/**
+ * BlackWhite 滤镜
+ */
 export const BlackWhite = createColorMatrixFilter(
   'BlackWhite',
   [

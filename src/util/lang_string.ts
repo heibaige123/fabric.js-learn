@@ -1,6 +1,11 @@
 import { getFabricWindow } from '../env';
 
 /**
+ * 将字符串首字母大写
+ * @param string 要大写的字符串
+ * @param firstLetterOnly 如果为 true，则仅大写第一个字母，其他字母保持不变；如果为 false，则大写第一个字母，其他字母转换为小写。
+ * @returns 字符串的大写版本
+ *
  * Capitalizes a string
  * @param {String} string String to capitalize
  * @param {Boolean} [firstLetterOnly] If true only first letter is capitalized
@@ -14,6 +19,10 @@ export const capitalize = (string: string, firstLetterOnly = false): string =>
   }`;
 
 /**
+ * 转义字符串中的 XML 字符
+ * @param string 要转义的字符串
+ * @returns 字符串的转义版本
+ *
  * Escapes XML in a string
  * @param {String} string String to escape
  * @return {String} Escaped version of a string
@@ -28,6 +37,10 @@ export const escapeXml = (string: string): string =>
 
 let segmenter: Intl.Segmenter | false;
 
+/**
+ * 获取 Intl.Segmenter 实例
+ * @returns Intl.Segmenter 实例或 false
+ */
 const getSegmenter = () => {
   if (!segmenter) {
     segmenter =
@@ -41,6 +54,10 @@ const getSegmenter = () => {
 };
 
 /**
+ * 将字符串分割为用户感知的单个单元（字素）
+ * @param textstring 要分割的字符串
+ * @returns 包含字素的数组
+ *
  * Divide a string in the user perceived single units
  * @param {String} textstring String to escape
  * @return {Array} array containing the graphemes
@@ -56,6 +73,11 @@ export const graphemeSplit = (textstring: string): string[] => {
   return graphemeSplitImpl(textstring);
 };
 
+/**
+ * 字素分割的后备实现
+ * @param textstring 要分割的字符串
+ * @returns 包含字素的数组
+ */
 const graphemeSplitImpl = (textstring: string): string[] => {
   const graphemes: string[] = [];
   for (let i = 0, chr; i < textstring.length; i++) {
@@ -68,6 +90,13 @@ const graphemeSplitImpl = (textstring: string): string[] => {
 };
 
 // taken from mdn in the charAt doc page.
+/**
+ * 获取完整字符（处理代理对）
+ * 取自 MDN 的 charAt 文档页面。
+ * @param str 字符串
+ * @param i 索引
+ * @returns 完整字符或 false
+ */
 const getWholeChar = (str: string, i: number): string | false => {
   const code = str.charCodeAt(i);
   if (isNaN(code)) {

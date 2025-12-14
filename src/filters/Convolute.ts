@@ -3,17 +3,31 @@ import type { T2DPipelineState, TWebGLUniformLocationMap } from './typedefs';
 import { classRegistry } from '../ClassRegistry';
 import { fragmentSource } from './shaders/convolute';
 
+/**
+ * Convolute 滤镜的自有属性
+ */
 export type ConvoluteOwnProps = {
+  /**
+   * 不透明度
+   */
   opaque: boolean;
+  /**
+   * 卷积矩阵
+   */
   matrix: number[];
 };
 
+/**
+ * Convolute 滤镜的默认值
+ */
 export const convoluteDefaultValues: ConvoluteOwnProps = {
   opaque: false,
   matrix: [0, 0, 0, 0, 1, 0, 0, 0, 0],
 };
 
 /**
+ * 改编自 <a href="http://www.html5rocks.com/en/tutorials/canvas/imagefilters/">html5rocks 文章</a>
+ *
  * Adapted from <a href="http://www.html5rocks.com/en/tutorials/canvas/imagefilters/">html5rocks article</a>
  * @example <caption>Sharpen filter</caption>
  * const filter = new Convolute({
@@ -55,11 +69,15 @@ export const convoluteDefaultValues: ConvoluteOwnProps = {
  */
 export class Convolute extends BaseFilter<'Convolute', ConvoluteOwnProps> {
   /*
+   * 不透明值 (true/false)
+   *
    * Opaque value (true/false)
    */
   declare opaque: ConvoluteOwnProps['opaque'];
 
   /*
+   * 滤镜的矩阵，最大 9x9
+   *
    * matrix for the filter, max 9x9
    */
   declare matrix: ConvoluteOwnProps['matrix'];
@@ -70,21 +88,31 @@ export class Convolute extends BaseFilter<'Convolute', ConvoluteOwnProps> {
 
   static uniformLocations = ['uMatrix', 'uOpaque', 'uHalfSize', 'uSize'];
 
+  /**
+   * 获取缓存键
+   * @returns {string} 缓存键
+   */
   getCacheKey() {
     return `${this.type}_${Math.sqrt(this.matrix.length)}_${
       this.opaque ? 1 : 0
     }` as keyof typeof fragmentSource;
   }
 
+  /**
+   * 获取片段着色器源码
+   * @returns {string} 片段着色器源码
+   */
   getFragmentSource() {
     return fragmentSource[this.getCacheKey()];
   }
 
   /**
+   * 将卷积操作应用于表示图像像素的 Uint8ClampedArray。
+   *
    * Apply the Brightness operation to a Uint8ClampedArray representing the pixels of an image.
    *
-   * @param {Object} options
-   * @param {ImageData} options.imageData The Uint8ClampedArray to be filtered.
+   * @param {Object} options 选项对象
+   * @param {ImageData} options.imageData The Uint8ClampedArray to be filtered. 要过滤的 Uint8ClampedArray。
    */
   applyTo2d(options: T2DPipelineState) {
     const imageData = options.imageData,
@@ -146,10 +174,12 @@ export class Convolute extends BaseFilter<'Convolute', ConvoluteOwnProps> {
   }
 
   /**
+   * 将数据从此滤镜发送到其着色器程序的 uniform。
+   *
    * Send data from this filter to its shader program's uniforms.
    *
-   * @param {WebGLRenderingContext} gl The GL canvas context used to compile this filter's shader.
-   * @param {Object} uniformLocations A map of string uniform names to WebGLUniformLocation objects
+   * @param {WebGLRenderingContext} gl The GL canvas context used to compile this filter's shader. 用于编译此滤镜着色器的 GL 画布上下文。
+   * @param {Object} uniformLocations A map of string uniform names to WebGLUniformLocation objects 字符串 uniform 名称到 WebGLUniformLocation 对象的映射
    */
   sendUniformData(
     gl: WebGLRenderingContext,
@@ -159,8 +189,10 @@ export class Convolute extends BaseFilter<'Convolute', ConvoluteOwnProps> {
   }
 
   /**
+   * 返回实例的对象表示
+   *
    * Returns object representation of an instance
-   * @return {Object} Object representation of an instance
+   * @return {Object} Object representation of an instance 实例的对象表示
    */
   toObject() {
     return {
