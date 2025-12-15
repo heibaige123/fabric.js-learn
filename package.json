@@ -104,6 +104,7 @@
     "engines": {
         "node": ">=20.0.0"
     },
+    "packageManager": "npm@10.9.3",
     "overrides": {
         "canvas": {
             "canvas": "3.2.0"
