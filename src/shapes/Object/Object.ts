@@ -1283,14 +1283,32 @@ export class FabricObject<
   }
 
   /**
+   * 渲染描边和填充，按照 paintFirst 属性指定的顺序。
+   *
    * @private
-   * @param {CanvasRenderingContext2D} ctx Context to render on
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
    */
   _renderPaintInOrder(ctx: CanvasRenderingContext2D) {
     if (this.paintFirst === STROKE) {
+      /**
+        效果：
+            填充会覆盖在描边之上。
+        视觉影响：
+            填充会盖住描边向内延伸的那一半宽度。
+            结果看起来描边变细了（只有向外延伸的那一半可见）。
+            这通常用于需要保持填充区域大小精确，或者想要一种“内描边被遮挡”的特殊效果时。
+         */
       this._renderStroke(ctx);
       this._renderFill(ctx);
     } else {
+      /**
+        效果：
+            描边会覆盖在填充之上。
+        视觉影响：
+            描边的一半宽度会盖住填充区域的边缘。
+            如果描边是半透明的，你会看到描边下面叠加了填充的颜色。
+            这是大多数矢量图形软件（如 SVG 默认）的标准行为。
+       */
       this._renderFill(ctx);
       this._renderStroke(ctx);
     }

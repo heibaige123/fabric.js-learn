@@ -8,8 +8,6 @@ import type { TFiller, TMat2D, TOptions } from '../typedefs';
 interface CanvasDrawableOptions {
   /**
    * 如果设置为 false，背景图像不受视口变换的影响
-   *
-   * if set to false background image is not affected by viewport transform
    * @since 1.6.3
    * @type Boolean
    * @todo we should really find a different way to do this
@@ -18,15 +16,13 @@ interface CanvasDrawableOptions {
 
   /**
    * Canvas 实例的背景颜色。
-   *
-   * Background color of canvas instance.
    * @type {(String|TFiller)}
    */
   backgroundColor: TFiller | string;
 
   /**
    * Canvas 实例的背景图像。
-   * 自 2.4.0 起，图像缓存处于活动状态，请在将图像作为背景时，
+   * 自 2.4.0 起，在将图像作为背景时，图像缓存处于激活状态
    * 向 canvas 属性添加对其所在的 canvas 的引用。否则图像无法检测缩放值。
    * 或者，您可以禁用图像 objectCaching。
    *
@@ -41,7 +37,6 @@ interface CanvasDrawableOptions {
   /**
    * 如果设置为 false，覆盖图像不受视口变换的影响
    *
-   * if set to false overlay image is not affected by viewport transform
    * @since 1.6.3
    * @type Boolean
    * @todo we should really find a different way to do this
@@ -50,8 +45,6 @@ interface CanvasDrawableOptions {
 
   /**
    * Canvas 实例的覆盖颜色。
-   *
-   * Overlay color of canvas instance.
    * @since 1.3.9
    * @type {(String|TFiller)}
    */
@@ -59,7 +52,7 @@ interface CanvasDrawableOptions {
 
   /**
    * Canvas 实例的覆盖图像。
-   * 自 2.4.0 起，图像缓存处于活动状态，请在将图像作为覆盖时，
+   * 自 2.4.0 起，请在将图像作为覆盖时，图像缓存处于激活状态，，
    * 向 canvas 属性添加对其所在的 canvas 的引用。否则图像无法检测缩放值。
    * 或者，您可以禁用图像 objectCaching。
    *
@@ -83,13 +76,6 @@ interface CanvasRenderingOptions {
    * 因为渲染是排队的，每帧执行一次。
    * 无论如何建议禁用，手动管理应用程序的渲染并不是很大的工作量 ( canvas.requestRenderAll() )
    * 默认保留为 true，以免破坏文档和旧的应用程序、fiddles。
-   *
-   * Indicates whether {@link StaticCanvas#add}, {@link StaticCanvas#insertAt} and {@link StaticCanvas#remove},
-   * {@link StaticCanvas#moveTo}, {@link StaticCanvas#clear} and many more, should also re-render canvas.
-   * Disabling this option will not give a performance boost when adding/removing a lot of objects to/from canvas at once
-   * since the renders are queued and executed one per frame.
-   * Disabling is suggested anyway and managing the renders of the app manually is not a big effort ( canvas.requestRenderAll() )
-   * Left default to true to do not break documentation and old app, fiddles.
    * @type Boolean
    */
   renderOnAddRemove: boolean;
@@ -98,12 +84,6 @@ interface CanvasRenderingOptions {
    * 基于 vptCoords 和 object.aCoords，跳过不在当前视口中的对象的渲染。
    * 在具有拥挤的 canvas 和使用缩放/平移的应用程序中可能会有很大帮助。
    * 如果对象的边界框的一个角在 canvas 上，则对象会被渲染。
-   *
-   * Based on vptCoords and object.aCoords, skip rendering of objects that
-   * are not included in current viewport.
-   * May greatly help in applications with crowded canvas and use of zoom/pan
-   * If One of the corner of the bounding box of the object is on the canvas
-   * the objects get rendered.
    * @type Boolean
    * @default true
    */
@@ -111,16 +91,12 @@ interface CanvasRenderingOptions {
 
   /**
    * 当为 true 时，canvas 按 devicePixelRatio 缩放，以便在视网膜屏幕上更好地渲染
-   *
-   * When true, canvas is scaled by devicePixelRatio for better rendering on retina screens
    * @type Boolean
    */
   enableRetinaScaling: boolean;
 
   /**
    * 指示此 canvas 是否将使用图像平滑，这在浏览器中默认开启
-   *
-   * Indicates whether this canvas will use image smoothing, this is on by default in browsers
    * @type Boolean
    */
   imageSmoothingEnabled: boolean;
@@ -129,11 +105,6 @@ interface CanvasRenderingOptions {
    * 一个 fabricObject，如果没有描边，则用其形状定义剪切区域。填充为黑色
    * clipPath 对象在 canvas 渲染时使用，上下文放置在 canvas 的左上角。
    * clipPath 将剪切掉控件，如果您不希望发生这种情况，请使用 controlsAboveOverlay = true
-   *
-   * a fabricObject that, without stroke define a clipping area with their shape. filled in black
-   * the clipPath object gets used when the canvas has rendered, and the context is placed in the
-   * top left corner of the canvas.
-   * clipPath will clip away controls, if you do not want this to happen use controlsAboveOverlay = true
    * @type FabricObject
    */
   clipPath?: FabricObject;
@@ -146,26 +117,17 @@ export interface CanvasExportOptions {
   /**
    * 指示 toObject/toDatalessObject 是否应包含默认值
    * 如果设置为 false，则优先于对象值。
-   *
-   * Indicates whether toObject/toDatalessObject should include default values
-   * if set to false, takes precedence over the object value.
-   * @type Boolean
    */
   includeDefaultValues: boolean;
 
   /**
-   * 当为 true 时，getSvgTransform() 将把 StaticCanvas.viewportTransform 应用于 SVG 变换。
-   * 当为 true 时，缩放的 canvas 将产生缩放的 SVG 输出。
-   *
-   * When true, getSvgTransform() will apply the StaticCanvas.viewportTransform to the SVG transformation. When true,
-   * a zoomed canvas will then produce zoomed SVG output.
-   * @type Boolean
+   * 当为 true 时，getSvgTransform() 将把 StaticCanvas.viewportTransform 应用于 SVG 变换。使用缩放后的 canvas 将产出缩放的 SVG。
    */
   svgViewportTransformation: boolean;
 }
 
 /**
- * 静态 Canvas 选项接口，继承自 CanvasDrawableOptions, CanvasRenderingOptions, CanvasExportOptions
+ * 静态 Canvas 选项接口
  */
 export interface StaticCanvasOptions
   extends CanvasDrawableOptions,
@@ -174,9 +136,6 @@ export interface StaticCanvasOptions
   /**
    * Canvas 的虚拟/逻辑像素宽度。
    * 如果视网膜缩放处于活动状态，canvas 可以大于宽度
-   *
-   * Width in virtual/logical pixels of the canvas.
-   * The canvas can be larger than width if retina scaling is active
    * @type number
    */
   width: number;
@@ -184,9 +143,6 @@ export interface StaticCanvasOptions
   /**
    * Canvas 的虚拟/逻辑像素高度。
    * 如果视网膜缩放处于活动状态，canvas 可以高于宽度
-   *
-   * Height in virtual/logical pixels of the canvas.
-   * The canvas can be taller than width if retina scaling is active
    * @type height
    */
   height: number;
@@ -194,7 +150,6 @@ export interface StaticCanvasOptions
   /**
    * 指示对象控件（边框/控件）是否渲染在覆盖图像之上
    *
-   * Indicates whether object controls (borders/controls) are rendered above overlay image
    * @type Boolean
    *
    * @todo move to Canvas

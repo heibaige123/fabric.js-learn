@@ -447,17 +447,44 @@ interface CanvasDnDEvents extends DnDEvents {
  * 画布选择事件映射
  */
 interface CanvasSelectionEvents {
+  /**
+   * 选区创建事件
+   */
   'selection:created': Partial<TEvent> & {
+    /**
+     * 选中对象列表
+     */
     selected: FabricObject[];
   };
+  /**
+   * 选区更新事件
+   */
   'selection:updated': Partial<TEvent> & {
+    /**
+     * 选中对象列表
+     */
     selected: FabricObject[];
+    /**
+     * 取消选中对象列表
+     */
     deselected: FabricObject[];
   };
+  /**
+   * 选区清除前事件
+   */
   'before:selection:cleared': Partial<TEvent> & {
+    /**
+     * 取消选中对象列表
+     */
     deselected: FabricObject[];
   };
+  /**
+   * 选区清除事件
+   */
   'selection:cleared': Partial<TEvent> & {
+    /**
+     * 取消选中对象列表
+     */
     deselected: FabricObject[];
   };
 }

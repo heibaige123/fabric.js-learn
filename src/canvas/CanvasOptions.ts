@@ -274,14 +274,7 @@ export interface CanvasEventsOptions {
    * 指示 canvas 上的右键单击是否可以输出上下文菜单
    * 默认值在 Fabric 7.0 中从 false 更改为 true
    * @see https://fabricjs.com/docs/upgrading/upgrading-to-fabric-70/
-   * @deprecated since 7.0, Will be removed in Fabric 8.0
-   * @type Boolean
-   * @since 1.6.5
-   *
-   * Indicates if the right click on canvas can output the context menu or not
-   * The default value changed from false to true in Fabric 7.0
-   * @see https://fabricjs.com/docs/upgrading/upgrading-to-fabric-70/
-   * @deprecated since 7.0, Will be removed in Fabric 8.0
+   * @deprecated 从 7.0 开始,  将在 Fabric 8.0 中移除
    * @type Boolean
    * @since 1.6.5
    */
@@ -291,14 +284,7 @@ export interface CanvasEventsOptions {
    * 指示 canvas 是否可以触发右键单击事件
    * 默认值在 Fabric 7.0 中从 false 更改为 true
    * @see https://fabricjs.com/docs/upgrading/upgrading-to-fabric-70/
-   * @deprecated since 7.0, Will be removed in Fabric 8.0
-   * @type Boolean
-   * @since 1.6.5
-   *
-   * Indicates if the canvas can fire right click events
-   * The default value changed from false to true in Fabric 7.0
-   * @see https://fabricjs.com/docs/upgrading/upgrading-to-fabric-70/
-   * @deprecated since 7.0, Will be removed in Fabric 8.0
+   * @deprecated 从 7.0 开始,  将在 Fabric 8.0 中移除
    * @type Boolean
    * @since 1.6.5
    */
@@ -308,14 +294,7 @@ export interface CanvasEventsOptions {
    * 指示 canvas 是否可以触发中键单击事件
    * 默认值在 Fabric 7.0 中从 false 更改为 true
    * @see https://fabricjs.com/docs/upgrading/upgrading-to-fabric-70/
-   * @deprecated since 7.0, Will be removed in Fabric 8.0
-   * @type Boolean
-   * @since 1.7.8
-   *
-   * Indicates if the canvas can fire middle click events
-   * The default value changed from false to true in Fabric 7.0
-   * @see https://fabricjs.com/docs/upgrading/upgrading-to-fabric-70/
-   * @deprecated since 7.0, Will be removed in Fabric 8.0
+   * @deprecated 从 7.0 开始,  将在 Fabric 8.0 中移除
    * @type Boolean
    * @since 1.7.8
    */

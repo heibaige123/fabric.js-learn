@@ -66,16 +66,12 @@ export class Rect<
 {
   /**
    * 水平圆角半径
-   *
-   * Horizontal border radius
    * @type Number
    */
   declare rx: number;
 
   /**
    * 垂直圆角半径
-   *
-   * Vertical border radius
    * @type Number
    */
   declare ry: number;
@@ -109,7 +105,6 @@ export class Rect<
   /**
    * 构造函数
    *
-   * Constructor
    * @param {Object} [options] 选项对象
    * @param {Object} [options] Options object
    */
@@ -121,8 +116,6 @@ export class Rect<
   }
   /**
    * 初始化 rx/ry 属性
-   *
-   * Initializes rx/ry attributes
    * @private
    */
   _initRxRy() {
@@ -135,22 +128,29 @@ export class Rect<
   }
 
   /**
+   * 渲染函数
+   *
    * @private
    * @param {CanvasRenderingContext2D} ctx 渲染上下文
-   * @param {CanvasRenderingContext2D} ctx Context to render on
    */
   _render(ctx: CanvasRenderingContext2D) {
     const { width: w, height: h } = this;
+    // 坐标系原点
+    // Fabric.js 的对象默认以中心点为原点进行变换（旋转、缩放）。
+    // 因此，绘制矩形时，左上角的坐标是 (-width/2, -height/2)，而不是通常的 (0, 0)。
     const x = -w / 2;
     const y = -h / 2;
+    // 圆角半径
     const rx = this.rx ? Math.min(this.rx, w / 2) : 0;
     const ry = this.ry ? Math.min(this.ry, h / 2) : 0;
     const isRounded = rx !== 0 || ry !== 0;
 
     ctx.beginPath();
 
+    // 移动到左上角的圆角结束点（上边的起点）。
     ctx.moveTo(x + rx, y);
 
+    // 画直线到右上角的圆角开始点。
     ctx.lineTo(x + w - rx, y);
     isRounded &&
       ctx.bezierCurveTo(
@@ -162,6 +162,7 @@ export class Rect<
         y + ry,
       );
 
+    // 画直线到右下角的圆角开始点。
     ctx.lineTo(x + w, y + h - ry);
     isRounded &&
       ctx.bezierCurveTo(
@@ -173,6 +174,7 @@ export class Rect<
         y + h,
       );
 
+    // 画直线到左下角的圆角开始点。
     ctx.lineTo(x + rx, y + h);
     isRounded &&
       ctx.bezierCurveTo(
@@ -184,6 +186,7 @@ export class Rect<
         y + h - ry,
       );
 
+    //  画直线到左上角的圆角开始点。
     ctx.lineTo(x, y + ry);
     isRounded &&
       ctx.bezierCurveTo(x, y + kRect * ry, x + kRect * rx, y, x + rx, y);
