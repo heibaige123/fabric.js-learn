@@ -26,9 +26,6 @@ export type CanvasItem = {
 export class StaticCanvasDOMManager {
   /**
    * 在设置视网膜缩放和其他选项之前保存 canvas 样式的副本，以便在销毁时将其恢复到原始状态
-   *
-   * Keeps a copy of the canvas style before setting retina scaling and other potions
-   * in order to return it to original state on dispose
    * @type string
    */
   private _originalCanvasStyle?: string;

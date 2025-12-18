@@ -7,12 +7,10 @@ import type { StaticCanvasOptions } from './StaticCanvasOptions';
  */
 export interface CanvasTransformOptions {
   /**
-   * 当为 true 时，对象可以通过拖动通常不会进行单边变换的角来进行单边（不成比例）变换。
-   *
-   * When true, objects can be transformed by one side (unproportionately)
-   * when dragged on the corners that normally would not do that.
+   * 当为 true 时，对象可以从一侧变换（不成比例）
+   * 当在角落上拖动时，通常不会这样做。
    * @type Boolean
-   * @since fabric 4.0 // changed name and default value
+   * @since fabric 4.0 // 更改名称和默认值
    */
   uniformScaling: boolean;
 
@@ -39,8 +37,6 @@ export interface CanvasTransformOptions {
    * 当为 true 时，对象使用中心点作为缩放变换的原点。
    * <b>向后不兼容说明：</b> 此属性替换了 "centerTransform" (Boolean)。
    *
-   * When true, objects use center point as the origin of scale transformation.
-   * <b>Backwards incompatibility note:</b> This property replaces "centerTransform" (Boolean).
    * @since 1.3.4
    * @type Boolean
    */
@@ -50,8 +46,6 @@ export interface CanvasTransformOptions {
    * 当为 true 时，对象使用中心点作为旋转变换的原点。
    * <b>向后不兼容说明：</b> 此属性替换了 "centerTransform" (Boolean)。
    *
-   * When true, objects use center point as the origin of rotate transformation.
-   * <b>Backwards incompatibility note:</b> This property replaces "centerTransform" (Boolean).
    * @since 1.3.4
    * @type Boolean
    */
@@ -62,10 +56,6 @@ export interface CanvasTransformOptions {
    * 值为：'altKey', 'shiftKey', 'ctrlKey'。
    * 如果为 `null` 或 'none' 或任何其他非修饰键的字符串，则禁用该功能。
    *
-   * Indicates which key enable centered Transform
-   * values: 'altKey', 'shiftKey', 'ctrlKey'.
-   * If `null` or 'none' or any other string that is not a modifier key
-   * feature is disabled feature disabled.
    * @since 1.6.2
    * @type ModifierKey
    */
@@ -76,10 +66,6 @@ export interface CanvasTransformOptions {
    * 值为：'altKey', 'shiftKey', 'ctrlKey'。
    * 如果为 `null` 或 'none' 或任何其他非修饰键的字符串，则禁用该功能。
    *
-   * Indicates which key enable alternate action on corner
-   * values: 'altKey', 'shiftKey', 'ctrlKey'.
-   * If `null` or 'none' or any other string that is not a modifier key
-   * feature is disabled feature disabled.
    * @since 1.6.2
    * @type ModifierKey
    */
@@ -93,7 +79,6 @@ export interface CanvasSelectionOptions {
   /**
    * 指示是否应启用组选择
    *
-   * Indicates whether group selection should be enabled
    * @type Boolean
    */
   selection: boolean;
@@ -103,12 +88,6 @@ export interface CanvasSelectionOptions {
    * 传递字符串或字符串数组作为值。
    * 值为：'altKey', 'shiftKey', 'ctrlKey'。
    * 如果为 `null` 或空或包含任何其他非修饰键的字符串，则禁用该功能。
-   *
-   * Indicates which key or keys enable multiple click selection
-   * Pass value as a string or array of strings
-   * values: 'altKey', 'shiftKey', 'ctrlKey'.
-   * If `null` or empty or containing any other string that is not a modifier key
-   * feature is disabled.
    * @since 1.6.2
    * @type ModifierKey|ModifierKey[]
    */
@@ -120,25 +99,13 @@ export interface CanvasSelectionOptions {
    * 值为：'altKey', 'shiftKey', 'ctrlKey'。
    * 由于一系列原因，这些原因来自于对事物应该如何工作的普遍期望，此功能仅在 preserveObjectStacking 为 true 时有效。
    * 如果为 `null` 或 'none' 或任何其他非修饰键的字符串，则禁用该功能。
-   *
-   * Indicates which key enable alternative selection
-   * in case of a target overlapping with active object and we don't want to loose the
-   * active selection, we can press this modifier key and continue selecting the current
-   * selected object also when is covered by another or many valid targets for selection.
-   * values: 'altKey', 'shiftKey', 'ctrlKey'.
-   * For a series of reason that come from the general expectations on how
-   * things should work, this feature works only for preserveObjectStacking true.
-   * If `null` or 'none' or any other string that is not a modifier key
-   * feature is disabled.
    * @since 1.6.5
    * @type null|ModifierKey
    */
   altSelectionKey: TOptionalModifierKey;
 
   /**
-   * 选择的颜色
-   *
-   * Color of selection
+   * 选择时的颜色
    * @type String
    */
   selectionColor: string;
@@ -147,24 +114,20 @@ export interface CanvasSelectionOptions {
    * 默认虚线数组模式。
    * 如果不为空，则选择边框为虚线。
    *
-   * Default dash array pattern
-   * If not empty the selection border is dashed
    * @type Array
    */
   selectionDashArray: number[];
 
   /**
-   * 选择边框的颜色（通常比选择本身的颜色稍深）
+   * 选择时边框的颜色（通常比选择本身的颜色稍深）
    *
-   * Color of the border of selection (usually slightly darker than color of selection itself)
    * @type String
    */
   selectionBorderColor: string;
 
   /**
-   * 用于对象/组选择的线条宽度
+   * 用于对象/组选择时的线条宽度
    *
-   * Width of a line used in object/group selection
    * @type Number
    */
   selectionLineWidth: number;
@@ -172,7 +135,6 @@ export interface CanvasSelectionOptions {
   /**
    * 仅选择完全包含在拖动选择矩形中的形状。
    *
-   * Select only shapes that are fully contained in the dragged selection rectangle.
    * @type Boolean
    */
   selectionFullyContained: boolean;
@@ -185,7 +147,6 @@ export interface CanvasCursorOptions {
   /**
    * 悬停在 canvas 上的对象时使用的默认光标值
    *
-   * Default cursor value used when hovering over an object on canvas
    * @type CSSStyleDeclaration['cursor']
    * @default move
    */
@@ -194,7 +155,6 @@ export interface CanvasCursorOptions {
   /**
    * 在 canvas 上移动对象时使用的默认光标值
    *
-   * Default cursor value used when moving an object on canvas
    * @type CSSStyleDeclaration['cursor']
    * @default move
    */
@@ -203,7 +163,6 @@ export interface CanvasCursorOptions {
   /**
    * 整个 canvas 使用的默认光标值
    *
-   * Default cursor value used for the entire canvas
    * @type String
    * @default default
    */
@@ -212,7 +171,6 @@ export interface CanvasCursorOptions {
   /**
    * 自由绘制期间使用的光标值
    *
-   * Cursor value used during free drawing
    * @type String
    * @default crosshair
    */
@@ -221,7 +179,6 @@ export interface CanvasCursorOptions {
   /**
    * 用于禁用元素（具有禁用操作的角）的光标值
    *
-   * Cursor value used for disabled elements ( corners with disabled action )
    * @type String
    * @since 2.0.0
    * @default not-allowed
@@ -236,7 +193,6 @@ export interface TargetFindOptions {
   /**
    * 当为 true 时，对象检测基于每个像素而不是每个边界框进行
    *
-   * When true, object detection happens on per-pixel basis rather than on per-bounding-box
    * @type Boolean
    */
   perPixelTargetFind: boolean;
@@ -244,7 +200,6 @@ export interface TargetFindOptions {
   /**
    * 对象检测期间容忍的目标像素周围的像素数（视为活动）
    *
-   * Number of pixels around target pixel to tolerate (consider active) during object detection
    * @type Number
    */
   targetFindTolerance: number;
@@ -255,12 +210,6 @@ export interface TargetFindOptions {
    * 如果在设置为 true 之前选择了某些内容，则会在第一次点击时取消选择。
    * 区域选择仍然有效。还要检查 `selection` 属性。
    * 如果您同时停用两者，则应查看 staticCanvas。
-   *
-   * When true, target detection is skipped. Target detection will return always undefined.
-   * click selection won't work anymore, events will fire with no targets.
-   * if something is selected before setting it to true, it will be deselected at the first click.
-   * area selection will still work. check the `selection` property too.
-   * if you deactivate both, you should look into staticCanvas.
    * @type Boolean
    */
   skipTargetFind: boolean;
@@ -303,7 +252,6 @@ export interface CanvasEventsOptions {
   /**
    * 当启用该选项时，使用 PointerEvent 代替 TPointerEvent。
    *
-   * When the option is enabled, PointerEvent is used instead of TPointerEvent.
    * @type Boolean
    */
   enablePointerEvents: boolean;
@@ -322,7 +270,6 @@ export interface CanvasOptions
   /**
    * 赋予 canvas 包装器 (div) 元素的默认元素类
    *
-   * Default element class that's given to wrapper (div) element of canvas
    * @type String
    * @deprecated customize {@link CanvasDOMManager} instead or access {@link elements} directly
    */
@@ -332,8 +279,6 @@ export interface CanvasOptions
    * 指示对象在被选中时是否应保持在当前堆栈位置。
    * 当为 false 时，对象被带到顶部并作为选择组的一部分进行渲染
    *
-   * Indicates whether objects should remain in current stack position when selected.
-   * When false objects are brought to top and rendered as part of the selection group
    * @type Boolean
    * @default true
    */

@@ -63,11 +63,8 @@ export const setCSSDimensions = (
 /**
  * 返回给定元素的偏移量
  *
- * Returns offset for a given element
  * @param element 要获取偏移量的元素
- * @param {HTMLElement} element Element to get offset for
  * @returns 包含 "left" 和 "top" 属性的对象
- * @return {Object} Object with "left" and "top" properties
  */
 export function getElementOffset(element: HTMLElement) {
   const doc = element && getDocumentFromElement(element),
@@ -103,11 +100,8 @@ export function getElementOffset(element: HTMLElement) {
 /**
  * 使元素不可选中
  *
- * Makes element unselectable
  * @param element 要设置为不可选中的元素
- * @param {HTMLElement} element Element to make unselectable
  * @returns 传入的元素
- * @return {HTMLElement} Element that was passed in
  */
 export function makeElementUnselectable(element: HTMLElement) {
   if (typeof element.onselectstart !== 'undefined') {

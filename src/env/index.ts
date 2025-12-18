@@ -19,11 +19,6 @@ let env: TFabricEnv;
  *
  * **注意**：必须在使用包之前调用。
  *
- * Sets the environment variables used by fabric.\
- * This is exposed for special cases, such as configuring a test environment, and should be used with care.
- *
- * **CAUTION**: Must be called before using the package.
- *
  * @example
  * <caption>Passing `window` and `document` objects to fabric (in case they are mocked or something)</caption>
  * import { getEnv, setEnv } from 'fabric';
@@ -60,8 +55,6 @@ export const getFabricWindow = (): (Window & typeof globalThis) | DOMWindow =>
 /**
  * 获取设备像素比
  * @returns 如果已定义则返回配置值，否则回退到环境值
- *
- * @returns the config value if defined, fallbacks to the environment value
  */
 export const getDevicePixelRatio = () =>
   Math.max(config.devicePixelRatio ?? getFabricWindow().devicePixelRatio, 1);

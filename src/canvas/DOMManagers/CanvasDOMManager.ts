@@ -26,8 +26,6 @@ export class CanvasDOMManager extends StaticCanvasDOMManager {
    * 构造函数
    * @param arg0 Canvas 元素或其 ID
    * @param options 选项对象
-   * @param options.allowTouchScrolling 是否允许触摸滚动
-   * @param options.containerClass 容器类名（已弃用，仅用于向后兼容）
    */
   constructor(
     arg0?: string | HTMLCanvasElement,
@@ -35,9 +33,13 @@ export class CanvasDOMManager extends StaticCanvasDOMManager {
       allowTouchScrolling = false,
       containerClass = '',
     }: {
+      /**
+       * 是否允许触摸滚动
+       */
       allowTouchScrolling?: boolean;
       /**
-       * @deprecated here only for backward compatibility
+       *  容器类名（已弃用，仅用于向后兼容）
+       * @deprecated
        */
       containerClass?: string;
     } = {},

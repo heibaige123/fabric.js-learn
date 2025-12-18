@@ -62,19 +62,14 @@ export const createCanvasElementFor = (
 };
 
 /**
- * 自 2.6.0 起从 canvas 实例移动到实用程序。
+ * 将 canvas 元素转换为数据 URL
+ *
+ * 自 2.6.0 起从 canvas 实例移动到工具方法中
  * 可能无用
  * @param canvasEl 要复制尺寸和内容的 canvas 元素
  * @param format 'jpeg' 或 'png'，在某些浏览器中 'webp' 也可以
  * @param quality <= 1 且 > 0
  * @returns 数据 URL
- *
- * since 2.6.0 moved from canvas instance to utility.
- * possibly useless
- * @param {CanvasElement} canvasEl to copy size and content of
- * @param {String} format 'jpeg' or 'png', in some browsers 'webp' is ok too
- * @param {number} quality <= 1 and > 0
- * @return {String} data url
  */
 export const toDataURL = (
   canvasEl: HTMLCanvasElement,
