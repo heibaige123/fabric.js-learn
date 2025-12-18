@@ -407,11 +407,8 @@ export class FabricImage<
    * 如果定义了过滤器，它们将应用于新图像。
    * 替换后，您可能需要调用 `canvas.renderAll` 和 `object.setCoords`，以渲染新图像并更新控件区域。
    *
-   * Sets image element for this instance to a specified one.
-   * If filters defined they are applied to new image.
-   * You might need to call `canvas.renderAll` and `object.setCoords` after replacing, to render new image and update controls area.
-   * @param {HTMLImageElement} element
-   * @param {Partial<TSize>} [size] Options object
+   * @param element 图像元素
+   * @param size 可选的宽度和高度对象
    */
   setElement(element: ImageSource, size: Partial<TSize> = {}) {
     this.removeTexture(this.cacheKey);
@@ -433,8 +430,6 @@ export class FabricImage<
 
   /**
    * 如果处于 webgl 模式，则删除单个纹理
-   *
-   * Delete a single texture if in webgl mode
    */
   removeTexture(key: string) {
     const backend = getFilterBackend(false);
@@ -444,9 +439,7 @@ export class FabricImage<
   }
 
   /**
-   * 删除纹理、对元素的引用以及最终的 JSDOM 清理
-   *
-   * Delete textures, reference to elements and eventually JSDOM cleanup
+   * 删除纹理、对元素的引用并清理 JSDOM 资源
    */
   dispose() {
     super.dispose();

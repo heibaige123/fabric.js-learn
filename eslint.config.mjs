@@ -40,7 +40,7 @@ export default tseslint.config(
       '@typescript-eslint/no-unnecessary-type-arguments': 'error',
       '@typescript-eslint/no-restricted-types': 1,
       '@typescript-eslint/ban-ts-comment': 1,
-      '@typescript-eslint/no-explicit-any': ['warn'],
+      '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-expressions': [
         'error',
         {

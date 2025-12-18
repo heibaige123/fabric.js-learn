@@ -64,9 +64,6 @@ export type TransformActionHandler<T extends Transform = Transform> =
 /**
  * 在控件点击/按下/抬起时运行的控件处理程序
  * 这些处理程序在有或没有定义变换的情况下运行
- *
- * Control handlers that run on control click/down/up
- * Those handlers run with or without a transform defined
  */
 export type ControlActionHandler = TransformAction<Transform, any>;
 
@@ -224,9 +221,6 @@ export interface BasicTransformEvent<E extends Event = TPointerEvent>
    * 变换数据
    */
   transform: Transform;
-  /* This pointer is usually a scenePoint. It isn't in the case of actions inside groups,
-   * where it becomes a point relative to the group center
-   */
   /**
    * 指针位置
    * 这个指针通常是一个场景点。在组内操作的情况下不是，
@@ -287,13 +281,37 @@ export interface ModifyPathEvent {
  * 对象修改事件映射
  */
 export type ObjectModificationEvents = {
+  /**
+   * 移动事件映射
+   */
   [MOVING]: BasicTransformEvent;
+  /**
+   * 缩放事件映射
+   */
   [SCALING]: BasicTransformEvent;
+  /**
+   * 旋转事件映射
+   */
   [ROTATING]: BasicTransformEvent;
+  /**
+   * 倾斜事件映射
+   */
   [SKEWING]: BasicTransformEvent;
+  /**
+   * 调整大小事件映射
+   */
   [RESIZING]: BasicTransformEvent;
+  /**
+   * 修改多边形事件映射
+   */
   [MODIFY_POLY]: BasicTransformEvent;
+  /**
+   * 修改路径事件映射
+   */
   [MODIFY_PATH]: BasicTransformEvent & ModifyPathEvent;
+  /**
+   * 已修改事件映射
+   */
   [MODIFIED]: ModifiedEvent;
 };
 
@@ -301,16 +319,81 @@ export type ObjectModificationEvents = {
  * 画布修改事件映射
  */
 type CanvasModificationEvents = {
-  'before:transform': TEvent & { transform: Transform };
-  'object:moving': BasicTransformEvent & { target: FabricObject };
-  'object:scaling': BasicTransformEvent & { target: FabricObject };
-  'object:rotating': BasicTransformEvent & { target: FabricObject };
-  'object:skewing': BasicTransformEvent & { target: FabricObject };
-  'object:resizing': BasicTransformEvent & { target: FabricObject };
-  'object:modifyPoly': BasicTransformEvent & { target: FabricObject };
+  /**
+   * 变换前事件
+   */
+  'before:transform': TEvent & {
+    /**
+     * 变换数据
+     */
+    transform: Transform;
+  };
+  /**
+   * 对象移动事件
+   */
+  'object:moving': BasicTransformEvent & {
+    /**
+     * 目标对象
+     */
+    target: FabricObject;
+  };
+  /**
+   * 对象缩放事件
+   */
+  'object:scaling': BasicTransformEvent & {
+    /**
+     * 目标对象
+     */
+    target: FabricObject;
+  };
+  /**
+   * 对象旋转事件
+   */
+  'object:rotating': BasicTransformEvent & {
+    /**
+     * 目标对象
+     */
+    target: FabricObject;
+  };
+  /**
+   * 对象倾斜事件
+   */
+  'object:skewing': BasicTransformEvent & {
+    /**
+     *  目标对象
+     */
+    target: FabricObject;
+  };
+  /**
+   * 对象调整大小事件
+   */
+  'object:resizing': BasicTransformEvent & {
+    /**
+     * 目标对象
+     */
+    target: FabricObject;
+  };
+  /**
+   * 对象修改多边形事件
+   */
+  'object:modifyPoly': BasicTransformEvent & {
+    /**
+     * 目标对象
+     */
+    target: FabricObject;
+  };
+  /**
+   * 对象修改路径事件
+   */
   'object:modifyPath': BasicTransformEvent & {
+    /**
+     * 目标对象
+     */
     target: FabricObject;
   } & ModifyPathEvent;
+  /**
+   * 对象已修改事件
+   */
   'object:modified': ModifiedEvent;
 };
 
