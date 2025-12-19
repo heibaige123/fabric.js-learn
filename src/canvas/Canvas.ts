@@ -90,7 +90,13 @@ const syntheticEventConfig = {
  * 合成事件上下文类型
  */
 type TSyntheticEventContext = {
+  /**
+   * 鼠标事件上下文
+   */
   mouse: { e: TPointerEvent };
+  /**
+   * 拖动事件上下文
+   */
   drag: DragEventData;
 };
 
@@ -110,37 +116,30 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   declare enablePointerEvents: boolean;
 
   /**
-   * 保存用于事件同步的 setTimeout 计时器的引用
-   *
-   * Holds a reference to a setTimeout timer for event synchronization
+   * 保存用于同步事件的 setTimeout 计时器的引用
    * @type number
    * @private
    */
   declare private _willAddMouseDown: number;
 
   /**
-   * 保存对正在接收 drag over 事件的 canvas 上的对象的引用。
-   *
-   * Holds a reference to an object on the canvas that is receiving the drag over event.
+   * 保存 drag over 事件对象的引用。
    * @type FabricObject
    * @private
    */
   declare private _draggedoverTarget?: FabricObject;
 
   /**
-   * 保存对拖动操作开始的 canvas 上的对象的引用
-   *
-   * Holds a reference to an object on the canvas from where the drag operation started
+   * 保存 drag start 事件对象的引用
    * @type FabricObject
    * @private
    */
   declare private _dragSource?: FabricObject;
 
   /**
-   * 保存对作为当前放置目标的 canvas 上的对象的引用
+   * 保存对作为当前 drop 对象的引用
    * 可能与 {@link _draggedoverTarget} 不同
    *
-   * Holds a reference to an object on the canvas that is the current drop target
    * May differ from {@link _draggedoverTarget}
    * @todo inspect whether {@link _draggedoverTarget} and {@link _dropTarget} should be merged somehow
    * @type FabricObject
@@ -153,11 +152,6 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
    * 如果发生鼠标移动，它将变为 false。
    * 默认为 true，在鼠标移动时变为 false。
    * 用于确定 mouseUp 是否为点击
-   *
-   * a boolean that keeps track of the click state during a cycle of mouse down/up.
-   * If a mouse move occurs it becomes false.
-   * Is true by default, turns false on mouse move.
-   * Used to determine if a mouseUp is a click
    */
   private _isClick: boolean;
 
@@ -209,9 +203,7 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   }
 
   /**
-   * 返回事件前缀 pointer 或 mouse。
-   *
-   * return an event prefix pointer or mouse.
+   * 返回事件前缀， pointer 或 mouse。
    * @private
    */
   private _getEventPrefix() {
@@ -255,8 +247,6 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
 
   /**
    * 移除所有事件监听器，在销毁实例时使用
-   *
-   * Removes all event listeners, used when disposing the instance
    */
   removeListeners() {
     this.addOrRemove(removeListener);
@@ -292,7 +282,7 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   /**
    * 鼠标滚轮事件处理程序
    * @private
-   * @param {Event} [e] Event object fired on wheel event
+   * @param e 鼠标滚轮事件对象
    */
   private _onMouseWheel(e: MouseEvent) {
     this._cacheTransformEventData(e);
@@ -1262,7 +1252,6 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
   /**
    * 重置事件处理期间所需的公共信息缓存
    *
-   * reset cache form common information needed during event processing
    * @private
    */
   _resetTransformEventData() {
@@ -1271,10 +1260,8 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
 
   /**
    * 缓存事件处理期间所需的公共信息
-   *
-   * Cache common information needed during event processing
    * @private
-   * @param {Event} e Event object fired on event
+   * @param {Event} e 事件对象
    */
   _cacheTransformEventData(e: TPointerEvent) {
     // reset in order to avoid stale caching

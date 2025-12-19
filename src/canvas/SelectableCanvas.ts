@@ -67,7 +67,7 @@ export type TargetsInfo = {
 };
 
 /**
- * 带有容器信息的目标信息的数据结构
+ * 带有容器目标信息的数据结构
  */
 export type TargetsInfoWithContainer = {
   // 我们认为最能延续选择动作的目标。
@@ -75,8 +75,9 @@ export type TargetsInfoWithContainer = {
   // the target we think is the most continuing the selection action.
   // could be hoveredTarget or the currently selected object
   target?: FabricObject;
-  // 容器下指针处的嵌套目标
-  // the nested targets under the pointer for container
+  /**
+   * 容器下指针处的嵌套目标
+   */
   subTargets: FabricObject[];
   // 目标的容器，如果没有可选择的嵌套目标，则为目标本身
   // the container for target, or target itself if there are no selectable nested targets
@@ -1208,11 +1209,6 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
    * 这意味着对 {@link viewportTransform} 的更改不会更改点的值
    * 并且从查看者的角度来看它保持不变。
    *
-   * @returns point existing in the same plane as the {@link HTMLCanvasElement},
-   * `(0, 0)` being the top left corner of the {@link HTMLCanvasElement}.
-   * This means that changes to the {@link viewportTransform} do not change the values of the point
-   * and it remains unchanged from the viewer's perspective.
-   *
    * @example
    * const scenePoint = sendPointToPlane(
    *  this.getViewportPoint(e),
@@ -1255,10 +1251,6 @@ export class SelectableCanvas<EventSpec extends CanvasEvents = CanvasEvents>
    * 返回相对于 canvas 的指针。
    *
    * 请改用 {@link getViewportPoint} 或 {@link getScenePoint}。
-   *
-   * Returns pointer relative to canvas.
-   *
-   * Use {@link getViewportPoint} or {@link getScenePoint} instead.
    *
    * @param {Event} e
    * @param {Boolean} [fromViewport] whether to return the point from the viewport or in the scene

@@ -5,6 +5,10 @@ import { createVector } from './util/misc/vectors';
 
 /**
  * 相交类型
+ *
+ * - Intersection 相交
+ * - Coincident 重合
+ * - Parallel 平行
  */
 export type IntersectionType = 'Intersection' | 'Coincident' | 'Parallel';
 
@@ -31,10 +35,6 @@ export class Intersection {
    * 用于验证点是否已在集合中
    * @param {Point} point 要检查的点
    * @returns {boolean} 如果点已存在则返回 true
-   *
-   * Used to verify if a point is alredy in the collection
-   * @param {Point} point
-   * @returns {boolean}
    */
   private includes(point: Point): boolean {
     return this.points.some((p) => p.eq(point));
@@ -44,10 +44,6 @@ export class Intersection {
    * 追加相交点
    * @param {...Point[]} points 要追加的点
    * @return {Intersection} 当前实例
-   *
-   * Appends points of intersection
-   * @param {...Point[]} points
-   * @return {Intersection} thisArg
    */
   private append(...points: Point[]): Intersection {
     this.points = this.points.concat(
@@ -66,14 +62,6 @@ export class Intersection {
    * @param {Point} B 线段的另一个端点
    * @param [infinite] 如果为 true，则检查 `T` 是否在由 `A` 和 `B` 定义的直线上
    * @returns 如果 `T` 被包含则返回 true
-   *
-   * check if point T is on the segment or line defined between A and B
-   *
-   * @param {Point} T the point we are checking for
-   * @param {Point} A one extremity of the segment
-   * @param {Point} B the other extremity of the segment
-   * @param [infinite] if true checks if `T` is on the line defined by `A` and `B`
-   * @returns true if `T` is contained
    */
   static isPointContained(T: Point, A: Point, B: Point, infinite = false) {
     if (A.eq(B)) {
@@ -114,12 +102,6 @@ export class Intersection {
    * @param point 要检查的点
    * @param points 多边形的点
    * @returns 如果点在多边形内则返回 true
-   *
-   * Use the ray casting algorithm to determine if point is in the polygon defined by points
-   * @see https://en.wikipedia.org/wiki/Point_in_polygon
-   * @param point
-   * @param points polygon points
-   * @returns
    */
   static isPointInPolygon(point: Point, points: Point[]) {
     const other = new Point(point).setX(
@@ -155,17 +137,6 @@ export class Intersection {
    * @param {boolean} [aInfinite=true] 通过传递 `false` 检查线段相交
    * @param {boolean} [bInfinite=true] 通过传递 `false` 检查线段相交
    * @return {Intersection} 相交结果
-   *
-   * Checks if a line intersects another
-   * @see {@link https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection line intersection}
-   * @see {@link https://en.wikipedia.org/wiki/Cramer%27s_rule Cramer's rule}
-   * @param {Point} a1
-   * @param {Point} a2
-   * @param {Point} b1
-   * @param {Point} b2
-   * @param {boolean} [aInfinite=true] check segment intersection by passing `false`
-   * @param {boolean} [bInfinite=true] check segment intersection by passing `false`
-   * @return {Intersection}
    */
   static intersectLineLine(
     a1: Point,
@@ -221,14 +192,6 @@ export class Intersection {
    * @param {Point} l1 直线上的点
    * @param {Point} l2 直线上的另一个点
    * @return {Intersection} 相交结果
-   *
-   * Checks if a segment intersects a line
-   * @see {@link intersectLineLine} for line intersection
-   * @param {Point} s1 boundary point of segment
-   * @param {Point} s2 other boundary point of segment
-   * @param {Point} l1 point on line
-   * @param {Point} l2 other point on line
-   * @return {Intersection}
    */
   static intersectSegmentLine(
     s1: Point,
@@ -247,14 +210,6 @@ export class Intersection {
    * @param {Point} b1 线段的边界点
    * @param {Point} b2 线段的另一个边界点
    * @return {Intersection} 相交结果
-   *
-   * Checks if a segment intersects another
-   * @see {@link intersectLineLine} for line intersection
-   * @param {Point} a1 boundary point of segment
-   * @param {Point} a2 other boundary point of segment
-   * @param {Point} b1 boundary point of segment
-   * @param {Point} b2 other boundary point of segment
-   * @return {Intersection}
    */
   static intersectSegmentSegment(
     a1: Point,
@@ -276,17 +231,6 @@ export class Intersection {
    * @param {Point[]} points 多边形的点
    * @param {boolean} [infinite=true] 通过传递 `false` 检查线段相交
    * @return {Intersection} 相交结果
-   *
-   * Checks if line intersects polygon
-   *
-   * @todo account for stroke
-   *
-   * @see {@link intersectSegmentPolygon} for segment intersection
-   * @param {Point} a1 point on line
-   * @param {Point} a2 other point on line
-   * @param {Point[]} points polygon points
-   * @param {boolean} [infinite=true] check segment intersection by passing `false`
-   * @return {Intersection}
    */
   static intersectLinePolygon(
     a1: Point,
@@ -321,13 +265,6 @@ export class Intersection {
    * @param {Point} a2 线段的另一个边界点
    * @param {Point[]} points 多边形的点
    * @return {Intersection} 相交结果
-   *
-   * Checks if segment intersects polygon
-   * @see {@link intersectLinePolygon} for line intersection
-   * @param {Point} a1 boundary point of segment
-   * @param {Point} a2 other boundary point of segment
-   * @param {Point[]} points polygon points
-   * @return {Intersection}
    */
   static intersectSegmentPolygon(
     a1: Point,
@@ -345,14 +282,6 @@ export class Intersection {
    * @param {Point[]} points1 第一个多边形的点
    * @param {Point[]} points2 第二个多边形的点
    * @return {Intersection} 相交结果
-   *
-   * Checks if polygon intersects another polygon
-   *
-   * @todo account for stroke
-   *
-   * @param {Point[]} points1
-   * @param {Point[]} points2
-   * @return {Intersection}
    */
   static intersectPolygonPolygon(
     points1: Point[],
@@ -390,13 +319,6 @@ export class Intersection {
    * @param {Point} r1 矩形的左上角点
    * @param {Point} r2 矩形的右下角点
    * @return {Intersection} 相交结果
-   *
-   * Checks if polygon intersects rectangle
-   * @see {@link intersectPolygonPolygon} for polygon intersection
-   * @param {Point[]} points polygon points
-   * @param {Point} r1 top left point of rect
-   * @param {Point} r2 bottom right point of rect
-   * @return {Intersection}
    */
   static intersectPolygonRectangle(
     points: Point[],

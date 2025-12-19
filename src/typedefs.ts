@@ -144,7 +144,8 @@ export type TMat2D = [
 /**
  * 跨域设置类型
  *
- * An invalid keyword and an empty string will be handled as the `anonymous` keyword.
+ * 无效关键字和空字符串将被视为“anonymous”关键字。
+ *
  * @see https://developer.mozilla.org/en-US/docs/HTML/CORS_settings_attributes
  */
 export type TCrossOrigin = '' | 'anonymous' | 'use-credentials' | null;
@@ -279,7 +280,6 @@ export type Abortable = {
   /**
    * 处理中止
    *
-   * handle aborting
    * @see https://developer.mozilla.org/en-US/docs/Web/API/AbortController/signal
    */
   signal?: AbortSignal;

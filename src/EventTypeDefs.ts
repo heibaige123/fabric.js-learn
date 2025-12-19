@@ -43,6 +43,11 @@ export type TPointerEvent = MouseEvent | TouchEvent | PointerEvent;
 
 /**
  * 变换动作函数类型
+ *
+ * @param eventData - 指针事件数据
+ * @param transform - 变换数据
+ * @param x - X 坐标
+ * @param y - Y 坐标
  */
 export type TransformAction<T extends Transform = Transform, R = void> = (
   eventData: TPointerEvent,
@@ -54,9 +59,6 @@ export type TransformAction<T extends Transform = Transform, R = void> = (
 /**
  * 定义变换的控件处理程序
  * 这些处理程序在用户开始变换和变换期间运行
- *
- * Control handlers that define a transformation
- * Those handlers run when the user starts a transform and during a transform
  */
 export type TransformActionHandler<T extends Transform = Transform> =
   TransformAction<T, boolean>;
@@ -69,6 +71,10 @@ export type ControlActionHandler = TransformAction<Transform, any>;
 
 /**
  * 控件回调函数类型
+ *
+ * @param eventData - 指针事件数据
+ * @param control - 控件实例
+ * @param fabricObject - 交互式 Fabric 对象实例
  */
 export type ControlCallback<R = void> = (
   eventData: TPointerEvent,
@@ -78,6 +84,11 @@ export type ControlCallback<R = void> = (
 
 /**
  * 控件光标回调函数类型
+ *
+ * @param eventData - 指针事件数据
+ * @param control - 控件实例
+ * @param fabricObject - 交互式 Fabric 对象实例
+ * @param coord - 控件坐标
  */
 export type ControlCursorCallback<R = string> = (
   eventData: TPointerEvent,
@@ -90,9 +101,6 @@ export type ControlCursorCallback<R = string> = (
  * 变换对象类型
  * 相对于目标的包含坐标平面
  * 两者在每个点上都一致
- *
- * relative to target's containing coordinate plane
- * both agree on every point
  */
 export type Transform = {
   /**
@@ -183,7 +191,13 @@ export type Transform = {
    * 原始变换数据
    */
   original: ReturnType<typeof saveObjectTransform> & {
+    /**
+     * X 轴原点
+     */
     originX: TOriginX;
+    /**
+     * Y 轴原点
+     */
     originY: TOriginY;
   };
   /**
@@ -507,14 +521,41 @@ export interface DropEventData extends DragEventData {
  * 拖放事件映射
  */
 interface DnDEvents {
+  /**
+   * 拖动开始事件
+   */
   dragstart: TEventWithTarget<DragEvent>;
+  /**
+   * 拖动事件
+   */
   drag: DragEventData;
+  /**
+   * 拖动结束事件
+   */
   dragover: DragEventData;
+  /**
+   * 拖入事件
+   */
   dragenter: DragEventData & InEvent;
+  /**
+   * 拖出事件
+   */
   dragleave: DragEventData & OutEvent;
+  /**
+   * 拖动结束事件
+   */
   dragend: DragEventData;
+  /**
+   * 放置前事件
+   */
   'drop:before': DropEventData;
+  /**
+   * 放置事件
+   */
   drop: DropEventData;
+  /**
+   * 放置后事件
+   */
   'drop:after': DropEventData;
 }
 
@@ -522,7 +563,13 @@ interface DnDEvents {
  * 画布拖放事件映射
  */
 interface CanvasDnDEvents extends DnDEvents {
+  /**
+   * 拖入事件
+   */
   'drag:enter': DragEventData & InEvent;
+  /**
+   * 拖出事件
+   */
   'drag:leave': DragEventData & OutEvent;
 }
 
@@ -576,7 +623,13 @@ interface CanvasSelectionEvents {
  * 集合事件映射
  */
 export interface CollectionEvents {
+  /**
+   * 对象添加事件
+   */
   'object:added': { target: FabricObject };
+  /**
+   * 对象移除事件
+   */
   'object:removed': { target: FabricObject };
 }
 
@@ -605,9 +658,6 @@ type TPointerEvents<Prefix extends string> = Record<
     TPointerEventInfo & {
       /**
        * 指示目标或当前目标在鼠标按下 -> 鼠标抬起循环开始之前是否已被选中
-       *
-       * Indicates if the target or current target where already selected
-       * before the cycle of mouse down -> mouse up started
        */
       alreadySelected: boolean;
     }
@@ -651,7 +701,13 @@ export type CanvasPointerEvents = TPointerEvents<'mouse:'>;
  * 杂项事件接口
  */
 export interface MiscEvents {
+  /**
+   * 点击上下文菜单前事件
+   */
   'contextmenu:before': SimpleEventHandler<Event>;
+  /**
+   * 上下文菜单事件
+   */
   contextmenu: SimpleEventHandler<Event>;
 }
 
@@ -668,29 +724,50 @@ export interface ObjectEvents
    * 选中事件
    */
   selected: Partial<TEvent> & {
+    /**
+     * 目标对象
+     */
     target: FabricObject;
   };
   /**
    * 取消选中事件
    */
   deselected: Partial<TEvent> & {
+    /**
+     * 目标对象
+     */
     target: FabricObject;
   };
   // tree
   /**
    * 添加事件
    */
-  added: { target: Group | Canvas | StaticCanvas };
+  added: {
+    /**
+     * 目标对象
+     */
+    target: Group | Canvas | StaticCanvas;
+  };
   /**
    * 移除事件
    */
-  removed: { target: Group | Canvas | StaticCanvas };
+  removed: {
+    /**
+     * 目标对象
+     */
+    target: Group | Canvas | StaticCanvas;
+  };
 
   // erasing
   /**
    * 擦除结束事件
    */
-  'erasing:end': { path: FabricObject };
+  'erasing:end': {
+    /**
+     * 目标对象
+     */
+    path: FabricObject;
+  };
 }
 
 /**
@@ -707,19 +784,39 @@ export interface StaticCanvasEvents extends CollectionEvents {
   /**
    * 渲染前事件
    */
-  'before:render': { ctx: CanvasRenderingContext2D };
+  'before:render': {
+    /**
+     * 渲染上下文
+     */
+    ctx: CanvasRenderingContext2D;
+  };
   /**
    * 渲染后事件
    */
-  'after:render': { ctx: CanvasRenderingContext2D };
+  'after:render': {
+    /**
+     * 渲染上下文
+     */
+    ctx: CanvasRenderingContext2D;
+  };
   /**
    * 对象布局前事件
    */
-  'object:layout:before': LayoutBeforeEvent & { target: Group };
+  'object:layout:before': LayoutBeforeEvent & {
+    /**
+     * 目标对象
+     */
+    target: Group;
+  };
   /**
    * 对象布局后事件
    */
-  'object:layout:after': LayoutAfterEvent & { target: Group };
+  'object:layout:after': LayoutAfterEvent & {
+    /**
+     * 目标对象
+     */
+    target: Group;
+  };
 }
 
 /**
@@ -736,11 +833,21 @@ export interface CanvasEvents
   /**
    * 路径创建前事件
    */
-  'before:path:created': { path: FabricObject };
+  'before:path:created': {
+    /**
+     * 路径对象
+     */
+    path: FabricObject;
+  };
   /**
    * 路径创建事件
    */
-  'path:created': { path: FabricObject };
+  'path:created': {
+    /**
+     * 路径对象
+     */
+    path: FabricObject;
+  };
 
   // erasing
   /**
@@ -753,11 +860,29 @@ export interface CanvasEvents
   'erasing:end':
     | never
     | {
+        /**
+         * 路径对象
+         */
         path: FabricObject;
+        /**
+         * 目标对象列表
+         */
         targets: FabricObject[];
+        /**
+         * 子目标对象列表
+         */
         subTargets: FabricObject[];
+        /**
+         * 绘制对象
+         */
         drawables: {
+          /**
+           * 背景图像
+           */
           backgroundImage?: FabricObject;
+          /**
+           * 覆盖图像
+           */
           overlayImage?: FabricObject;
         };
       };
@@ -766,23 +891,51 @@ export interface CanvasEvents
   /**
    * 文本选择改变事件
    */
-  'text:selection:changed': { target: IText };
+  'text:selection:changed': {
+    /**
+     * 目标对象
+     */
+    target: IText;
+  };
   /**
    * 文本改变事件
    */
-  'text:changed': { target: IText };
+  'text:changed': {
+    /**
+     * 目标对象
+     */
+    target: IText;
+  };
   /**
    * 进入文本编辑事件
    */
-  'text:editing:entered': { target: IText } & Partial<TEvent>;
+  'text:editing:entered': {
+    /**
+     * 目标对象
+     */
+    target: IText;
+  } & Partial<TEvent>;
   /**
    * 退出文本编辑事件
    */
-  'text:editing:exited': { target: IText };
+  'text:editing:exited': {
+    /**
+     * 目标对象
+     */
+    target: IText;
+  };
 }
 
 /**
  * 事件额外数据类型
  */
 export type TEventsExtraData = Record<PropertyKey, Record<PropertyKey, never>> &
-  Record<'down', { alreadySelected: boolean }>;
+  Record<
+    'down',
+    {
+      /**
+       * 已选中
+       */
+      alreadySelected: boolean;
+    }
+  >;

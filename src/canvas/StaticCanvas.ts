@@ -48,9 +48,6 @@ import { getDevicePixelRatio } from '../env';
 /**
  * 拥有 TCanvasSizeOptions 中的两个选项都设置为 true 会将调用转换为 calcOffset
  * 最好尝试使用类型进行限制以避免混淆。
- *
- * Having both options in TCanvasSizeOptions set to true transform the call in a calcOffset
- * Better try to restrict with types to avoid confusion.
  */
 export type TCanvasSizeOptions =
   | {
@@ -129,7 +126,6 @@ export type PatternQuality = 'fast' | 'good' | 'best' | 'nearest' | 'bilinear';
 /**
  * 静态 Canvas 类
  *
- * Static canvas class
  * @see {@link http://fabric5.fabricjs.com/static_canvas|StaticCanvas demo}
  * @fires before:render
  * @fires after:render
