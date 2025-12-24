@@ -7,7 +7,7 @@ export const CONFIG = [
   },
   {
     selected: true,
-    name: '十字动画-2',
+    name: '彩色文字',
     component: lazy(() => import('./pages/demo-02')),
   },
 ];
