@@ -1519,13 +1519,8 @@ export class StaticCanvas<
    *
    * **重要**：建议在调用此方法之前中止加载任务，以防止竞争条件和不必要的网络连接
    *
-   * Populates canvas with data from the specified JSON.
-   * JSON format must conform to the one of {@link fabric.Canvas#toJSON}
-   *
-   * **IMPORTANT**: It is recommended to abort loading tasks before calling this method to prevent race conditions and unnecessary networking
-   *
-   * @param {String|Object} json JSON string or object
-   * @param {Function} [reviver] Method for further parsing of JSON elements, called after each fabric object created.
+   * @param {String|Object} json JSON 字符串或对象
+   * @param {Function} [reviver] 用于进一步解析 JSON 元素的方法，在创建每个结构对象后调用。
    * @param {Object} [options] options
    * @param {AbortSignal} [options.signal] see https://developer.mozilla.org/en-US/docs/Web/API/AbortController/signal
    * @return {Promise<Canvas | StaticCanvas>} instance

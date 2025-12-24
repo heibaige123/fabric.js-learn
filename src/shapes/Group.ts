@@ -38,11 +38,9 @@ import type { DrawContext } from './Object/Object';
 
 /**
  * 此类处理使用 {@link Group#fromObject} 创建组的特定情况，不打算在任何其他情况下使用。
- *
- * This class handles the specific case of creating a group using {@link Group#fromObject} and is not meant to be used in any other case.
- * We could have used a boolean in the constructor, as we did previously, but we think the boolean
- * would stay in the group's constructor interface and create confusion, therefore it was removed.
- * This layout manager doesn't do anything and therefore keeps the exact layout the group had when {@link Group#toObject} was called.
+ * 我们本可以像以前那样在构造函数中使用布尔值，但我们认为布尔值
+ * 会保留在组的构造函数接口中并产生混淆，因此将其删除。
+ * 这个布局管理器什么都不做，因此保持 {@link Group#toObject} 被调用时组的确切布局。
  */
 class NoopLayoutManager extends LayoutManager {
   performLayout() {}
@@ -828,10 +826,6 @@ export class Group
   /**
    * 返回实例的字符串表示
    * @returns 字符串表示
-   *
-   * Returns a string representation of an instance
-   * 返回实例的字符串表示
-   * @returns {string}
    */
   toString() {
     return `#<Group: (${this.complexity()})>`;
@@ -840,8 +834,6 @@ export class Group
   /**
    * 销毁组
    *
-   * Disposes the group
-   * 销毁组
    */
   dispose() {
     this.layoutManager.unsubscribeTargets({
@@ -945,9 +937,6 @@ export class Group
    *
    * @todo support loading from svg
    * @private
-   * @param {Object} object Object to create a group from
-   * @param {Object} object 用于创建组的对象
-   * @returns {Promise<Group>}
    */
   static fromObject<T extends TOptions<SerializedGroupProps>>(
     { type, objects = [], layoutManager, ...options }: T,

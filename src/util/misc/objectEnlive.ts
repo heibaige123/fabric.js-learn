@@ -97,16 +97,7 @@ export type EnlivenObjectOptions = Abortable & {
  * @param [options] 选项
  * @param [options.reviver] 用于进一步解析对象元素的方法，在创建每个 fabric 对象后调用。
  * @param [options.signal] 处理中止，参见 https://developer.mozilla.org/en-US/docs/Web/API/AbortController/signal
- * @returns
- *
- * @TODO type this correctly.
- * Creates corresponding fabric instances from their object representations
- * @param {Object[]} objects Objects to enliven
- * @param {EnlivenObjectOptions} [options]
- * @param {(serializedObj: object, instance: FabricObject) => any} [options.reviver] Method for further parsing of object elements,
- * called after each fabric object created.
- * @param {AbortSignal} [options.signal] handle aborting, see https://developer.mozilla.org/en-US/docs/Web/API/AbortController/signal
- * @returns {Promise<FabricObject[]>}
+ * @returns 激活的对象数组
  */
 export const enlivenObjects = <
   T extends
@@ -158,12 +149,6 @@ export const enlivenObjects = <
  * @param [options] 选项
  * @param [options.signal] 处理中止，参见 https://developer.mozilla.org/en-US/docs/Web/API/AbortController/signal
  * @returns 具有激活值的输入对象
- *
- * Creates corresponding fabric instances residing in an object, e.g. `clipPath`
- * @param {Object} object with properties to enlive ( fill, stroke, clipPath, path )
- * @param {object} [options]
- * @param {AbortSignal} [options.signal] handle aborting, see https://developer.mozilla.org/en-US/docs/Web/API/AbortController/signal
- * @returns {Promise<Record<string, FabricObject | TFiller | null>>} the input object with enlived values
  */
 export const enlivenObjectEnlivables = <
   R = Record<string, FabricObject | TFiller | null>,

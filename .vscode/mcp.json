@@ -1,0 +1,8 @@
+{
+    "servers": {
+        "fabric.js Docs": {
+            "type": "sse",
+            "url": "https://gitmcp.io/fabricjs/fabric.js"
+        }
+    }
+}

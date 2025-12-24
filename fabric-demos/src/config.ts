@@ -4,9 +4,9 @@ export const CONFIG = [
   {
     name: '十字动画',
     component: lazy(() => import('./pages/demo-01')),
-    selected: true,
   },
   {
+    selected: true,
     name: '十字动画-2',
     component: lazy(() => import('./pages/demo-02')),
   },

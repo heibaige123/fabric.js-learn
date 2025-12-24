@@ -18,11 +18,6 @@ export class WebGLProbe extends GLProbe {
    * @param gl 用于测试的 WebGL 上下文
    * @param precision 要测试的精度，可以是以下任意一种
    * @returns 用户的浏览器 WebGL 是否支持给定精度
-   *
-   * Tests if webgl supports certain precision
-   * @param {WebGL} Canvas WebGL context to test on
-   * @param {GLPrecision} Precision to test can be any of following
-   * @returns {Boolean} Whether the user's browser WebGL supports given precision.
    */
   private testPrecision(
     gl: WebGLRenderingContext,
@@ -41,8 +36,6 @@ export class WebGLProbe extends GLProbe {
   /**
    * 查询浏览器的 WebGL 支持情况
    * @param canvas 用于获取上下文的 Canvas 元素
-   *
-   * query browser for WebGL
    */
   queryWebGL(canvas: HTMLCanvasElement) {
     const gl = canvas.getContext('webgl');
