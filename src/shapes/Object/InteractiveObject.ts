@@ -516,9 +516,6 @@ export class InteractiveFabricObject<
    * @override 同时设置控件的坐标
    * 参见 {@link https://github.com/fabricjs/fabric.js/wiki/When-to-call-setCoords} 和 {@link https://fabric5.fabricjs.com/fabric-gotchas}
    *
-   * @override set controls' coordinates as well
-   * See {@link https://github.com/fabricjs/fabric.js/wiki/When-to-call-setCoords} and {@link https://fabric5.fabricjs.com/fabric-gotchas}
-   * @return {void}
    */
   setCoords(): void {
     super.setCoords();

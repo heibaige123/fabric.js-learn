@@ -16,7 +16,6 @@ interface CanvasDrawableOptions {
 
   /**
    * Canvas 实例的背景颜色。
-   * @type {(String|TFiller)}
    */
   backgroundColor: TFiller | string;
 
@@ -25,12 +24,6 @@ interface CanvasDrawableOptions {
    * 自 2.4.0 起，在将图像作为背景时，图像缓存处于激活状态
    * 向 canvas 属性添加对其所在的 canvas 的引用。否则图像无法检测缩放值。
    * 或者，您可以禁用图像 objectCaching。
-   *
-   * Background image of canvas instance.
-   * since 2.4.0 image caching is active, please when putting an image as background, add to the
-   * canvas property a reference to the canvas it is on. Otherwise the image cannot detect the zoom
-   * vale. As an alternative you can disable image objectCaching
-   * @type FabricObject
    */
   backgroundImage?: FabricObject;
 
@@ -56,11 +49,6 @@ interface CanvasDrawableOptions {
    * 向 canvas 属性添加对其所在的 canvas 的引用。否则图像无法检测缩放值。
    * 或者，您可以禁用图像 objectCaching。
    *
-   * Overlay image of canvas instance.
-   * since 2.4.0 image caching is active, please when putting an image as overlay, add to the
-   * canvas property a reference to the canvas it is on. Otherwise the image cannot detect the zoom
-   * vale. As an alternative you can disable image objectCaching
-   * @type FabricObject
    */
   overlayImage?: FabricObject;
 }
@@ -136,21 +124,18 @@ export interface StaticCanvasOptions
   /**
    * Canvas 的虚拟/逻辑像素宽度。
    * 如果视网膜缩放处于活动状态，canvas 可以大于宽度
-   * @type number
    */
   width: number;
 
   /**
    * Canvas 的虚拟/逻辑像素高度。
    * 如果视网膜缩放处于活动状态，canvas 可以高于宽度
-   * @type height
    */
   height: number;
 
   /**
    * 指示对象控件（边框/控件）是否渲染在覆盖图像之上
    *
-   * @type Boolean
    *
    * @todo move to Canvas
    */
@@ -162,12 +147,6 @@ export interface StaticCanvasOptions
    * 如果为 true，当在 canvas 上使用触摸事件时，如果可以滚动，canvas 将滚动。
    * 如果我们处于绘制模式或正在选择对象，canvas 会 preventDefault，因此不会滚动
    *
-   * Indicates whether the browser can be scrolled when using a touchscreen and dragging on the canvas
-   * It gives PRIORITY to DOM scrolling, it doesn't make it always possible.
-   * If is true, when using a touch event on the canvas, the canvas will scroll if scroll is possible.
-   * If we are in drawing mode or if we are selecting an object the canvas preventDefault and so it won't scroll
-   * @type Boolean
-   *
    * @todo move to Canvas
    */
   allowTouchScrolling: boolean;
@@ -175,8 +154,6 @@ export interface StaticCanvasOptions
   /**
    * 聚焦视口的变换（Canvas 2D API 变换矩阵）
    *
-   * The transformation (a Canvas 2D API transform matrix) which focuses the viewport
-   * @type Array
    * @example <caption>Default transform</caption>
    * canvas.viewportTransform = [1, 0, 0, 1, 0, 0];
    * @example <caption>Scale by 70% and translate toward bottom-right by 50, without skewing</caption>
@@ -212,5 +189,15 @@ export const staticCanvasDefaults: TOptions<StaticCanvasOptions> = {
   allowTouchScrolling: false,
 
   viewportTransform: [...iMatrix],
+
+  /**
+   * 图案质量类型定义
+   *
+   * - fast 使用低质量的缩放算法进行图案渲染
+   * - good 使用中等质量的缩放算法进行图案渲染
+   * - best 使用高质量的缩放算法进行图案渲染
+   * - nearest 使用最近邻插值进行图案渲染
+   * - bilinear 使用双线性插值进行图案渲染
+   */
   patternQuality: 'best',
 };

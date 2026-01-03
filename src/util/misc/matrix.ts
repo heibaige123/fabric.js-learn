@@ -86,17 +86,10 @@ export const isIdentityMatrix = (mat: TMat2D) =>
  * 将变换 t 应用于点 p
  * @deprecated 使用 {@link Point#transform}
  *
- * Apply transform t to point p
- * @deprecated use {@link Point#transform}
  * @param p 要变换的点
  * @param t 变换矩阵
  * @param ignoreOffset 指示不应应用偏移量
  * @returns 变换后的点
- *
- * @param  {Point | XY} p The point to transform
- * @param  {Array} t The transform
- * @param  {Boolean} [ignoreOffset] Indicates that the offset should not be applied
- * @return {Point} The transformed point
  */
 export const transformPoint = (
   p: XY,
@@ -107,12 +100,9 @@ export const transformPoint = (
 /**
  * 反转变换 t
  *
- * Invert transformation t
  * @param t 变换矩阵
  * @returns 反转后的变换矩阵
  *
- * @param {Array} t The transform
- * @return {Array} The inverted transform
  */
 export const invertTransform = (t: TMat2D): TMat2D => {
   const a = 1 / (t[0] * t[3] - t[1] * t[2]),
@@ -132,10 +122,6 @@ export const invertTransform = (t: TMat2D): TMat2D => {
  * @param is2x2 标记是否作为 2x2 矩阵相乘
  * @returns 两个变换矩阵的乘积
  *
- * @param  {TMat2D} a First transformMatrix
- * @param  {TMat2D} b Second transformMatrix
- * @param  {Boolean} is2x2 flag to multiply matrices as 2x2 matrices
- * @return {TMat2D} The product of the two transform matrices
  */
 export const multiplyTransformMatrices = (
   a: TMat2D,

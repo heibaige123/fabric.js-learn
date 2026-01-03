@@ -284,11 +284,8 @@ export class ObjectGeometry<EventSpec extends ObjectEvents = ObjectEvents>
   }
 
   /**
-   * Checks if object intersects with the scene rect formed by tl and br
    * 检查对象是否与由 tl 和 br 形成的场景矩形相交
-   * @param {Point} tl Top-left point of the rectangle
    * @param {Point} tl 矩形的左上角点
-   * @param {Point} br Bottom-right point of the rectangle
    * @param {Point} br 矩形的右下角点
    * @returns {boolean}
    */
@@ -356,7 +353,6 @@ export class ObjectGeometry<EventSpec extends ObjectEvents = ObjectEvents>
   }
 
   /**
-   * Checks if object is overlapping with another object
    * 检查对象是否与另一个对象重叠
    * @param {ObjectGeometry} other Object to test
    * @param {ObjectGeometry} other 要测试的对象
@@ -371,11 +367,8 @@ export class ObjectGeometry<EventSpec extends ObjectEvents = ObjectEvents>
   }
 
   /**
-   * Checks if point is inside the object
    * 检查点是否在对象内部
-   * @param {Point} point Point to check against
    * @param {Point} point 要检查的点
-   * @return {Boolean} true if point is inside the object
    * @return {Boolean} 如果点在对象内部，则为 true
    */
   containsPoint(point: Point): boolean {
@@ -383,8 +376,6 @@ export class ObjectGeometry<EventSpec extends ObjectEvents = ObjectEvents>
   }
 
   /**
-   * Checks if object is contained within the canvas with current viewportTransform
-   * the check is done stopping at first point that appears on screen
    * 检查对象是否包含在具有当前 viewportTransform 的画布中
    * 检查在屏幕上出现的第一个点处停止
    * @return {Boolean} true if object is fully or partially contained within canvas
@@ -535,8 +526,6 @@ export class ObjectGeometry<EventSpec extends ObjectEvents = ObjectEvents>
   }
 
   /**
-   * Calculates the coordinates of the 4 corner of the bbox, in absolute coordinates.
-   * those never change with zoom or viewport changes.
    * 计算 bbox 的 4 个角的坐标，以绝对坐标表示。
    * 这些坐标永远不会随缩放或视口更改而更改。
    * @return {TCornerPoint}
@@ -559,9 +548,6 @@ export class ObjectGeometry<EventSpec extends ObjectEvents = ObjectEvents>
   }
 
   /**
-   * Sets corner and controls position coordinates based on current angle, width and height, left and top.
-   * aCoords are used to quickly find an object on the canvas.
-   * See {@link https://github.com/fabricjs/fabric.js/wiki/When-to-call-setCoords} and {@link http://fabric5.fabricjs.com/fabric-gotchas}
    * 根据当前角度、宽度和高度、左侧和顶部设置角和控件位置坐标。
    * aCoords 用于在画布上快速查找对象。
    * 参见 {@link https://github.com/fabricjs/fabric.js/wiki/When-to-call-setCoords} 和 {@link http://fabric5.fabricjs.com/fabric-gotchas}

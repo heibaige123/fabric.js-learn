@@ -31,12 +31,6 @@ export class Observable<EventSpec> {
    * @param {Function} handler 当指定类型的事件发生时接收通知的函数
    * @return {Function} 取消订阅函数
    *
-   * Observes specified event
-   * @alias on
-   * @param {string} eventName Event name (eg. 'after:render')
-   * @param {EventRegistryObject} handlers key/value pairs (eg. {'after:render': handler, 'selection:cleared': handler})
-   * @param {Function} handler Function that receives a notification when an event of the specified type occurs
-   * @return {Function} disposer
    */
   on<K extends keyof EventSpec, E extends EventSpec[K]>(
     eventName: K,
@@ -76,13 +70,6 @@ export class Observable<EventSpec> {
    * @param {EventRegistryObject} handlers 键/值对 (例如 {'after:render': handler, 'selection:cleared': handler})
    * @param {Function} handler 当指定类型的事件发生时接收通知的函数
    * @return {Function} 取消订阅函数
-   *
-   * Observes specified event **once**
-   * @alias once
-   * @param {string} eventName Event name (eg. 'after:render')
-   * @param {EventRegistryObject} handlers key/value pairs (eg. {'after:render': handler, 'selection:cleared': handler})
-   * @param {Function} handler Function that receives a notification when an event of the specified type occurs
-   * @return {Function} disposer
    */
   once<K extends keyof EventSpec, E extends EventSpec[K]>(
     eventName: K,
@@ -120,10 +107,6 @@ export class Observable<EventSpec> {
    * @private
    * @param {string} eventName 事件名称
    * @param {Function} [handler] 处理函数
-   *
-   * @private
-   * @param {string} eventName
-   * @param {Function} [handler]
    */
   private _removeEventListener<K extends keyof EventSpec>(
     eventName: K,
@@ -148,36 +131,21 @@ export class Observable<EventSpec> {
    * 我们知道我们应该为内部流程提供受保护的事件，但我们还没有
    * @deprecated
    * @param {string} eventName 事件名称 (例如 'after:render')
-   *
-   * Unsubscribe all event listeners for eventname.
-   * Do not use this pattern. You could kill internal fabricJS events.
-   * We know we should have protected events for internal flows, but we don't have yet
-   * @deprecated
-   * @param {string} eventName event name (eg. 'after:render')
    */
   off<K extends keyof EventSpec>(eventName: K): void;
   /**
    * 取消订阅一个事件监听器
    * @param {string} eventName 事件名称 (例如 'after:render')
    * @param {TEventCallback} handler 要取消订阅的事件监听器
-   *
-   * unsubscribe an event listener
-   * @param {string} eventName event name (eg. 'after:render')
-   * @param {TEventCallback} handler event listener to unsubscribe
    */
   off<K extends keyof EventSpec>(eventName: K, handler: TEventCallback): void;
   /**
    * 取消订阅事件监听器
    * @param handlers 处理程序键/值对 (例如 {'after:render': handler, 'selection:cleared': handler})
-   *
-   * unsubscribe event listeners
-   * @param handlers handlers key/value pairs (eg. {'after:render': handler, 'selection:cleared': handler})
    */
   off(handlers: EventRegistryObject<EventSpec>): void;
   /**
    * 取消订阅所有事件监听器
-   *
-   * unsubscribe all event listeners
    */
   off(): void;
   off<K extends keyof EventSpec>(
@@ -208,10 +176,6 @@ export class Observable<EventSpec> {
    * 触发带有可选选项对象的事件
    * @param {String} eventName 要触发的事件名称
    * @param {Object} [options] 选项对象
-   *
-   * Fires event with an optional options object
-   * @param {String} eventName Event name to fire
-   * @param {Object} [options] Options object
    */
   fire<K extends keyof EventSpec>(eventName: K, options?: EventSpec[K]) {
     if (!this.__eventListeners) {

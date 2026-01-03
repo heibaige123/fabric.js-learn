@@ -125,12 +125,10 @@ export type SupportedSVGUnit = 'mm' | 'cm' | 'in' | 'pt' | 'pc' | 'em';
 /**
  * 2D 变换矩阵类型
  *
- * A transform matrix.
- * Basically a matrix in the form
  * [ a c e ]
  * [ b d f ]
  * [ 0 0 1 ]
- * For more details, see {@link https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform#matrix}
+ * 详情参考 {@link https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/transform#matrix}
  */
 export type TMat2D = [
   a: number,

@@ -6,7 +6,6 @@ import type { Canvas } from './Canvas';
 /**
  * 负责同步 canvas 的所有交互式文本实例
  *
- * In charge of synchronizing all interactive text instances of a canvas
  */
 export class TextEditingManager {
   /**

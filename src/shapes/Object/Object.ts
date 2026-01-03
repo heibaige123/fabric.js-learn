@@ -365,8 +365,6 @@ export class FabricObject<
   declare _cacheCanvas?: HTMLCanvasElement;
 
   /**
-   * zoom level used on the cacheCanvas to draw the cache, X axe
-   * since 1.7.0
    * 用于在 cacheCanvas 上绘制缓存的缩放级别，X 轴
    * 自 1.7.0 起
    * @type number
@@ -376,8 +374,6 @@ export class FabricObject<
   declare zoomX?: number;
 
   /**
-   * zoom level used on the cacheCanvas to draw the cache, Y axe
-   * since 1.7.0
    * 用于在 cacheCanvas 上绘制缓存的缩放级别，Y 轴
    * 自 1.7.0 起
    * @type number
@@ -387,8 +383,6 @@ export class FabricObject<
   declare zoomY?: number;
 
   /**
-   * zoom level used on the cacheCanvas to draw the cache, Y axe
-   * since 1.7.0
    * 用于在 cacheCanvas 上绘制缓存的缩放级别，Y 轴
    * 自 1.7.0 起
    * @type number
@@ -1644,7 +1638,6 @@ export class FabricObject<
   }
 
   /**
-   * Returns complexity of an instance
    * 返回实例的复杂度
    * @return {Number} complexity of this instance (is 1 unless subclassed)
    */

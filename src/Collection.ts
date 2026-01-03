@@ -68,10 +68,6 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
      * @param {...FabricObject[]} objects 要添加的对象
      * @returns {number} 新的数组长度
      *
-     * Adds objects to collection
-     * Objects should be instances of (or inherit from) FabricObject
-     * @param {...FabricObject[]} objects to add
-     * @returns {number} new array length
      */
     add(...objects: FabricObject[]): number {
       const size = this._objects.push(...objects);
@@ -85,10 +81,6 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
      * @param {...FabricObject[]} objects 要插入的对象
      * @returns {number} 新的数组长度
      *
-     * Inserts an object into collection at specified index
-     * @param {number} index Index to insert object at
-     * @param {...FabricObject[]} objects Object(s) to insert
-     * @returns {number} new array length
      */
     insertAt(index: number, ...objects: FabricObject[]) {
       this._objects.splice(index, 0, ...objects);
@@ -102,10 +94,6 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
      * @param {...FabricObject[]} objects 要移除的对象
      * @returns {FabricObject[]} 已移除的对象
      *
-     * Removes objects from a collection, then renders canvas (if `renderOnAddRemove` is not `false`)
-     * @private
-     * @param {...FabricObject[]} objects objects to remove
-     * @returns {FabricObject[]} removed objects
      */
     remove(...objects: FabricObject[]) {
       const array = this._objects,
@@ -129,13 +117,6 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
      * @param {Function} callback
      *                   回调函数，第一个参数为当前对象，
      *                   第二个参数为索引，第三个参数为所有对象的数组。
-     *
-     * Executes given function for each object in this group
-     * A simple shortcut for getObjects().forEach, before es6 was more complicated,
-     * now is just a shortcut.
-     * @param {Function} callback
-     *                   Callback invoked with current object as first argument,
-     *                   index - as second and an array of all objects - as third.
      */
     forEachObject(
       callback: (
@@ -153,10 +134,6 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
      * 返回此实例的子对象数组
      * @param {...String} [types] 指定时，仅返回这些类型的对象
      * @return {Array} 对象数组
-     *
-     * Returns an array of children objects of this instance
-     * @param {...String} [types] When specified, only objects of these types are returned
-     * @return {Array}
      */
     getObjects(...types: string[]) {
       if (types.length === 0) {
@@ -170,9 +147,6 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
      * @param {Number} index 索引
      * @return {Object} 指定索引处的对象
      *
-     * Returns object at specified index
-     * @param {Number} index
-     * @return {Object} object at index
      */
     item(index: number) {
       return this._objects[index];
@@ -192,9 +166,6 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
     /**
      * 返回集合的大小（即：包含其对象的数组的长度）
      * @return {Number} 集合大小
-     *
-     * Returns a size of a collection (i.e: length of an array containing its objects)
-     * @return {Number} Collection size
      */
     size() {
       return this._objects.length;
@@ -207,13 +178,6 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
      * @param {Object} object 要检查的对象
      * @param {Boolean} [deep=false] `true` 检查所有后代，`false` 仅检查 `_objects`
      * @return {Boolean} 如果集合包含该对象，则返回 `true`
-     *
-     * Returns true if collection contains an object.\
-     * **Prefer using {@link FabricObject#isDescendantOf} for performance reasons**
-     * instead of `a.contains(b)` use `b.isDescendantOf(a)`
-     * @param {Object} object Object to check against
-     * @param {Boolean} [deep=false] `true` to check all descendants, `false` to check only `_objects`
-     * @return {Boolean} `true` if collection contains an object
      */
     contains(object: FabricObject, deep?: boolean): boolean {
       if (this._objects.includes(object)) {
@@ -231,9 +195,6 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
     /**
      * 返回集合复杂度的数字表示
      * @return {Number} 复杂度
-     *
-     * Returns number representation of a collection complexity
-     * @return {Number} complexity
      */
     complexity() {
       return this._objects.reduce((memo, current) => {
@@ -247,10 +208,6 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
      * @param {fabric.Object} object 要发送到背面的对象
      * @returns {boolean} 如果发生更改则返回 true
      *
-     * Moves an object or the objects of a multiple selection
-     * to the bottom of the stack of drawn objects
-     * @param {fabric.Object} object Object to send to back
-     * @returns {boolean} true if change occurred
      */
     sendObjectToBack(object: FabricObject) {
       if (!object || object === this._objects[0]) {
@@ -267,10 +224,6 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
      * @param {fabric.Object} object 要发送到顶部的对象
      * @returns {boolean} 如果发生更改则返回 true
      *
-     * Moves an object or the objects of a multiple selection
-     * to the top of the stack of drawn objects
-     * @param {fabric.Object} object Object to send
-     * @returns {boolean} true if change occurred
      */
     bringObjectToFront(object: FabricObject) {
       if (!object || object === this._objects[this._objects.length - 1]) {
@@ -290,11 +243,6 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
      * @param {boolean} [intersecting] 如果为 `true`，则将对象发送到下一个较低的相交对象后面
      * @returns {boolean} 如果发生更改则返回 true
      *
-     * Moves an object or a selection down in stack of drawn objects
-     * An optional parameter, `intersecting` allows to move the object in behind
-     * the first intersecting object. Where intersection is calculated with
-     * bounding box. If no intersection is found, there will not be change in the
-     * stack.
      * @param {fabric.Object} object Object to send
      * @param {boolean} [intersecting] If `true`, send object behind next lower intersecting object
      * @returns {boolean} true if change occurred
@@ -323,14 +271,6 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
      * @param {boolean} [intersecting] 如果为 `true`，则将对象发送到下一个较高的相交对象前面
      * @returns {boolean} 如果发生更改则返回 true
      *
-     * Moves an object or a selection up in stack of drawn objects
-     * An optional parameter, intersecting allows to move the object in front
-     * of the first intersecting object. Where intersection is calculated with
-     * bounding box. If no intersection is found, there will not be change in the
-     * stack.
-     * @param {fabric.Object} object Object to send
-     * @param {boolean} [intersecting] If `true`, send object in front of next upper intersecting object
-     * @returns {boolean} true if change occurred
      */
     bringObjectForward(object: FabricObject, intersecting?: boolean) {
       if (!object) {
@@ -354,10 +294,6 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
      * @param {number} index 要移动到的位置
      * @returns {boolean} 如果发生更改则返回 true
      *
-     * Moves an object to specified level in stack of drawn objects
-     * @param {fabric.Object} object Object to send
-     * @param {number} index Position to move to
-     * @returns {boolean} true if change occurred
      */
     moveObjectTo(object: FabricObject, index: number) {
       if (object === this._objects[index]) {
@@ -437,12 +373,6 @@ export function createCollectionMixin<TBase extends Constructor>(Base: TBase) {
      * @param {{ includeIntersecting?: boolean }} options 包含 includeIntersecting 的对象
      * @returns 包含在边界框中的对象数组，按堆栈顺序从上到下排列
      *
-     * Given a bounding box, return all the objects of the collection that are contained in the bounding box.
-     * If `includeIntersecting` is true, return also the objects that intersect the bounding box as well.
-     * This is meant to work with selection. Is not a generic method.
-     * @param {TBBox} bbox a bounding box in scene coordinates
-     * @param {{ includeIntersecting?: boolean }} options an object with includeIntersecting
-     * @returns array of objects contained in the bounding box, ordered from top to bottom stacking wise
      */
     collectObjects(
       { left, top, width, height }: TBBox,

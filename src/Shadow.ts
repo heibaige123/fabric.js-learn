@@ -29,8 +29,6 @@ import { rotateVector } from './util/misc/vectors';
 
 (?:$|\s): This captures either the end of the line or a whitespace character. It ensures that the match ends either at the end of the string or with a whitespace character.
    */
-// eslint-disable-next-line max-len
-
 const shadowOffsetRegex = '(-?\\d+(?:\\.\\d*)?(?:px)?(?:\\s?|$))?';
 
 const reOffsetsAndBlur = new RegExp(

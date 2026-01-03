@@ -9,9 +9,6 @@ export class CommonMethods<EventSpec> extends Observable<EventSpec> {
    * @protected
    * @param {Object} [options] 选项对象
    *
-   * Sets object's properties from options, for initialization only
-   * @protected
-   * @param {Object} [options] Options object
    */
   protected _setOptions(options: any = {}) {
     for (const prop in options) {
@@ -24,7 +21,6 @@ export class CommonMethods<EventSpec> extends Observable<EventSpec> {
    * @private
    * @param {Record<string, any>} obj 属性对象
    *
-   * @private
    */
   _setObject(obj: Record<string, any>) {
     for (const prop in obj) {
@@ -38,9 +34,6 @@ export class CommonMethods<EventSpec> extends Observable<EventSpec> {
    * @param {Object|Function} value 属性值（如果是函数，则将值传递给它，并将其返回值用作新值）
    * @returns {CommonMethods} 当前实例
    *
-   * Sets property to a given value. When changing position/dimension -related properties (left, top, scale, angle, etc.) `set` does not update position of object's borders/controls. If you need to update those, call `setCoords()`.
-   * @param {String|Object} key Property name or object (if object, iterate over the object properties)
-   * @param {Object|Function} value Property value (if function, the value is passed into it and its return value is used as a new one)
    */
   set(key: string | Record<string, any>, value?: any) {
     if (typeof key === 'object') {
@@ -65,8 +58,6 @@ export class CommonMethods<EventSpec> extends Observable<EventSpec> {
    * @param {String} property 要切换的属性
    * @returns {CommonMethods} 当前实例
    *
-   * Toggles specified property from `true` to `false` or from `false` to `true`
-   * @param {String} property Property to toggle
    */
   toggle(property: string) {
     const value = this.get(property);
@@ -81,9 +72,6 @@ export class CommonMethods<EventSpec> extends Observable<EventSpec> {
    * @param {String} property 属性名称
    * @return {*} 属性值
    *
-   * Basic getter
-   * @param {String} property Property name
-   * @return {*} value of a property
    */
   get(property: string): any {
     return this[property as keyof this];

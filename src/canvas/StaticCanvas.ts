@@ -52,21 +52,21 @@ import { getDevicePixelRatio } from '../env';
 export type TCanvasSizeOptions =
   | {
       /**
-       * 仅将给定的尺寸设置为 canvas backstore 尺寸
+       * 将给定的尺寸设置为 canvas backstore 尺寸
        */
       backstoreOnly?: true;
       /**
-       * 仅将给定的尺寸设置为 css 尺寸
+       * 不将给定的尺寸设置为 css 尺寸
        */
       cssOnly?: false;
     }
   | {
       /**
-       * 仅将给定的尺寸设置为 canvas backstore 尺寸
+       * 不将给定的尺寸设置为 canvas backstore 尺寸
        */
       backstoreOnly?: false;
       /**
-       * 仅将给定的尺寸设置为 css 尺寸
+       * 将给定的尺寸设置为 css 尺寸
        */
       cssOnly?: true;
     };
@@ -105,11 +105,11 @@ export type TSVGExportOptions = {
    */
   encoding?: 'UTF-8'; // test Encoding type and see what happens
   /**
-   * 宽度属性
+   * 宽度
    */
   width?: string;
   /**
-   * 高度属性
+   * 高度
    */
   height?: string;
   /**
@@ -120,6 +120,12 @@ export type TSVGExportOptions = {
 
 /**
  * 图案质量类型定义
+ *
+ * - fast 使用低质量的缩放算法进行图案渲染
+ * - good 使用中等质量的缩放算法进行图案渲染
+ * - best 使用高质量的缩放算法进行图案渲染
+ * - nearest 使用最近邻插值进行图案渲染
+ * - bilinear 使用双线性插值进行图案渲染
  */
 export type PatternQuality = 'fast' | 'good' | 'best' | 'nearest' | 'bilinear';
 
@@ -227,17 +233,12 @@ export class StaticCanvas<
   /**
    * 场景平面坐标中的视口边界框，参见 {@link calcViewportBoundaries}
    *
-   * The viewport bounding box in scene plane coordinates, see {@link calcViewportBoundaries}
    */
   declare vptCoords: TCornerPoint;
 
   /**
    * 对 canvas 实际 HTMLCanvasElement 的引用。
    * 可用于读取原始像素，但切勿写入或操作
-   *
-   * A reference to the canvas actual HTMLCanvasElement.
-   * Can be use to read the raw pixels, but never write or manipulate
-   * @type HTMLCanvasElement
    */
   get lowerCanvasEl() {
     return this.elements.lower?.el;
@@ -251,22 +252,15 @@ export class StaticCanvas<
   }
 
   /**
-   * 如果为 true，则 Canvas 正在处理或已被销毁/销毁。
+   * 如果为 true，则 Canvas 正在或已被销毁/销毁时
    * 此 canvas 上将不再执行任何渲染操作。
    *
-   * If true the Canvas is in the process or has been disposed/destroyed.
-   * No more rendering operation will be executed on this canvas.
-   * @type boolean
    */
   declare destroyed?: boolean;
 
   /**
    * 已开始销毁过程但尚未完成。
-   * 可能会完成已安排的渲染周期，但停止添加更多。
-   *
-   * Started the process of disposing but not done yet.
-   * WIll likely complete the render cycle already scheduled but stopping adding more.
-   * @type boolean
+   * 已完成安排的渲染周期，但停止添加更多。
    */
   declare disposed?: boolean;
 
@@ -292,12 +286,6 @@ export class StaticCanvas<
    * 当为 true 时，跳过控件绘制。
    * 此布尔值用于避免 toDataURL 导出控件。
    * 不支持使用此布尔值来构建其他流程和功能
-   *
-   * When true control drawing is skipped.
-   * This boolean is used to avoid toDataURL to export controls.
-   * Usage of this boolean to build up other flows and features is not supported
-   * @type Boolean
-   * @default false
    */
   declare protected skipControlsDrawing: boolean;
 
@@ -305,8 +293,6 @@ export class StaticCanvas<
    * 控制 node-canvas 下图像的渲染。
    * 对浏览器上下文没有影响。
    *
-   * Controls the rendering of images under node-canvas.
-   * Has no effects on the browser context.
    */
   declare patternQuality: PatternQuality;
 
@@ -450,8 +436,6 @@ export class StaticCanvas<
    * 计算 canvas 元素相对于文档的偏移量
    * 此方法也作为 window 的 "resize" 事件处理程序附加
    *
-   * Calculates canvas element offset relative to the document
-   * This method is also attached as "resize" event handler of window
    */
   calcOffset() {
     return (this._offset = this.elements.calcOffset());
@@ -460,7 +444,6 @@ export class StaticCanvas<
   /**
    * 返回 canvas 宽度（以像素为单位）
    *
-   * Returns canvas width (in px)
    * @return {Number}
    */
   getWidth(): number {
@@ -470,17 +453,17 @@ export class StaticCanvas<
   /**
    * 返回 canvas 高度（以像素为单位）
    *
-   * Returns canvas height (in px)
-   * @return {Number}
    */
   getHeight(): number {
     return this.height;
   }
 
   /**
-   * 仅供内部使用
+   * 内部统一设置静态画布的尺寸（像素尺寸与 CSS 尺寸），并在更新后重新计算偏移量。
    *
-   * Internal use only
+   * @param dimensions 尺寸对象
+   * @param options 选项对象
+   *
    * @protected
    */
   protected _setDimensionsImpl(
@@ -508,7 +491,6 @@ export class StaticCanvas<
   /**
    * 设置此 canvas 实例的尺寸（宽度，高度）。当 options.cssOnly 标志处于活动状态时，您还应提供度量单位 (px/%/em)
    *
-   * Sets dimensions (width, height) of this canvas instance. when options.cssOnly flag active you should also supply the unit of measure (px/%/em)
    * @param {Object}        dimensions                    Object with width/height properties
    * @param {Number|String} [dimensions.width]            Width of canvas element
    * @param {Number|String} [dimensions.height]           Height of canvas element
@@ -537,9 +519,6 @@ export class StaticCanvas<
 
   /**
    * 返回 canvas 缩放级别
-   *
-   * Returns canvas zoom level
-   * @return {Number}
    */
   getZoom() {
     return this.viewportTransform[0];
@@ -548,8 +527,7 @@ export class StaticCanvas<
   /**
    * 设置此 canvas 实例的视口变换
    *
-   * Sets viewport transformation of this canvas instance
-   * @param {Array} vpt a Canvas 2D API transform matrix
+   * @param {Array} vpt 变换矩阵
    */
   setViewportTransform(vpt: TMat2D) {
     this.viewportTransform = vpt;
@@ -562,12 +540,8 @@ export class StaticCanvas<
    * 意味着随后对同一点的缩放将具有从该点开始缩放的视觉效果。该点不会移动。
    * 这与 canvas 中心或视口的视觉中心无关。
    *
-   * Sets zoom level of this canvas instance, the zoom centered around point
-   * meaning that following zoom to point with the same point will have the visual
-   * effect of the zoom originating from that point. The point won't move.
-   * It has nothing to do with canvas center or visual center of the viewport.
-   * @param {Point} point to zoom with respect to
-   * @param {Number} value to set zoom to, less than 1 zooms out
+   * @param point 缩放中心点
+   * @param value 缩放级别，小于 1 表示缩小
    */
   zoomToPoint(point: Point, value: number) {
     // TODO: just change the scale, preserve other transformations
@@ -585,8 +559,6 @@ export class StaticCanvas<
   /**
    * 设置此 canvas 实例的缩放级别
    *
-   * Sets zoom level of this canvas instance
-   * @param {Number} value to set zoom to, less than 1 zooms out
    */
   setZoom(value: number) {
     this.zoomToPoint(new Point(0, 0), value);
@@ -595,8 +567,7 @@ export class StaticCanvas<
   /**
    * 平移视口，以便将点放置在 canvas 的左上角
    *
-   * Pan viewport so as to place point at top left corner of canvas
-   * @param {Point} point to move to
+   * @param point 要移动到的点
    */
   absolutePan(point: Point) {
     const vpt: TMat2D = [...this.viewportTransform];
@@ -608,8 +579,7 @@ export class StaticCanvas<
   /**
    * 相对平移视点
    *
-   * Pans viewpoint relatively
-   * @param {Point} point (position vector) to move by
+   * @param {Point} point 要平移的点
    */
   relativePan(point: Point) {
     return this.absolutePan(
@@ -621,10 +591,8 @@ export class StaticCanvas<
   }
 
   /**
-   * 返回对应于此实例的 &lt;canvas> 元素
+   * 返回对应于此实例的 <canvas> 元素
    *
-   * Returns &lt;canvas> element corresponding to this instance
-   * @return {HTMLCanvasElement}
    */
   getElement(): HTMLCanvasElement {
     return this.elements.lower.el;
@@ -633,8 +601,7 @@ export class StaticCanvas<
   /**
    * 清除 canvas 元素的指定上下文
    *
-   * Clears specified context of canvas element
-   * @param {CanvasRenderingContext2D} ctx Context to clear
+   * @param ctx 要清除的上下文
    */
   clearContext(ctx: CanvasRenderingContext2D) {
     ctx.clearRect(0, 0, this.width, this.height);
@@ -643,8 +610,6 @@ export class StaticCanvas<
   /**
    * 返回绘制对象的 canvas 上下文
    *
-   * Returns context of canvas where objects are drawn
-   * @return {CanvasRenderingContext2D}
    */
   getContext(): CanvasRenderingContext2D {
     return this.elements.lower.ctx;
@@ -652,8 +617,6 @@ export class StaticCanvas<
 
   /**
    * 清除实例的所有上下文（背景、主、顶部）
-   *
-   * Clears all contexts (background, main, top) of an instance
    */
   clear() {
     this.remove(...this.getObjects());
@@ -668,8 +631,6 @@ export class StaticCanvas<
 
   /**
    * 渲染 canvas
-   *
-   * Renders the canvas
    */
   renderAll() {
     this.cancelRequestedRender();
@@ -685,11 +646,6 @@ export class StaticCanvas<
    * 让 fabricJS 调用它。如果你手动调用它，你可能会有更多的 animationFrame 堆叠在一起
    * 对于命令式渲染，请使用 canvas.renderAll
    *
-   * Function created to be instance bound at initialization
-   * used in requestAnimationFrame rendering
-   * Let the fabricJS call it. If you call it manually you could have more
-   * animationFrame stacking on to of each other
-   * for an imperative rendering, use canvas.renderAll
    * @private
    */
   renderAndReset() {
@@ -702,9 +658,6 @@ export class StaticCanvas<
    * 除非已经有一个正在进行中，在这种情况下什么也不做
    * 布尔标志将避免附加更多。
    *
-   * Append a renderAll request to next animation frame.
-   * unless one is already in progress, in that case nothing is done
-   * a boolean flag will avoid appending more.
    */
   requestRenderAll() {
     if (!this.nextRenderHandle && !this.disposed && !this.destroyed) {
@@ -716,8 +669,6 @@ export class StaticCanvas<
    * 使用当前 viewportTransform 计算 canvas 的 4 个角的位置。
    * 有助于确定对象何时处于当前渲染视口中
    *
-   * Calculate the position of the 4 corner of canvas with current viewportTransform.
-   * helps to determinate when an object is in the current rendering viewport
    */
   calcViewportBoundaries(): TCornerPoint {
     const width = this.width,
@@ -809,8 +760,8 @@ export class StaticCanvas<
   /**
    * 在 lowerCanvasEl 上绘制缓存的 clipPath
    *
-   * Paint the cached clipPath on the lowerCanvasEl
-   * @param {CanvasRenderingContext2D} ctx Context to render on
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   * @param {TCachedFabricObject} clipPath 裁剪路径对象
    */
   drawClipPathOnCanvas(
     ctx: CanvasRenderingContext2D,
@@ -833,9 +784,11 @@ export class StaticCanvas<
   }
 
   /**
+   * 渲染对象数组
+   *
    * @private
-   * @param {CanvasRenderingContext2D} ctx Context to render on
-   * @param {Array} objects to render
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   * @param {Array} objects 要渲染的对象数组
    */
   _renderObjects(ctx: CanvasRenderingContext2D, objects: FabricObject[]) {
     for (let i = 0, len = objects.length; i < len; ++i) {
@@ -844,9 +797,11 @@ export class StaticCanvas<
   }
 
   /**
+   * 渲染背景或覆盖
+   *
    * @private
-   * @param {CanvasRenderingContext2D} ctx Context to render on
-   * @param {string} property 'background' or 'overlay'
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
+   * @param {string} property 'background' 或 'overlay'
    */
   _renderBackgroundOrOverlay(
     ctx: CanvasRenderingContext2D,
@@ -897,16 +852,20 @@ export class StaticCanvas<
   }
 
   /**
+   * 渲染背景
+   *
    * @private
-   * @param {CanvasRenderingContext2D} ctx Context to render on
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
    */
   _renderBackground(ctx: CanvasRenderingContext2D) {
     this._renderBackgroundOrOverlay(ctx, 'background');
   }
 
   /**
+   * 渲染覆盖
+   *
    * @private
-   * @param {CanvasRenderingContext2D} ctx Context to render on
+   * @param {CanvasRenderingContext2D} ctx 渲染上下文
    */
   _renderOverlay(ctx: CanvasRenderingContext2D) {
     this._renderBackgroundOrOverlay(ctx, 'overlay');
@@ -915,8 +874,6 @@ export class StaticCanvas<
   /**
    * 返回 canvas 中心的坐标。
    *
-   * Returns coordinates of a center of canvas.
-   * @return {Point}
    */
   getCenterPoint() {
     return new Point(this.width / 2, this.height / 2);
@@ -925,7 +882,8 @@ export class StaticCanvas<
   /**
    * 在 canvas 中水平居中对象
    *
-   * Centers object horizontally in the canvas
+   * @param {FabricObject} object 在 canvas 中水平居中的对象
+   *
    */
   centerObjectH(object: FabricObject) {
     return this._centerObject(
@@ -937,8 +895,8 @@ export class StaticCanvas<
   /**
    * 在 canvas 中垂直居中对象
    *
-   * Centers object vertically in the canvas
-   * @param {FabricObject} object Object to center vertically
+   * @param {FabricObject} object 在 canvas 中垂直居中的对象
+   *
    */
   centerObjectV(object: FabricObject) {
     return this._centerObject(
@@ -950,8 +908,7 @@ export class StaticCanvas<
   /**
    * 在 canvas 中垂直和水平居中对象
    *
-   * Centers object vertically and horizontally in the canvas
-   * @param {FabricObject} object Object to center vertically and horizontally
+   * @param {FabricObject} object 在 canvas 中垂直和水平居中的对象
    */
   centerObject(object: FabricObject) {
     return this._centerObject(object, this.getCenterPoint());
@@ -960,8 +917,7 @@ export class StaticCanvas<
   /**
    * 在视口中垂直和水平居中对象
    *
-   * Centers object vertically and horizontally in the viewport
-   * @param {FabricObject} object Object to center vertically and horizontally
+   * @param {FabricObject} object 在视口中垂直和水平居中的对象
    */
   viewportCenterObject(object: FabricObject) {
     return this._centerObject(object, this.getVpCenter());
@@ -970,8 +926,7 @@ export class StaticCanvas<
   /**
    * 在视口中水平居中对象，object.top 不变
    *
-   * Centers object horizontally in the viewport, object.top is unchanged
-   * @param {FabricObject} object Object to center vertically and horizontally
+   * @param {FabricObject} object 在视口中水平居中的对象
    */
   viewportCenterObjectH(object: FabricObject) {
     return this._centerObject(
@@ -983,7 +938,6 @@ export class StaticCanvas<
   /**
    * 在视口中垂直居中对象，object.top 不变
    *
-   * Centers object Vertically in the viewport, object.top is unchanged
    * @param {FabricObject} object Object to center vertically and horizontally
    */
   viewportCenterObjectV(object: FabricObject) {
@@ -996,7 +950,6 @@ export class StaticCanvas<
   /**
    * 计算 canvas 中对应于实际视口中心的点。
    *
-   * Calculate the point in canvas that correspond to the center of actual viewport.
    * @return {Point} vpCenter, viewport center
    */
   getVpCenter(): Point {
@@ -1007,9 +960,11 @@ export class StaticCanvas<
   }
 
   /**
+   * 在给定中心点处居中对象
+   *
    * @private
-   * @param {FabricObject} object Object to center
-   * @param {Point} center Center point
+   * @param {FabricObject} object 要居中的对象
+   * @param {Point} center 中心点
    */
   _centerObject(object: FabricObject, center: Point) {
     object.setXY(center, CENTER, CENTER);
@@ -1020,8 +975,7 @@ export class StaticCanvas<
   /**
    * 返回 canvas 的无数据 JSON 表示
    *
-   * Returns dataless JSON representation of canvas
-   * @param {Array} [propertiesToInclude] Any properties that you might want to additionally include in the output
+   * @param {Array} [propertiesToInclude] 你可能想要在输出中额外包含的任何属性
    * @return {String} json string
    */
   toDatalessJSON(propertiesToInclude?: string[]) {
@@ -1031,8 +985,7 @@ export class StaticCanvas<
   /**
    * 返回 canvas 的对象表示
    *
-   * Returns object representation of canvas
-   * @param {Array} [propertiesToInclude] Any properties that you might want to additionally include in the output
+   * @param {Array} [propertiesToInclude] 你可能想要在输出中额外包含的任何属性
    * @return {Object} object representation of an instance
    */
   toObject(propertiesToInclude?: string[]) {
@@ -1046,11 +999,6 @@ export class StaticCanvas<
    * 拥有 toJSON 方法意味着你可以执行 JSON.stringify(myCanvas)
    * JSON 不支持其他属性，因为 toJSON 有自己的签名
    *
-   * Returns Object representation of canvas
-   * this alias is provided because if you call JSON.stringify on an instance,
-   * the toJSON object will be invoked if it exists.
-   * Having a toJSON method means you can do JSON.stringify(myCanvas)
-   * JSON does not support additional properties because toJSON has its own signature
    * @return {Object} JSON compatible object
    * @see {@link http://fabric5.fabricjs.com/fabric-intro-part-3#serialization}
    * @see {@link http://jsfiddle.net/fabricjs/pec86/|jsFiddle demo}
@@ -1066,7 +1014,6 @@ export class StaticCanvas<
   /**
    * 返回 canvas 的无数据对象表示
    *
-   * Returns dataless object representation of canvas
    * @param {Array} [propertiesToInclude] Any properties that you might want to additionally include in the output
    * @return {Object} object representation of an instance
    */
@@ -1335,7 +1282,6 @@ export class StaticCanvas<
   /**
    * 创建包含 SVG 引用元素（如模式、渐变等）的标记。
    *
-   * Creates markup containing SVG referenced elements like patterns, gradients etc.
    * @return {String}
    */
   createSVGRefElementsMarkup(): string {
@@ -1364,9 +1310,6 @@ export class StaticCanvas<
    * 字体外观的字体 URL 必须由开发人员收集
    * 并且不会由 fabricjs 从 DOM 中提取
    *
-   * Creates markup containing SVG font faces,
-   * font URLs for font faces must be collected by developers
-   * and are not extracted from the DOM by fabricjs
    * @param {Array} objects Array of fabric objects
    * @return {String}
    */
@@ -1434,7 +1377,6 @@ export class StaticCanvas<
   /**
    * 这是一个单独的函数，因为 Canvas (非静态) 在这里需要额外的代码
    *
-   * This is its own function because the Canvas ( non static ) requires extra code here
    * @param markup 标记数组
    * @param instance 对象实例
    * @param reviver SVG 复活回调函数
@@ -1583,8 +1525,7 @@ export class StaticCanvas<
   /**
    * 克隆 canvas 实例
    *
-   * Clones canvas instance
-   * @param {string[]} [properties] Array of properties to include in the cloned canvas and children
+   * @param {string[]} [properties] 你可能想要在克隆的 canvas 和子项中包含的属性数组
    */
   clone(properties: string[]) {
     const data = this.toObject(properties);
@@ -1596,8 +1537,6 @@ export class StaticCanvas<
    * 克隆 canvas 实例而不克隆现有数据。
    * 这本质上是复制 canvas 尺寸，因为 loadFromJSON 不会影响 canvas 大小。
    *
-   * Clones canvas instance without cloning existing data.
-   * This essentially copies canvas dimensions since loadFromJSON does not affect canvas size.
    */
   cloneWithoutData() {
     const el = createCanvasElementFor(this);
@@ -1607,7 +1546,6 @@ export class StaticCanvas<
   /**
    * 将 canvas 元素导出为 dataurl 图像。请注意，当使用乘数时，裁剪会适当缩放
    *
-   * Exports canvas element to a dataurl image. Note that when multiplier is used, cropping is scaled appropriately
    * @param {Object} [options] 选项对象
    * @param {String} [options.format=png] 输出图像的格式。 "jpeg" 或 "png"
    * @param {Number} [options.quality=1] 质量级别 (0..1)。仅用于 jpeg。
@@ -1689,11 +1627,6 @@ export class StaticCanvas<
    * 这是一个用于获取 dataUrl 的中间步骤，但也用于
    * 创建 canvas 的快速图像副本，而无需传递 dataUrl 字符串
    *
-   * Create a new HTMLCanvas element painted with the current canvas content.
-   * No need to resize the actual one or repaint it.
-   * Will transfer object ownership to a new canvas, paint it, and set everything back.
-   * This is an intermediary step used to get to a dataUrl but also it is useful to
-   * create quick image copies of a canvas without passing for the dataUrl string
    * @param {Number} [multiplier] a zoom factor.
    * @param {Object} [options] Cropping informations
    * @param {Number} [options.left] Cropping left offset.
@@ -1744,9 +1677,8 @@ export class StaticCanvas<
   /**
    * 等待渲染完成以销毁 canvas
    *
-   * Waits until rendering has settled to destroy the canvas
-   * @returns {Promise<boolean>} a promise resolving to `true` once the canvas has been destroyed or to `false` if the canvas has was already destroyed
-   * @throws if aborted by a consequent call
+   * @returns {Promise<boolean>} 一个 Promise，当 canvas 被销毁后解析为 `true`，如果 canvas 已经被销毁则解析为 `false`
+   * @throws 如果被后续调用中止
    */
   dispose() {
     !this.disposed &&
@@ -1785,17 +1717,6 @@ export class StaticCanvas<
    * 仅当您确定渲染已完成时才调用此方法。
    * 考虑使用 {@link dispose}，因为它是 **安全** 的
    *
-   * Clears the canvas element, disposes objects and frees resources.
-   *
-   * Invoked as part of the **async** operation of {@link dispose}.
-   *
-   * **CAUTION**:
-   *
-   * This method is **UNSAFE**.
-   * You may encounter a race condition using it if there's a requested render.
-   * Call this method only if you are sure rendering has settled.
-   * Consider using {@link dispose} as it is **SAFE**
-   *
    * @private
    */
   destroy() {
@@ -1817,8 +1738,7 @@ export class StaticCanvas<
   /**
    * 返回实例的字符串表示形式
    *
-   * Returns a string representation of an instance
-   * @return {String} string representation of an instance
+   * @return {String} 实例的字符串表示形式
    */
   toString() {
     return `#<Canvas (${this.complexity()}): { objects: ${
