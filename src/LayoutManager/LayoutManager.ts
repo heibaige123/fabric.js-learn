@@ -111,9 +111,6 @@ export class LayoutManager {
    * 为已知会使布局失效的事件（在子对象上执行的一般变换）附加处理程序。
    * 返回用于稍后取消订阅和清理的清理函数。
    *
-   * Attach handlers for events that we know will invalidate the layout when
-   * performed on child objects ( general transforms ).
-   * Returns the disposers for later unsubscribing and cleanup
    * @param {FabricObject} object 要附加处理程序的对象
    * @param {RegistrationContext & Partial<StrictLayoutContext>} context 注册上下文
    * @returns {VoidFunction[]} 移除处理程序的清理函数数组
@@ -160,8 +157,6 @@ export class LayoutManager {
    * 订阅对象以转换将触发父级布局更改的事件。
    * 这仅对交互式组很重要。
    *
-   * Subscribe an object to transform events that will trigger a layout change on the parent
-   * This is important only for interactive groups.
    * @param object 要订阅的对象
    * @param context 注册上下文
    */
@@ -177,7 +172,6 @@ export class LayoutManager {
   /**
    * 取消订阅对象布局触发器
    *
-   * unsubscribe object layout triggers
    * @param object 要取消订阅的对象
    * @param _context 注册上下文（可选）
    */
@@ -355,8 +349,6 @@ export class LayoutManager {
    * @param layoutResult 布局结果，包含偏移量
    * @param object 要布局的对象
    *
-   * @param {FabricObject} object
-   * @param {Point} offset
    */
   protected layoutObject(
     context: StrictLayoutContext,

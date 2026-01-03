@@ -108,7 +108,6 @@ export class StaticCanvasDOMManager {
   /**
    * 计算 canvas 元素相对于文档的偏移量
    *
-   * Calculates canvas element offset relative to the document
    * @returns 偏移量对象
    */
   calcOffset() {

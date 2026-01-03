@@ -44,8 +44,6 @@ export class ActiveSelectionLayoutManager extends LayoutManager {
   /**
    * 仅当所有子对象都被取消选择时，才从父对象取消订阅
    * @param context 注册上下文
-   *
-   * unsubscribe from parent only if all its children were deselected
    */
   unsubscribeTargets(
     context: RegistrationContext & Partial<StrictLayoutContext>,

@@ -9,8 +9,6 @@ import { classRegistry } from '../../ClassRegistry';
 
 /**
  * 布局将保持目标的初始大小。
- *
- * Layout will keep target's initial size.
  */
 export class FixedLayout extends LayoutStrategy {
   /**

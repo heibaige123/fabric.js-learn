@@ -9,8 +9,6 @@ import { classRegistry } from '../../ClassRegistry';
 
 /**
  * 布局将调整边界框以匹配剪切路径的边界框。
- *
- * Layout will adjust the bounding box to match the clip path bounding box.
  */
 export class ClipPathLayout extends LayoutStrategy {
   /**

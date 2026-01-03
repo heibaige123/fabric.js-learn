@@ -18,16 +18,11 @@ import { getObjectBounds } from './utils';
  *
  * 负责计算传递对象的边界框。
  *
- * Exposes a main public method {@link calcLayoutResult} that is used by the `LayoutManager` to perform layout.
- * Returning `undefined` signals the `LayoutManager` to skip the layout.
- *
- * In charge of calculating the bounding box of the passed objects.
  */
 export abstract class LayoutStrategy {
   /**
    * 由子类覆盖以实现持久化（TS 不支持 `static abstract`）
    *
-   * override by subclass for persistence (TS does not support `static abstract`)
    */
   static type = 'strategy';
 
@@ -36,11 +31,6 @@ export abstract class LayoutStrategy {
    * @param context 布局上下文
    * @param objects 参与布局的对象数组
    * @returns 布局结果 **或** `undefined` 以跳过布局
-   *
-   * Used by the `LayoutManager` to perform layout
-   * @TODO/fix: if this method is calcResult, should calc unconditionally.
-   * the condition to not calc should be evaluated by the layoutManager.
-   * @returns layout result **OR** `undefined` to skip layout
    */
   public calcLayoutResult(
     context: StrictLayoutContext,

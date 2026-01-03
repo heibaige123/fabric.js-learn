@@ -34,8 +34,6 @@ export type LayoutTrigger =
 export type LayoutStrategyResult = {
   /**
    * 在**包含**平面中测量的新中心点（与 `originX` 设置为 `center` 时的 `left` 相同）
-   *
-   * new center point as measured by the **containing** plane (same as `left` with `originX` set to `center`)
    */
   center: Point;
 
@@ -44,26 +42,17 @@ export type LayoutStrategyResult = {
    *
    * 由于对象是相对于组的中心测量的，一旦组的大小发生变化，我们必须对对象的位置应用校正，以便它们与新中心相关联。
    * 换句话说，此值使得可以相对于左上角（例如，但不限于）布局对象。
-   *
-   * correction vector to translate objects by, measured in the same plane as `center`
-   *
-   * Since objects are measured relative to the group's center, once the group's size changes we must apply a correction to
-   * the objects' positions so that they relate to the new center.
-   * In other words, this value makes it possible to layout objects relative to the tl corner, for instance, but not only.
    */
   correction?: Point;
 
   /**
    * 由平面测量的用于平移对象的校正向量
    *
-   * correction vector to translate objects by as measured by the plane
    */
   relativeCorrection?: Point;
 
   /**
    * 布局目标的新宽度和高度
-   *
-   * new width and height of the layout target
    */
   size: Point;
 };
@@ -86,8 +75,6 @@ export type LayoutResult = {
   nextCenter: Point;
   /**
    * 用于偏移对象的向量，由平面测量
-   *
-   * The vector used to offset objects by, as measured by the plane
    */
   offset: Point;
 };
@@ -139,7 +126,6 @@ export type CommonLayoutContext = {
   /**
    * 从触发当前调用的对象开始的对象数组
    *
-   * array of objects starting from the object that triggered the call to the current one
    */
   path?: Group[];
 };

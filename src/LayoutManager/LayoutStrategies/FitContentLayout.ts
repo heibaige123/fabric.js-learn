@@ -4,8 +4,6 @@ import { classRegistry } from '../../ClassRegistry';
 
 /**
  * 布局将调整边界框以适应目标的对象。
- *
- * Layout will adjust the bounding box to fit target's objects.
  */
 export class FitContentLayout extends LayoutStrategy {
   /**
@@ -19,8 +17,6 @@ export class FitContentLayout extends LayoutStrategy {
    * @param context 布局上下文
    * @returns 总是返回 true
    *
-   * @override layout on all triggers
-   * Override at will
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   shouldPerformLayout(context: StrictLayoutContext) {
