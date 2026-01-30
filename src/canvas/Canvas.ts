@@ -665,6 +665,10 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
    * @param {evt} event Event object
    */
   _isMainEvent(evt: TPointerEvent): boolean {
+    // isPrimary 的只读属性 PointerEvent 接口会指示创建事件的指针设备是否为主指针。 
+    // 如果 导致事件触发的指针是主要的，并且会返回 否则就是错误的。
+    // 在多指针场景中（例如支持多个触摸点的触摸屏），该属性用于识别 为每种指针类型设置主动指针。
+    // 只有主指针才能产生 兼容性鼠标事件 。仅希望单点交互的作者可以通过忽略非主指针来实现这一点。
     if ((evt as PointerEvent).isPrimary === true) {
       return true;
     }
@@ -794,8 +798,7 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
       clearTimeout(this._willAddMouseDown);
     }
     this._willAddMouseDown = setTimeout(() => {
-      // Wait 400ms before rebinding mousedown to prevent double triggers
-      // from touch devices
+      // 等待400毫秒后再重新绑定mousedown事件，防止触摸设备触发双击
       addListener(
         this.upperCanvasEl,
         `${eventTypePrefix}down`,
@@ -961,7 +964,7 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
       (transform.target !== target || transform.corner !== corner)
     ) {
       const originalControl =
-          transform.target && transform.target.controls[transform.corner],
+        transform.target && transform.target.controls[transform.corner],
         originalMouseUpHandler =
           originalControl &&
           originalControl.getMouseUpHandler(
@@ -1419,10 +1422,10 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
       //  both pointer and object should agree on every point
       localPointer = target.group
         ? sendPointToPlane(
-            scenePoint,
-            undefined,
-            target.group.calcTransformMatrix(),
-          )
+          scenePoint,
+          undefined,
+          target.group.calcTransformMatrix(),
+        )
         : scenePoint;
     transform.shiftKey = e.shiftKey;
     transform.altKey = !!this.centeredKey && e[this.centeredKey];
@@ -1467,8 +1470,8 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
     }
     let hoverCursor = target.hoverCursor || this.hoverCursor;
     const activeSelection = isActiveSelection(this._activeObject)
-        ? this._activeObject
-        : null,
+      ? this._activeObject
+      : null,
       // only show proper corner when group selection is not active
       corner =
         (!activeSelection || target.group !== activeSelection) &&
@@ -1639,10 +1642,10 @@ export class Canvas extends SelectableCanvas implements CanvasOptions {
           : []
         : collectedObjects.length > 1
           ? collectedObjects
-              .filter((object) => !object.onSelect({ e }))
-              .reverse()
+            .filter((object) => !object.onSelect({ e }))
+            .reverse()
           : // `setActiveObject` will call `onSelect(collectedObjects[0])` in this case
-            collectedObjects;
+          collectedObjects;
 
     // set active object
     if (objects.length === 1) {

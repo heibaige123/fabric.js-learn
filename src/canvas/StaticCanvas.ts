@@ -51,25 +51,25 @@ import { getDevicePixelRatio } from '../env';
  */
 export type TCanvasSizeOptions =
   | {
-      /**
-       * 将给定的尺寸设置为 canvas backstore 尺寸
-       */
-      backstoreOnly?: true;
-      /**
-       * 不将给定的尺寸设置为 css 尺寸
-       */
-      cssOnly?: false;
-    }
+    /**
+     * 将给定的尺寸设置为 canvas backstore 尺寸
+     */
+    backstoreOnly?: true;
+    /**
+     * 不将给定的尺寸设置为 css 尺寸
+     */
+    cssOnly?: false;
+  }
   | {
-      /**
-       * 不将给定的尺寸设置为 canvas backstore 尺寸
-       */
-      backstoreOnly?: false;
-      /**
-       * 将给定的尺寸设置为 css 尺寸
-       */
-      cssOnly?: true;
-    };
+    /**
+     * 不将给定的尺寸设置为 canvas backstore 尺寸
+     */
+    backstoreOnly?: false;
+    /**
+     * 将给定的尺寸设置为 css 尺寸
+     */
+    cssOnly?: true;
+  };
 
 /**
  * SVG 导出选项类型定义
@@ -141,12 +141,11 @@ export type PatternQuality = 'fast' | 'good' | 'best' | 'nearest' | 'bilinear';
  */
 // TODO: fix `EventSpec` inheritance https://github.com/microsoft/TypeScript/issues/26154#issuecomment-1366616260
 export class StaticCanvas<
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    EventSpec extends StaticCanvasEvents = StaticCanvasEvents,
-  >
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  EventSpec extends StaticCanvasEvents = StaticCanvasEvents,
+>
   extends createCollectionMixin(CommonMethods<CanvasEvents>)
-  implements StaticCanvasOptions
-{
+  implements StaticCanvasOptions {
   /**
    * Canvas 宽度（像素）
    */
@@ -394,7 +393,7 @@ export class StaticCanvas<
       log(
         'warn',
         'Canvas is trying to add an object that belongs to a different canvas.\n' +
-          'Resulting to default behavior: removing object from previous canvas and adding to new canvas',
+        'Resulting to default behavior: removing object from previous canvas and adding to new canvas',
       );
       obj.canvas.remove(obj);
     }
@@ -1429,18 +1428,14 @@ export class StaticCanvas<
           ? matrixToSVG(invertTransform(this.viewportTransform))
           : '';
       markup.push(
-        `<rect transform="${additionalTransform} translate(${finalWidth / 2},${
-          finalHeight / 2
-        })" x="${filler.offsetX - finalWidth / 2}" y="${
-          filler.offsetY - finalHeight / 2
-        }" width="${
-          (repeat === 'repeat-y' || repeat === 'no-repeat') && isPattern(filler)
-            ? (filler.source as HTMLImageElement).width
-            : finalWidth
-        }" height="${
-          (repeat === 'repeat-x' || repeat === 'no-repeat') && isPattern(filler)
-            ? (filler.source as HTMLImageElement).height
-            : finalHeight
+        `<rect transform="${additionalTransform} translate(${finalWidth / 2},${finalHeight / 2
+        })" x="${filler.offsetX - finalWidth / 2}" y="${filler.offsetY - finalHeight / 2
+        }" width="${(repeat === 'repeat-y' || repeat === 'no-repeat') && isPattern(filler)
+          ? (filler.source as HTMLImageElement).width
+          : finalWidth
+        }" height="${(repeat === 'repeat-x' || repeat === 'no-repeat') && isPattern(filler)
+          ? (filler.source as HTMLImageElement).height
+          : finalHeight
         }" fill="url(#SVGID_${filler.id})"></rect>\n`,
       );
     } else {
@@ -1741,8 +1736,7 @@ export class StaticCanvas<
    * @return {String} 实例的字符串表示形式
    */
   toString() {
-    return `#<Canvas (${this.complexity()}): { objects: ${
-      this._objects.length
-    } }>`;
+    return `#<Canvas (${this.complexity()}): { objects: ${this._objects.length
+      } }>`;
   }
 }

@@ -9,8 +9,6 @@ interface CanvasDrawableOptions {
   /**
    * 如果设置为 false，背景图像不受视口变换的影响
    * @since 1.6.3
-   * @type Boolean
-   * @todo we should really find a different way to do this
    */
   backgroundVpt: boolean;
 
@@ -31,8 +29,6 @@ interface CanvasDrawableOptions {
    * 如果设置为 false，覆盖图像不受视口变换的影响
    *
    * @since 1.6.3
-   * @type Boolean
-   * @todo we should really find a different way to do this
    */
   overlayVpt: boolean;
 
@@ -119,8 +115,8 @@ export interface CanvasExportOptions {
  */
 export interface StaticCanvasOptions
   extends CanvasDrawableOptions,
-    CanvasRenderingOptions,
-    CanvasExportOptions {
+  CanvasRenderingOptions,
+  CanvasExportOptions {
   /**
    * Canvas 的虚拟/逻辑像素宽度。
    * 如果视网膜缩放处于活动状态，canvas 可以大于宽度
